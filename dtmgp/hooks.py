@@ -1,6 +1,6 @@
 app_name = "dtmgp"
-app_title = "Dtmgp"
-app_publisher = "Auwal Isiaku"
+app_title = "dtmgp"
+app_publisher = "Auwal Isiaku	"
 app_description = "Local Government Digital Transformation, Management and Governance Platform"
 app_email = "engr.auwal@live.com"
 app_license = "mit"
@@ -15,7 +15,7 @@ app_license = "mit"
 # 	{
 # 		"name": "dtmgp",
 # 		"logo": "/assets/dtmgp/logo.png",
-# 		"title": "Dtmgp",
+# 		"title": "dtmgp",
 # 		"route": "/dtmgp",
 # 		"has_permission": "dtmgp.api.permission.has_app_permission"
 # 	}

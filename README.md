@@ -1,4 +1,4 @@
-### Dtmgp
+### dtmgp
 
 Local Government Digital Transformation, Management and Governance Platform
 

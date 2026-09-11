@@ -1,7 +1,7 @@
 [project]
 name = "dtmgp"
 authors = [
-    { name = "Auwal Isiaku", email = "engr.auwal@live.com"}
+    { name = "Auwal Isiaku	", email = "engr.auwal@live.com"}
 ]
 description = "Local Government Digital Transformation, Management and Governance Platform"
 requires-python = ">=3.10"
