@@ -25,12 +25,18 @@ app_license = "mit"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/dtmgp/css/dtmgp.css"
-# app_include_js = "/assets/dtmgp/js/dtmgp.js"
+app_include_css = "/assets/dtmgp/css/dtmgp.css"
+app_include_js = "/assets/dtmgp/js/dtmgp.js"
 
 # include js, css files in header of web template
-# web_include_css = "/assets/dtmgp/css/dtmgp.css"
-# web_include_js = "/assets/dtmgp/js/dtmgp.js"
+web_include_css = [
+	"/assets/dtmgp/css/dtmgp.css",
+	"/assets/dtmgp/css/login.css",
+]
+
+website_context = {
+	"splash_image": "/assets/dtmgp/images/benue-govt-logo.jpeg",
+}
 
 # include custom scss in every website theme (without file extension ".scss")
 # website_theme_scss = "dtmgp/public/scss/website"
@@ -83,7 +89,7 @@ app_license = "mit"
 # ------------
 
 # before_install = "dtmgp.install.before_install"
-# after_install = "dtmgp.install.after_install"
+after_install = "dtmgp.install.after_install"
 
 # Uninstallation
 # ------------
@@ -252,4 +258,3 @@ app_license = "mit"
 # ------------
 # List of apps whose translatable strings should be excluded from this app's translations.
 # ignore_translatable_strings_from = []
-

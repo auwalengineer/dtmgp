@@ -1,0 +1,266 @@
+body:has(.dtmgp-login-page) {
+	background: var(--dtmgp-paper);
+	color: var(--dtmgp-ink);
+	font-family: Georgia, "Times New Roman", serif;
+}
+
+body:has(.dtmgp-login-page) .navbar,
+body:has(.dtmgp-login-page) footer {
+	display: none;
+}
+
+.dtmgp-login-page {
+	box-sizing: border-box;
+	display: grid;
+	grid-template-columns: minmax(290px, 0.88fr) minmax(420px, 1.12fr);
+	align-items: center;
+	gap: clamp(42px, 7vw, 120px);
+	width: min(1180px, calc(100% - 64px));
+	min-height: 100vh;
+	margin: 0 auto;
+	padding: 72px 0;
+	position: relative;
+}
+
+.dtmgp-noscript {
+	background: #fff3cd;
+	border: 1px solid #e2c46f;
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	grid-column: 1 / -1;
+	padding: 12px 16px;
+}
+
+.dtmgp-login-page::before {
+	background: var(--dtmgp-green);
+	content: "";
+	height: 6px;
+	left: 0;
+	position: absolute;
+	top: 0;
+	width: 100%;
+}
+
+.dtmgp-brief {
+	max-width: 470px;
+}
+
+.dtmgp-brief-kicker,
+.dtmgp-card-kicker {
+	color: var(--dtmgp-green);
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.14em;
+	margin: 0 0 18px;
+	text-transform: uppercase;
+}
+
+.dtmgp-brief h1 {
+	font-size: clamp(2.4rem, 4.2vw, 4.25rem);
+	font-weight: 400;
+	letter-spacing: 0;
+	line-height: 0.98;
+	margin: 0;
+}
+
+.dtmgp-brief h1 strong {
+	color: var(--dtmgp-green);
+	display: block;
+	font-weight: 700;
+}
+
+.dtmgp-brief-copy {
+	border-left: 3px solid var(--dtmgp-gold);
+	color: var(--dtmgp-muted);
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.96rem;
+	line-height: 1.7;
+	margin: 32px 0 0;
+	padding-left: 18px;
+}
+
+.dtmgp-brief-meta {
+	color: var(--dtmgp-ink);
+	display: flex;
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.76rem;
+	font-weight: 700;
+	gap: 10px;
+	letter-spacing: 0.08em;
+	margin-top: 38px;
+	text-transform: uppercase;
+}
+
+.dtmgp-brief-meta::before {
+	background: var(--dtmgp-gold);
+	content: "";
+	display: block;
+	height: 1px;
+	margin-top: 0.55em;
+	width: 36px;
+}
+
+.dtmgp-login-panel {
+	background: #fff;
+	border: 1px solid var(--dtmgp-line);
+	box-sizing: border-box;
+	box-shadow: 0 22px 60px rgba(20, 37, 31, 0.09);
+	justify-self: center;
+	max-width: 510px;
+	margin: 0;
+	padding: clamp(30px, 5vw, 54px);
+	width: 100%;
+}
+
+.dtmgp-login-panel .page-card-head {
+	align-items: flex-start;
+	border: 0;
+	display: flex;
+	flex-direction: column;
+	padding: 0 0 25px;
+}
+
+.dtmgp-login-panel .app-logo {
+	height: 68px;
+	margin: 0 0 14px;
+	object-fit: contain;
+	object-position: left center;
+	width: 62px;
+}
+
+.dtmgp-login-panel .page-card-head h2 {
+	color: var(--dtmgp-ink);
+	font-size: 1.75rem;
+	font-weight: 600;
+	line-height: 1.2;
+	margin: 0;
+}
+
+.dtmgp-login-panel .dtmgp-card-kicker {
+	margin-bottom: 8px;
+}
+
+.dtmgp-login-panel .page-card-body {
+	padding: 0;
+}
+
+.dtmgp-login-panel .form-group {
+	margin-bottom: 20px;
+}
+
+.dtmgp-login-panel .form-control {
+	background: #fbfdfb;
+	border: 1px solid var(--dtmgp-line);
+	border-radius: 0;
+	box-shadow: none;
+	color: var(--dtmgp-ink);
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	height: 52px;
+	padding-left: 17px;
+}
+
+.dtmgp-login-panel .form-control:focus {
+	border-color: var(--dtmgp-green);
+	box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+}
+
+.dtmgp-login-panel .field-icon {
+	display: none;
+}
+
+.dtmgp-login-panel .toggle-password {
+	color: var(--dtmgp-green) !important;
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.78rem;
+	font-weight: 700;
+	text-transform: uppercase;
+}
+
+.dtmgp-login-panel .forgot-password-message {
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.82rem;
+	margin: 0 0 26px;
+	text-align: right;
+}
+
+.dtmgp-login-panel .forgot-password-message a,
+.dtmgp-login-panel .sign-up-message a {
+	color: var(--dtmgp-green);
+	font-weight: 700;
+}
+
+.dtmgp-login-panel .page-card-actions {
+	padding: 0;
+}
+
+.dtmgp-login-panel .btn-login {
+	background: var(--dtmgp-green);
+	border: 0;
+	border-radius: 0;
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.8rem;
+	font-weight: 700;
+	height: 52px;
+	letter-spacing: 0.1em;
+	text-transform: uppercase;
+}
+
+.dtmgp-login-panel .btn-login:hover,
+.dtmgp-login-panel .btn-login:focus {
+	background: var(--dtmgp-green-dark);
+}
+
+.dtmgp-login-panel .login-divider {
+	font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+.dtmgp-alternative-logins {
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	margin-top: 22px;
+}
+
+.dtmgp-alternative-logins .btn-login-option {
+	border-radius: 0;
+	min-height: 42px;
+}
+
+.dtmgp-login-note {
+	border-top: 1px solid var(--dtmgp-line);
+	color: var(--dtmgp-muted);
+	font-family: ui-sans-serif, system-ui, sans-serif;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	margin: 28px 0 0;
+	padding-top: 18px;
+}
+
+@media (max-width: 760px) {
+	.dtmgp-login-page {
+		display: block;
+		min-height: auto;
+		padding: 58px 0 36px;
+		width: min(100% - 36px, 510px);
+	}
+
+	.dtmgp-brief {
+		margin-bottom: 34px;
+	}
+
+	.dtmgp-brief h1 {
+		font-size: clamp(2.35rem, 12vw, 3.5rem);
+	}
+
+	.dtmgp-brief-copy {
+		font-size: 0.88rem;
+		margin-top: 22px;
+	}
+
+	.dtmgp-brief-meta {
+		margin-top: 24px;
+	}
+
+	.dtmgp-login-panel {
+		justify-self: stretch;
+		padding: 28px 22px;
+	}
+}

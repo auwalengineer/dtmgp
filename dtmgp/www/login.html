@@ -1,0 +1,134 @@
+{% extends "templates/web.html" %}
+
+{% macro logo_section(title=null) %}
+<div class="page-card-head">
+	<img class="app-logo" src="/assets/dtmgp/images/benue-govt-logo.jpeg" alt="Benue State Government emblem">
+	<p class="dtmgp-card-kicker">LG-DTMGP</p>
+	<h2>{{ title or _("Secure sign in") }}</h2>
+</div>
+{% endmacro %}
+
+{% macro login_fields() %}
+{% if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
+<div class="page-card-body">
+	<div class="form-group">
+		<label class="form-label sr-only" for="login_email">{{ login_label or _("Email") }}</label>
+		<div class="email-field">
+			<input type="text" id="login_email" class="form-control" placeholder="{{ login_name_placeholder or _('Email or username') }}" required autofocus autocomplete="username">
+		</div>
+	</div>
+	<div class="form-group">
+		<label class="form-label sr-only" for="login_password">{{ _("Password") }}</label>
+		<div class="password-field">
+			<input type="password" id="login_password" class="form-control" placeholder="{{ _('Password') }}" autocomplete="current-password" required>
+			<span toggle="#login_password" class="toggle-password text-muted">{{ _("Show") }}</span>
+		</div>
+	</div>
+	{% if not disable_user_pass_login %}
+	<p class="forgot-password-message"><a href="#forgot">{{ _("Forgot Password?") }}</a></p>
+	{% endif %}
+</div>
+{% endif %}
+<div class="page-card-actions">
+	{% if not disable_user_pass_login %}
+	<button class="btn btn-sm btn-primary btn-block btn-login" type="submit">{{ _("Sign in") }}</button>
+	{% endif %}
+	{% if ldap_settings and ldap_settings.enabled %}
+	<button class="btn btn-sm btn-default btn-block btn-login btn-ldap-login">{{ _("Login with LDAP") }}</button>
+	{% endif %}
+</div>
+{% endmacro %}
+
+{% macro alternative_logins() %}
+{% if provider_logins or login_with_frappe_cloud_url or login_with_email_link %}
+<div class="dtmgp-alternative-logins">
+	{% if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
+	<p class="text-muted login-divider">{{ _("or") }}</p>
+	{% endif %}
+	{% for provider in provider_logins %}
+	<a href="{{ provider.auth_url }}" class="btn btn-block btn-default btn-sm btn-login-option btn-{{ provider.name }}">
+		{% if provider.icon %}{{ provider.icon }}{% endif %}
+		{{ _("Login with {0}").format(provider.provider_name) }}
+	</a>
+	{% endfor %}
+	{% if login_with_frappe_cloud_url %}
+	<a href="{{ login_with_frappe_cloud_url }}" class="btn btn-block btn-default btn-sm btn-login-option btn-login-with-frappe-cloud">{{ _("Login with Frappe Cloud") }}</a>
+	{% endif %}
+	{% if login_with_email_link %}
+	<a href="#login-with-email-link" class="btn btn-block btn-default btn-sm btn-login-option btn-login-with-email-link">{{ _("Login with Email Link") }}</a>
+	{% endif %}
+</div>
+{% endif %}
+{% endmacro %}
+
+{% block head_include %}
+{{ include_style('login.bundle.css') }}
+{% endblock %}
+
+{% block page_content %}
+<main class="dtmgp-login-page">
+	<noscript>
+		<div class="dtmgp-noscript" role="alert">{{ _("JavaScript is required to sign in.") }}</div>
+	</noscript>
+	<section class="dtmgp-brief" aria-labelledby="dtmgp-login-title">
+		<p class="dtmgp-brief-kicker">Benue State Government</p>
+		<h1 id="dtmgp-login-title">Local Government <strong>Digital Transformation</strong></h1>
+		<p class="dtmgp-brief-copy">A secure management and governance platform connecting all 23 Local Government Areas with accountable, auditable operations.</p>
+		<p class="dtmgp-brief-meta">Public sector operations platform</p>
+	</section>
+
+	<section class="for-login dtmgp-login-state">
+		<div class="login-content page-card dtmgp-login-panel">
+			{{ logo_section() }}
+			<form class="form-signin form-login" role="form">
+				{{ login_fields() }}
+				{{ alternative_logins() }}
+				<p class="dtmgp-login-note">Authorized personnel only. Activity is monitored and audited in accordance with public service controls.</p>
+			</form>
+		</div>
+		{% if not disable_signup and not disable_user_pass_login %}
+		<p class="text-center sign-up-message">{{ _("Don't have an account?") }} <a href="#signup">{{ _("Sign up") }}</a></p>
+		{% endif %}
+	</section>
+
+	<section class="for-email-login dtmgp-login-state">
+		<div class="login-content page-card dtmgp-login-panel">
+			{{ logo_section() }}
+			<form class="form-signin form-login" role="form">{{ login_fields() }}</form>
+		</div>
+	</section>
+
+	<section class="for-signup dtmgp-login-state {{ 'signup-disabled' if disable_signup else '' }}">
+		<div class="login-content page-card dtmgp-login-panel">
+			{{ logo_section(_("Create your account")) }}
+			{% if not disable_signup %}{{ signup_form_template }}{% else %}<p class="text-muted">{{ _("Signups have been disabled for this website.") }}</p>{% endif %}
+		</div>
+	</section>
+
+	<section class="for-forgot dtmgp-login-state">
+		<div class="login-content page-card dtmgp-login-panel">
+			{{ logo_section(_("Reset your password")) }}
+			<form class="form-signin form-forgot hide" role="form">
+				<div class="page-card-body"><input type="email" id="forgot_email" class="form-control" placeholder="{{ _('Email Address') }}" required autofocus autocomplete="username"></div>
+				<div class="page-card-actions"><button class="btn btn-sm btn-primary btn-block btn-forgot" type="submit">{{ _("Reset Password") }}</button><p class="text-center sign-up-message"><a href="#login">{{ _("Back to Login") }}</a></p></div>
+			</form>
+		</div>
+	</section>
+
+	<section class="for-login-with-email-link dtmgp-login-state">
+		<div class="login-content page-card dtmgp-login-panel">
+			{{ logo_section(_("Sign in with email link")) }}
+			<form class="form-signin form-login-with-email-link hide" role="form">
+				<div class="page-card-body"><input type="email" id="login_with_email_link_email" class="form-control" placeholder="{{ _('Email Address') }}" required autofocus autocomplete="username"></div>
+				<div class="page-card-actions"><button class="btn btn-sm btn-primary btn-block btn-login-with-email-link" type="submit">{{ _("Send login link") }}</button><p class="text-center sign-up-message"><a href="#login">{{ _("Back to Login") }}</a></p></div>
+			</form>
+		</div>
+	</section>
+</main>
+{% endblock %}
+
+{% block script %}
+<script>{% include "templates/includes/login/login.js" %}</script>
+{% endblock %}
+
+{% block sidebar %}{% endblock %}

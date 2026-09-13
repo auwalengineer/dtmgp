@@ -4,4 +4,9 @@
 *.swp
 tags
 node_modules
+dist
+.env.local
+.env.*.local
+playwright-report
+test-results
 __pycache__

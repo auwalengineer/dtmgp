@@ -1,0 +1,145 @@
+:root {
+	--dtmgp-ink: #14251f;
+	--dtmgp-muted: #5d6c67;
+	--dtmgp-green: #087443;
+	--dtmgp-green-dark: #075331;
+	--dtmgp-gold: #d6a62e;
+	--dtmgp-paper: #f7faf7;
+	--dtmgp-line: #d9e4dd;
+}
+
+body {
+	color: var(--dtmgp-ink);
+	font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+body:has(.desk-sidebar) {
+	background-color: var(--dtmgp-paper);
+}
+
+body:has(.desk-sidebar) .page-container,
+body:has(.desk-sidebar) .page-head,
+body:has(.desk-sidebar) .layout-main-section-wrapper {
+	background-color: var(--dtmgp-paper);
+}
+
+body:has(.desk-sidebar) .page-head {
+	border-bottom: 1px solid var(--dtmgp-line);
+}
+
+a {
+	color: var(--dtmgp-green);
+}
+
+a:hover,
+a:focus {
+	color: var(--dtmgp-green-dark);
+}
+
+.navbar {
+	background-color: var(--dtmgp-green-dark);
+	border-bottom: 1px solid var(--dtmgp-line);
+	color: #fff;
+}
+
+.navbar .nav-link,
+.navbar .text-muted,
+.navbar .navbar-home {
+	color: #fff !important;
+}
+
+.navbar .nav-link:hover,
+.navbar .nav-link:focus {
+	color: var(--dtmgp-gold) !important;
+}
+
+.desk-sidebar {
+	background-color: var(--dtmgp-paper);
+	color: var(--dtmgp-ink);
+	padding: 16px 12px;
+}
+
+.desk-sidebar .standard-sidebar-section {
+	margin-bottom: 20px;
+}
+
+.desk-sidebar .standard-sidebar-label {
+	color: var(--dtmgp-muted);
+}
+
+.desk-sidebar .standard-sidebar-item {
+	color: var(--dtmgp-ink);
+	transition: background-color 120ms ease, color 120ms ease;
+}
+
+.desk-sidebar .standard-sidebar-item > a,
+.desk-sidebar .standard-sidebar-item .sidebar-item-label {
+	color: inherit;
+}
+
+.desk-sidebar .standard-sidebar-item:hover,
+.desk-sidebar .standard-sidebar-item:focus-within {
+	background-color: rgba(8, 116, 67, 0.1);
+	color: var(--dtmgp-green-dark);
+}
+
+.desk-sidebar .standard-sidebar-item.selected {
+	background-color: var(--dtmgp-green);
+	color: #fff;
+}
+
+.navbar-home {
+	align-items: center;
+	display: flex;
+	height: 48px;
+	justify-content: center;
+	width: 48px;
+}
+
+.navbar-home .app-logo {
+	content: url("/assets/dtmgp/images/benue-govt-logo.jpeg");
+	height: 38px;
+	max-height: 38px;
+	max-width: 38px;
+	object-fit: contain;
+	width: 38px;
+}
+
+.navbar-brand,
+.page-header h1,
+.page-header h2,
+.page-header h3 {
+	color: var(--dtmgp-ink);
+}
+
+.btn-primary {
+	background-color: var(--dtmgp-green);
+	border-color: var(--dtmgp-green);
+}
+
+.btn-primary:hover,
+.btn-primary:focus,
+.btn-primary:active {
+	background-color: var(--dtmgp-green-dark);
+	border-color: var(--dtmgp-green-dark);
+}
+
+.form-control:focus,
+.form-select:focus {
+	border-color: var(--dtmgp-green);
+	box-shadow: 0 0 0 3px rgba(8, 116, 67, 0.12);
+}
+
+.dtmgp-splash {
+	align-items: center;
+	display: flex;
+	height: 100vh;
+	justify-content: center;
+	width: 100%;
+}
+
+.dtmgp-splash img {
+	height: 96px;
+	object-fit: contain;
+	width: 88px;
+}
