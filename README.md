@@ -59,7 +59,8 @@ Pre-commit is configured to use the following tools for checking and formatting 
 
 This app can use GitHub Actions for CI. The following workflows are configured:
 
-- CI: Installs this app and runs unit tests on every push to `develop` branch.
+- CI: Installs ERPNext, HRMS, and this app on a clean version-15 site; verifies the 23-LGA seed; and runs backend tests.
+- Vue CI: Runs type-checking, unit tests, the production build, hashed-asset integrity checks, and a production dependency audit.
 - Linters: Runs [Frappe Semgrep Rules](https://github.com/frappe/semgrep-rules) and [pip-audit](https://pypi.org/project/pip-audit/) on every pull request.
 
 

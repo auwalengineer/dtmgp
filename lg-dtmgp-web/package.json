@@ -10,6 +10,7 @@
     "dev": "vite",
     "build": "vue-tsc -b --noEmit && vite build",
     "build:staging": "vue-tsc -b --noEmit && vite build --mode staging",
+    "check:assets": "node scripts/check-build-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
     "typecheck": "vue-tsc -b --noEmit"

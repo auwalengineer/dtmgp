@@ -180,7 +180,7 @@ Every pull request must eventually enforce:
 - A build-integrity check proving every asset referenced by `index.html` exists.
 - Review of migrations, fixtures, permission changes, retention changes, and new external data flows.
 
-Current gap: the repository CI covers backend installation/tests and Python lint/security checks, but frontend CI, explicit 23-LGA seed assertions, asset-integrity checks, and browser tests are not yet wired into GitHub Actions.
+Current gap: CI covers backend installation/tests, Python lint/security checks, Vue type-check/tests/build, explicit 23-LGA seed assertions, and frontend asset integrity. Browser tests will be added when critical integrated journeys are available.
 
 ## Release policy
 
