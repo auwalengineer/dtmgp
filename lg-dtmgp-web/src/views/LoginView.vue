@@ -1,0 +1,10 @@
+<script setup lang="ts">
+import { ArrowRight, Eye, EyeOff, LockKeyhole } from "@lucide/vue";
+import { ref } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { useSessionStore } from "@/stores/session";
+const session = useSessionStore(); const router = useRouter(); const route = useRoute();
+const username = ref(""); const password = ref(""); const showPassword = ref(false); const busy = ref(false); const error = ref("");
+async function submit() { busy.value = true; error.value = ""; try { await session.login(username.value, password.value); await router.push(String(route.query.redirect || "/")); } catch (reason) { error.value = reason instanceof Error ? reason.message : "Unable to sign in"; } finally { busy.value = false; } }
+</script>
+<template><main class="vue-login"><section class="vue-login-brief"><img src="/benue-govt-logo.jpeg" alt="Benue State Government emblem" /><p class="eyebrow">Benue State Government</p><h1>Local Government <strong>Digital Transformation</strong></h1><p>Secure workforce and governance operations for all 23 Local Government Areas.</p></section><section class="vue-login-form"><div class="login-lock"><LockKeyhole :size="20" /></div><p class="eyebrow">LG-DTMGP</p><h2>Staff sign in</h2><form @submit.prevent="submit"><label>Email or username<input v-model="username" autocomplete="username" required /></label><label>Password<span class="password-input"><input v-model="password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required /><button type="button" :title="showPassword ? 'Hide password' : 'Show password'" @click="showPassword = !showPassword"><EyeOff v-if="showPassword" :size="18" /><Eye v-else :size="18" /></button></span></label><p v-if="error" class="login-error" role="alert">{{ error }}</p><button class="primary-action login-submit" :disabled="busy">{{ busy ? "Signing in..." : "Sign in" }}<ArrowRight :size="17" /></button></form><p class="login-security">Authorized personnel only. Activity is monitored and audited.</p></section></main></template>

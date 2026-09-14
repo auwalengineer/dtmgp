@@ -10,13 +10,15 @@ import {
   UsersRound,
   X,
 } from "@lucide/vue";
+import { useSessionStore } from "@/stores/session";
 
 defineProps<{ open: boolean }>();
 defineEmits<{ close: [] }>();
+const session = useSessionStore();
 
 const navigation = [
   { label: "Overview", to: "/", icon: LayoutDashboard },
-  { label: "Administration", to: "/administration", icon: Building2 },
+  { label: "Administration", to: "/administration/users", icon: Building2, userAdmin: true },
   { label: "People & HR", to: "/people", icon: UsersRound },
   { label: "Finance & Revenue", to: "/finance", icon: CircleDollarSign },
   { label: "Projects & Assets", to: "/projects", icon: FolderKanban },
@@ -35,7 +37,7 @@ const navigation = [
     </header>
     <nav aria-label="Primary navigation">
       <p class="nav-label">Operations</p>
-      <RouterLink v-for="item in navigation" :key="item.to" :to="item.to" class="nav-item" @click="$emit('close')">
+      <RouterLink v-for="item in navigation.filter((entry) => !entry.userAdmin || session.canManageUsers)" :key="item.to" :to="item.to" class="nav-item" @click="$emit('close')">
         <component :is="item.icon" :size="19" />
         <span>{{ item.label }}</span>
       </RouterLink>

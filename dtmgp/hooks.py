@@ -130,12 +130,21 @@ after_install = "dtmgp.install.after_install"
 # Permissions evaluated in scripted ways
 
 # permission_query_conditions = {
-# 	"Event": "frappe.desk.doctype.event.event.get_permission_query_conditions",
-# }
+permission_query_conditions = {
+	"User": "dtmgp.permissions.user.get_permission_query_conditions",
+}
 #
-# has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
-# }
+has_permission = {
+	"User": "dtmgp.permissions.user.has_permission",
+}
+
+doc_events = {
+	"User": {
+		"validate": "dtmgp.permissions.user_events.validate_user_scope",
+		"after_insert": "dtmgp.permissions.user_events.sync_user_lga_permission",
+		"on_update": "dtmgp.permissions.user_events.sync_user_lga_permission",
+	}
+}
 
 # DocType Class
 # ---------------
