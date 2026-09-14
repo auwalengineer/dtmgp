@@ -16,7 +16,7 @@ The current foundation includes Benue State branding for Desk, the website login
 
 The Vue 3 application shell is maintained in `lg-dtmgp-web`. It includes responsive state navigation, an operational overview, module routes, and environment-specific development, staging, and production configuration.
 
-Stage 0 governance documentation is indexed in [`docs/README.md`](docs/README.md), covering state offices and workflows, the role-permission matrix, data classification, naming and coding conventions, and operational safeguards.
+Stage 0 governance documentation is indexed in [`docs/README.md`](docs/README.md), covering state offices and workflows, permissions, data classification, operational safeguards, architecture decisions, approvals, and the initial backlog.
 
 On installation, `dtmgp.install.after_install` creates the group Company `Benue State Local Government Administration` and all 23 Benue LGA child Companies. The seed is idempotent and can be safely rerun with:
 
@@ -24,10 +24,12 @@ On installation, `dtmgp.install.after_install` creates the group Company `Benue 
 bench --site <site-name> execute dtmgp.setup.organization.seed_lga_companies
 ```
 
-The following Stage 0 decisions remain project-owner gates before domain implementation:
+The Stage 0 design baseline is approved for implementation. The following external evidence remains required before production:
 
-- Validate the proposed state-office mapping, workflow approvers, role matrix, and data classifications with business owners.
-- Approve the proposed operational targets, retention periods, alert thresholds, and release gates.
+- Named business-owner validation of statutory office mappings, workflow alternates, deadlines, and delegations.
+- Records/legal approval of retention and disposal authority.
+- Security approval of Restricted-data and emergency-access controls.
+- Hosting evidence for backup isolation, monitoring routes, and measured recovery targets.
 
 ### Installation
 

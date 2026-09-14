@@ -1,6 +1,6 @@
 # Operations and Delivery Policy
 
-Status: Stage 0 baseline  
+Status: Approved for implementation with production evidence conditions, 2026-09-14
 Applies to: development, staging, production, backups, exports, integrations, and support operations
 
 The targets below are the minimum technical baseline. The project owner, records owner, security owner, and hosting operator must approve them before production go-live. A legal hold or applicable records rule overrides normal deletion.

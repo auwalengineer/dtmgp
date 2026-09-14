@@ -1,6 +1,6 @@
 # State Offices and Initial Workflows
 
-Status: Stage 0 baseline  
+Status: Approved for implementation with production validation conditions, 2026-09-14
 Scope: Benue State and all 23 Local Government Areas  
 Organizational model: one Frappe site with each LGA represented by a child Company
 

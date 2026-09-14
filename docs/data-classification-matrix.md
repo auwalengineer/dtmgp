@@ -1,6 +1,6 @@
 # Data-Classification Matrix
 
-Status: Stage 0 baseline
+Status: Approved for implementation, 2026-09-14
 
 ## Classification levels
 

@@ -1,6 +1,6 @@
 # Naming and Coding Conventions
 
-Status: Stage 0 baseline
+Status: Approved for implementation, 2026-09-14
 
 ## Product and repository names
 
