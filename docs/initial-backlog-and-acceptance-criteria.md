@@ -3,6 +3,10 @@
 Status: Approved for implementation, 2026-09-14
 Release target: Foundation and minimum useful first release
 
+Current implementation progress and the prioritized remaining work are tracked in
+[`implementation-status.md`](implementation-status.md). This backlog remains the approved
+acceptance baseline; a feature is not considered complete merely because its navigation entry exists.
+
 ## Priority definitions
 
 | Priority | Meaning |
