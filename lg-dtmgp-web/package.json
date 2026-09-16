@@ -13,19 +13,22 @@
     "check:assets": "node scripts/check-build-assets.mjs",
     "preview": "vite preview",
     "test": "vitest run",
+    "test:e2e": "playwright test",
     "typecheck": "vue-tsc -b --noEmit"
   },
   "dependencies": {
-    "@tanstack/vue-query": "5.59.20",
     "@lucide/vue": "1.45.0",
+    "@tanstack/vue-query": "5.59.20",
     "pinia": "2.2.6",
     "vue": "3.5.13",
     "vue-router": "4.5.0",
     "zod": "3.24.1"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "5.2.1",
+    "@axe-core/playwright": "^4.10.2",
+    "@playwright/test": "^1.55.0",
     "@types/node": "18.19.130",
+    "@vitejs/plugin-vue": "5.2.1",
     "@vue/test-utils": "2.4.6",
     "typescript": "5.7.2",
     "vite": "5.4.21",
