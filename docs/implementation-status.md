@@ -29,6 +29,7 @@ Latest reviewed milestone: `406c34c`
 | Security audit foundation | Complete | Append-only audit events for user/permission changes and authorization denials with sensitive-value redaction |
 | Runtime release detection | Complete | Build metadata publication, periodic version polling and non-blocking refresh notification |
 | CI baseline | Complete | Clean-site install, repeatable migration, backend/unit/browser/accessibility checks, secret scan, Vue build, asset verification and production dependency audit |
+| Finance, revenue and procurement foundation | Complete | Eight LGA-scoped governance DocTypes, ERPNext accounting/purchasing integration, controlled transitions, amount-based approvals, audit events, APIs and Vue cockpit |
 
 ## Partially complete backlog
 
@@ -46,6 +47,9 @@ Latest reviewed milestone: `406c34c`
 | HR-001 Scoped staff directory | Core approved Employee fields and LGA scope are live | Approve production field allowlist, add restricted-field denial tests and staging acceptance |
 | HR-002 Staff verification | Verification status and authorized verify action exist | Implement exercise/record model, reviewer separation, evidence, exceptions, reasons, audit trail and Restricted-file controls |
 | DSH-001 LGA operational dashboard | Scoped workforce/account metrics exist | Add metric source, reporting period, freshness, drill-down and approved governance/project indicators |
+| FIN-001 Finance and treasury | Payment requests, budget/account/cost-center links, scoped dashboard and ERPNext ledger permissions are live | Configure chart-of-accounts policy, bank signatories, voucher print formats and staging acceptance |
+| REV-001 Revenue administration | Revenue heads, assessments, submitted receipts, reconciliation totals and Revenue Officer role are live | Approve lawful revenue-head catalogue, rates, payment gateway and enforcement process |
+| PRC-001 Procurement | Plans and cases link ERPNext material requests, RFQs, suppliers, purchase orders and receipts | Configure BSPPC thresholds, committees, bid evidence, public notices and contract-variation acceptance |
 
 ## Pending engineering work
 
@@ -75,7 +79,7 @@ Latest reviewed milestone: `406c34c`
 
 ### Deferred domains
 
-Finance/revenue, procurement, payroll, chieftaincy, external integrations and offline/PWA remain deferred until their approved entry conditions are met. Their navigation entries are registered placeholders, not completed business modules.
+Payroll, chieftaincy, external integrations and offline/PWA remain deferred until their approved entry conditions are met. Finance/revenue and procurement now have operational foundations; functions beyond the records and controls listed above remain pending until their business configuration is approved.
 
 ## External production conditions
 

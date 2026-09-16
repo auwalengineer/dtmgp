@@ -7,10 +7,10 @@ from dtmgp.permissions.scope import get_allowed_companies, get_user_roles
 STATE = {"State Administrator", "State Executive Viewer", "State Auditor"}
 GOVERNANCE = STATE | {"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "HR Officer", "Procurement Officer", "Project Officer", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer"}
 HR = STATE | {"LGA Administrator", "LGA Chairman", "LGA Secretary", "HR Officer", "Internal Auditor", "Read-only Officer"}
-FINANCE = STATE | {"LGA Administrator", "LGA Chairman", "Treasurer", "Procurement Officer", "Internal Auditor", "Read-only Officer"}
+FINANCE = STATE | {"LGA Administrator", "LGA Chairman", "Treasurer", "Revenue Officer", "Procurement Officer", "Internal Auditor", "Read-only Officer"}
 PROJECTS = STATE | {"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "Procurement Officer", "Project Officer", "Internal Auditor", "Read-only Officer"}
 TRADITIONAL = STATE | {"LGA Administrator", "LGA Chairman", "LGA Secretary", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer"}
-ANALYTICS = STATE | {"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "HR Officer", "Procurement Officer", "Project Officer", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer"}
+ANALYTICS = STATE | {"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "Revenue Officer", "HR Officer", "Procurement Officer", "Project Officer", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer"}
 SYSTEM_ADMIN = {"System Manager", "State Administrator", "LGA Administrator"}
 STATE_ONLY = {"System Manager", "State Administrator"}
 

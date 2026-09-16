@@ -6,3 +6,4 @@
 # Patches added in this section will be executed after doctypes are migrated
 dtmgp.patches.v1_0.add_people_hr_metadata
 dtmgp.patches.v1_0.add_lga_profiles
+dtmgp.patches.v1_0.add_finance_permissions

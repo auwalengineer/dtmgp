@@ -133,11 +133,27 @@ after_install = "dtmgp.install.after_install"
 permission_query_conditions = {
 	"User": "dtmgp.permissions.user.get_permission_query_conditions",
 	"DTMGP Audit Event": "dtmgp.permissions.audit_event.get_permission_query_conditions",
+	"DTMGP Approval Limit": "dtmgp.permissions.finance.approval_limit_query",
+	"DTMGP Revenue Head": "dtmgp.permissions.finance.revenue_head_query",
+	"DTMGP Revenue Assessment": "dtmgp.permissions.finance.revenue_assessment_query",
+	"DTMGP Revenue Receipt": "dtmgp.permissions.finance.revenue_receipt_query",
+	"DTMGP Procurement Plan": "dtmgp.permissions.finance.procurement_plan_query",
+	"DTMGP Procurement Case": "dtmgp.permissions.finance.procurement_case_query",
+	"DTMGP Payment Request": "dtmgp.permissions.finance.payment_request_query",
+	"DTMGP Audit Query": "dtmgp.permissions.finance.audit_query_query",
 }
 #
 has_permission = {
 	"User": "dtmgp.permissions.user.has_permission",
 	"DTMGP Audit Event": "dtmgp.permissions.audit_event.has_permission",
+	"DTMGP Approval Limit": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Revenue Head": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Revenue Assessment": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Revenue Receipt": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Procurement Plan": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Procurement Case": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Payment Request": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Audit Query": "dtmgp.permissions.finance.has_permission",
 }
 
 doc_events = {
@@ -150,7 +166,15 @@ doc_events = {
 		"after_insert": "dtmgp.audit.audit_user_permission",
 		"on_update": "dtmgp.audit.audit_user_permission",
 		"on_trash": "dtmgp.audit.audit_user_permission",
-	}
+	},
+	"DTMGP Approval Limit": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change", "on_trash": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Revenue Head": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change", "on_trash": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Revenue Assessment": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change", "on_submit": "dtmgp.audit.audit_finance_change", "on_cancel": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Revenue Receipt": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change", "on_submit": "dtmgp.audit.audit_finance_change", "on_cancel": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Procurement Plan": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Procurement Case": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Payment Request": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Audit Query": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
 }
 
 # DocType Class

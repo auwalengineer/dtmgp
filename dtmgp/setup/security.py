@@ -12,6 +12,7 @@ PLATFORM_ROLES = (
 	"LGA Chairman",
 	"LGA Secretary",
 	"Treasurer",
+	"Revenue Officer",
 	"HR Officer",
 	"Procurement Officer",
 	"Project Officer",
@@ -32,6 +33,7 @@ def seed_security_setup():
 	_ensure_user_lga_field()
 	_ensure_employee_fields()
 	_ensure_hr_permissions()
+	_ensure_erpnext_finance_permissions()
 
 
 def _ensure_user_permission(role_name):
@@ -127,3 +129,30 @@ def _ensure_hr_permissions():
 						"create": create,
 					}
 				).insert()
+
+
+def _ensure_erpnext_finance_permissions():
+	permissions = {
+		"Account": ("Treasurer", "Internal Auditor", "State Auditor"),
+		"Budget": ("Treasurer", "Internal Auditor", "State Auditor"),
+		"Journal Entry": ("Treasurer", "Internal Auditor", "State Auditor"),
+		"Payment Entry": ("Treasurer", "Revenue Officer", "Internal Auditor", "State Auditor"),
+		"Bank Transaction": ("Treasurer", "Internal Auditor", "State Auditor"),
+		"Supplier": ("Procurement Officer", "Treasurer", "Internal Auditor", "State Auditor"),
+		"Material Request": ("Procurement Officer", "Treasurer", "Internal Auditor", "State Auditor"),
+		"Request for Quotation": ("Procurement Officer", "Treasurer", "Internal Auditor", "State Auditor"),
+		"Supplier Quotation": ("Procurement Officer", "Treasurer", "Internal Auditor", "State Auditor"),
+		"Purchase Order": ("Procurement Officer", "Treasurer", "Internal Auditor", "State Auditor"),
+		"Purchase Receipt": ("Procurement Officer", "Treasurer", "Internal Auditor", "State Auditor"),
+		"Purchase Invoice": ("Treasurer", "Procurement Officer", "Internal Auditor", "State Auditor"),
+	}
+	for doctype, roles in permissions.items():
+		for role in roles:
+			filters = {"parent": doctype, "role": role, "permlevel": 0}
+			if frappe.db.exists("Custom DocPerm", filters):
+				continue
+			write = role not in {"Internal Auditor", "State Auditor"}
+			frappe.get_doc({
+				"doctype": "Custom DocPerm", **filters, "read": 1, "report": 1, "export": 1,
+				"create": int(write), "write": int(write), "submit": int(write), "cancel": int(write),
+			}).insert()

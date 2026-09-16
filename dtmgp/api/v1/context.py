@@ -5,7 +5,9 @@ from dtmgp.navigation import get_navigation
 from dtmgp.permissions.scope import (
 	can_manage_hr,
 	can_manage_users,
+	can_manage_finance,
 	can_view_hr,
+	can_view_finance,
 	get_allowed_companies,
 	is_state_user,
 	require_authenticated_user,
@@ -27,6 +29,8 @@ def get_current_user_context():
 		"can_manage_users": can_manage_users(),
 		"can_view_hr": can_view_hr(),
 		"can_manage_hr": can_manage_hr(),
+		"can_view_finance": can_view_finance(),
+		"can_manage_finance": can_manage_finance(),
 		"navigation": get_navigation(),
 		"csrf_token": frappe.session.data.csrf_token,
 	}

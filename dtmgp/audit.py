@@ -74,6 +74,22 @@ def audit_user_change(doc, method=None):
 		)
 
 
+def audit_finance_change(doc, method=None):
+	event_type = "workflow_transition" if doc.has_value_changed("status") else "financial_record_change"
+	previous = doc.get_doc_before_save()
+	metadata = {"operation": method, "docstatus": doc.docstatus}
+	if previous and previous.get("status") != doc.get("status"):
+		metadata["status"] = {"from": previous.get("status"), "to": doc.get("status")}
+	record_event(
+		event_type,
+		f"{doc.doctype} {method or 'changed'}",
+		company=doc.get("company"),
+		reference_doctype=doc.doctype,
+		reference_name=doc.name,
+		metadata=metadata,
+	)
+
+
 def _insert_event(payload, commit=False):
 	frappe.get_doc(
 		{

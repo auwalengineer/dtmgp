@@ -1,0 +1,19 @@
+{
+ "actions": [], "allow_rename": 0, "autoname": "format:APL-{#####}", "creation": "2026-09-16 00:00:00.000000",
+ "doctype": "DocType", "engine": "InnoDB", "field_order": ["company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"],
+ "fields": [
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"transaction_type","fieldtype":"Select","in_list_view":1,"label":"Transaction Type","options":"Payment Request\nProcurement Plan\nProcurement Award\nContract Variation\nRevenue Adjustment","reqd":1},
+  {"fieldname":"approving_role","fieldtype":"Link","in_list_view":1,"label":"Approving Role","options":"Role","reqd":1},
+  {"fieldname":"minimum_amount","fieldtype":"Currency","label":"Minimum Amount","non_negative":1,"reqd":1},
+  {"fieldname":"maximum_amount","fieldtype":"Currency","in_list_view":1,"label":"Maximum Amount","non_negative":1,"reqd":1},
+  {"default":"1","fieldname":"active","fieldtype":"Check","label":"Active"}
+ ],
+ "index_web_pages_for_search": 0, "links": [], "modified": "2026-09-16 00:00:00.000000", "modified_by": "Administrator", "module": "dtmgp", "name": "DTMGP Approval Limit", "naming_rule": "Expression", "owner": "Administrator",
+ "permissions": [
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Treasurer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"}
+ ], "sort_field": "modified", "sort_order": "DESC", "states": []
+}

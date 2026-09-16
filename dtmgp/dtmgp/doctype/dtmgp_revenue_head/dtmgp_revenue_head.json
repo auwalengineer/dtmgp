@@ -1,0 +1,23 @@
+{
+ "actions": [], "autoname": "format:RVH-{revenue_code}-{#####}", "creation": "2026-09-16 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","revenue_code","revenue_name","legal_authority","collection_frequency","rate_type","default_rate","income_account","valid_from","valid_to","disabled"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"revenue_code","fieldtype":"Data","in_list_view":1,"label":"Revenue Code","reqd":1},
+  {"fieldname":"revenue_name","fieldtype":"Data","in_list_view":1,"label":"Revenue Name","reqd":1},
+  {"fieldname":"legal_authority","fieldtype":"Small Text","label":"Legal Authority","reqd":1},
+  {"fieldname":"collection_frequency","fieldtype":"Select","label":"Collection Frequency","options":"One-time\nDaily\nMonthly\nQuarterly\nAnnually"},
+  {"fieldname":"rate_type","fieldtype":"Select","label":"Rate Type","options":"Fixed\nPercentage\nBand","reqd":1},
+  {"fieldname":"default_rate","fieldtype":"Currency","label":"Default Rate","non_negative":1},
+  {"fieldname":"income_account","fieldtype":"Link","label":"ERPNext Income Account","options":"Account"},
+  {"fieldname":"valid_from","fieldtype":"Date","label":"Valid From"},{"fieldname":"valid_to","fieldtype":"Date","label":"Valid To"},
+  {"default":"0","fieldname":"disabled","fieldtype":"Check","label":"Disabled"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-16 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Revenue Head","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Treasurer","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Revenue Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

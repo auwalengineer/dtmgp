@@ -1,0 +1,21 @@
+{
+ "actions":[],"autoname":"format:PAY-{YYYY}-{#####}","creation":"2026-09-16 00:00:00.000000","doctype":"DocType","engine":"InnoDB",
+ "field_order":["company","request_date","requesting_department","payee_type","payee","description","amount","expense_account","cost_center","procurement_case","purchase_invoice","status","approval_reference","payment_entry","justification"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},{"default":"Today","fieldname":"request_date","fieldtype":"Date","label":"Request Date","reqd":1},
+  {"fieldname":"requesting_department","fieldtype":"Link","label":"Requesting Department","options":"Department","reqd":1},{"fieldname":"payee_type","fieldtype":"Select","label":"Payee Type","options":"Supplier\nEmployee\nOther","reqd":1},
+  {"fieldname":"payee","fieldtype":"Data","in_list_view":1,"label":"Payee","reqd":1},{"fieldname":"description","fieldtype":"Data","in_list_view":1,"label":"Description","reqd":1},
+  {"fieldname":"amount","fieldtype":"Currency","in_list_view":1,"label":"Amount","non_negative":1,"reqd":1},{"fieldname":"expense_account","fieldtype":"Link","label":"Expense Account","options":"Account","reqd":1},
+  {"fieldname":"cost_center","fieldtype":"Link","label":"Cost Center","options":"Cost Center","reqd":1},{"fieldname":"procurement_case","fieldtype":"Link","label":"Procurement Case","options":"DTMGP Procurement Case"},
+  {"fieldname":"purchase_invoice","fieldtype":"Link","label":"ERPNext Purchase Invoice","options":"Purchase Invoice"},
+  {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nBudget Checked\nPending Audit\nPending Approval\nApproved\nRejected\nPaid\nCancelled","reqd":1},
+  {"fieldname":"approval_reference","fieldtype":"Data","label":"Approval Reference"},{"fieldname":"payment_entry","fieldtype":"Link","label":"ERPNext Payment Entry","options":"Payment Entry"},
+  {"fieldname":"justification","fieldtype":"Small Text","label":"Expenditure Justification"}
+ ],"index_web_pages_for_search":0,"links":[],"modified":"2026-09-16 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Payment Request","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Treasurer","share":1,"write":1},
+  {"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor","write":1}
+ ],"sort_field":"request_date","sort_order":"DESC","states":[],"track_changes":1
+}

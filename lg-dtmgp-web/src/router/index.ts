@@ -7,6 +7,7 @@ import LoginView from "@/views/LoginView.vue";
 import UsersView from "@/views/UsersView.vue";
 import AdministrationView from "@/views/AdministrationView.vue";
 import WorkspaceView from "@/views/WorkspaceView.vue";
+import FinanceView from "@/views/FinanceView.vue";
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,11 +15,12 @@ export const router = createRouter({
     { path: "/login", name: "login", component: LoginView, meta: { public: true } },
     { path: "/", name: "overview", component: OverviewView, meta: { title: "Overview" } },
     { path: "/people", name: "people", component: PeopleHrView, meta: { title: "People & HR", requiresHrAccess: true } },
+    { path: "/finance", name: "finance", component: FinanceView, meta: { title: "Finance, Revenue & Procurement", requiresNavigationModule: true } },
     { path: "/administration", name: "administration", component: AdministrationView, meta: { title: "Administration", requiresUserAdmin: true } },
     { path: "/administration/users", name: "users", component: UsersView, meta: { title: "Users", requiresUserAdmin: true } },
     { path: "/workspace/:domain/:section?/:item?", name: "workspace", component: WorkspaceView },
     {
-      path: "/:module(people|finance|projects|traditional-affairs|analytics)",
+      path: "/:module(people|projects|traditional-affairs|analytics)",
       name: "module",
       component: ModulePlaceholder,
       meta: { requiresNavigationModule: true },

@@ -1,0 +1,20 @@
+{
+ "actions":[],"autoname":"format:AQ-{YYYY}-{#####}","creation":"2026-09-16 00:00:00.000000","doctype":"DocType","engine":"InnoDB",
+ "field_order":["company","query_date","query_type","severity","reference_doctype","reference_name","subject","finding","recommendation","assigned_to","response_due_date","status","management_response","resolution"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},{"default":"Today","fieldname":"query_date","fieldtype":"Date","label":"Query Date","reqd":1},
+  {"fieldname":"query_type","fieldtype":"Select","label":"Query Type","options":"Finance\nRevenue\nProcurement\nStores\nCompliance","reqd":1},{"fieldname":"severity","fieldtype":"Select","in_list_view":1,"label":"Severity","options":"Low\nMedium\nHigh\nCritical","reqd":1},
+  {"fieldname":"reference_doctype","fieldtype":"Link","label":"Reference DocType","options":"DocType"},{"fieldname":"reference_name","fieldtype":"Dynamic Link","label":"Reference Document","options":"reference_doctype"},
+  {"fieldname":"subject","fieldtype":"Data","in_list_view":1,"label":"Subject","reqd":1},{"fieldname":"finding","fieldtype":"Text Editor","label":"Finding","reqd":1},{"fieldname":"recommendation","fieldtype":"Text Editor","label":"Recommendation"},
+  {"fieldname":"assigned_to","fieldtype":"Link","label":"Assigned To","options":"User","reqd":1},{"fieldname":"response_due_date","fieldtype":"Date","label":"Response Due Date","reqd":1},
+  {"default":"Open","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Open\nResponse Submitted\nUnder Review\nResolved\nClosed","reqd":1},
+  {"fieldname":"management_response","fieldtype":"Text Editor","label":"Management Response"},{"fieldname":"resolution","fieldtype":"Text Editor","label":"Resolution"}
+ ],"index_web_pages_for_search":0,"links":[],"modified":"2026-09-16 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Audit Query","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Auditor","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor","share":1,"write":1},
+  {"email":1,"print":1,"read":1,"role":"Treasurer","write":1},
+  {"email":1,"print":1,"read":1,"role":"Procurement Officer","write":1}
+ ],"sort_field":"query_date","sort_order":"DESC","states":[],"track_changes":1
+}
