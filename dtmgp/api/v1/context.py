@@ -1,5 +1,7 @@
 import frappe
 
+from dtmgp.navigation import get_navigation
+
 from dtmgp.permissions.scope import (
 	can_manage_hr,
 	can_manage_users,
@@ -25,5 +27,6 @@ def get_current_user_context():
 		"can_manage_users": can_manage_users(),
 		"can_view_hr": can_view_hr(),
 		"can_manage_hr": can_manage_hr(),
+		"navigation": get_navigation(),
 		"csrf_token": frappe.session.data.csrf_token,
 	}

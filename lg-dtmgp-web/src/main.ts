@@ -16,7 +16,6 @@ async function bootstrap() {
   app.provide("environment", environment);
   app.use(pinia);
   app.use(VueQueryPlugin);
-  app.use(router);
   const session = useSessionStore(pinia);
   await session.restore();
   router.beforeEach((to) => {
@@ -24,7 +23,16 @@ async function bootstrap() {
     if (!to.meta.public && !session.authenticated) return { name: "login", query: { redirect: to.fullPath } };
     if (to.meta.requiresUserAdmin && !session.canManageUsers) return { name: "overview" };
     if (to.meta.requiresHrAccess && !session.canViewHr) return { name: "overview" };
+    if (to.name === "workspace") {
+      const routes = session.navigation.flatMap(module => module.children.flatMap(section => [section.to, ...(section.children || []).map(item => item.to)]));
+      if (![...routes, ...session.globalMenu.map(item => item.to)].includes(to.path)) return { name: "overview" };
+    }
+    if (to.meta.requiresNavigationModule) {
+      const domain = String(to.params.module).replace("traditional-affairs", "traditional");
+      if (!session.navigation.some(module => module.id === domain)) return { name: "overview" };
+    }
   });
+  app.use(router);
   await router.isReady();
   app.mount("#app");
 }

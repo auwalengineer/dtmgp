@@ -6,6 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from dtmgp.api.v1.administration import get_dashboard
 from dtmgp.api.v1.overview import get_overview
 from dtmgp.api.v1.users import create_user, list_users, update_user
+from dtmgp.navigation import get_navigation
 from dtmgp.permissions.scope import get_allowed_companies
 from dtmgp.permissions.user import has_permission
 from dtmgp.setup.organization import BENUE_LGAS
@@ -88,6 +89,44 @@ class TestUserScope(FrappeTestCase):
 		frappe.set_user(self.makurdi_admin.name)
 		with self.assertRaises(frappe.PermissionError):
 			get_overview(self.gboko)
+
+	def test_navigation_is_filtered_by_business_role(self):
+		hr_officer = self._make_user("HR Officer", self.makurdi)
+		treasurer = self._make_user("Treasurer", self.makurdi)
+
+		self.assertEqual(
+			{module["id"] for module in get_navigation(hr_officer.name)["modules"]},
+			{"governance", "hr", "analytics"},
+		)
+		self.assertEqual(
+			{module["id"] for module in get_navigation(treasurer.name)["modules"]},
+			{"governance", "finance", "projects", "analytics"},
+		)
+		lga_admin_modules = {module["id"] for module in get_navigation(self.makurdi_admin.name)["modules"]}
+		self.assertIn("system", lga_admin_modules)
+		self.assertNotIn("traditional", {module["id"] for module in get_navigation(hr_officer.name)["modules"]})
+
+	def test_sensitive_navigation_sections_are_state_only(self):
+		lga_navigation = get_navigation(self.makurdi_admin.name)
+		system = next(module for module in lga_navigation["modules"] if module["id"] == "system")
+		self.assertNotIn("security-audit", {section["id"] for section in system["children"]})
+
+		state_navigation = get_navigation("Administrator")
+		state_system = next(module for module in state_navigation["modules"] if module["id"] == "system")
+		self.assertIn("security-audit", {section["id"] for section in state_system["children"]})
+
+	def test_business_navigation_requires_an_assigned_lga(self):
+		user = frappe.get_doc(
+			{
+				"doctype": "User",
+				"email": f"unscoped-{uuid4().hex}@example.com",
+				"first_name": "Unscoped",
+				"enabled": 1,
+				"send_welcome_email": 0,
+				"roles": [{"role": "HR Officer"}],
+			}
+		).insert()
+		self.assertEqual(get_navigation(user.name)["modules"], [])
 
 	def _make_user(self, role, company):
 		email = f"scope-{uuid4().hex}@example.com"
