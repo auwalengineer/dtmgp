@@ -1,49 +1,80 @@
 <script setup lang="ts">
-import { ArrowRight, CalendarClock, CheckCircle2, CircleAlert, FileClock, FolderKanban } from "@lucide/vue";
+import { ArrowRight, Building2, ShieldCheck, UserRoundCheck, UserRoundX } from "@lucide/vue";
+import { computed, ref, watch } from "vue";
+import { RouterLink } from "vue-router";
 
-const metrics = [
-  { label: "LGAs reporting", value: "21 / 23", detail: "2 submissions outstanding", tone: "green" },
-  { label: "Open resolutions", value: "146", detail: "18 due this week", tone: "gold" },
-  { label: "Active projects", value: "284", detail: "₦42.8bn monitored value", tone: "blue" },
-  { label: "Compliance alerts", value: "12", detail: "4 require state review", tone: "red" },
-];
+import { apiRequest } from "@/services/api";
+import { useSessionStore } from "@/stores/session";
 
-const actions = [
-  { title: "Statutory returns", detail: "2 LGAs have not submitted August returns", icon: FileClock, type: "Overdue" },
-  { title: "Council resolutions", detail: "18 actions reach their due date this week", icon: CalendarClock, type: "Due soon" },
-  { title: "Project inspections", detail: "7 field reports are awaiting review", icon: FolderKanban, type: "Review" },
-];
+interface Overview {
+  scope: string;
+  lga_count: number;
+  user_count: number;
+  active_user_count: number;
+  disabled_user_count: number;
+  unassigned_role_count: number;
+  can_manage_users: boolean;
+  is_statewide: boolean;
+}
+
+const session = useSessionStore();
+const overview = ref<Overview | null>(null);
+const loading = ref(true);
+const error = ref("");
+const greeting = computed(() => session.user.name.split(" ")[0] || "colleague");
+const dateLabel = new Intl.DateTimeFormat("en-NG", { dateStyle: "full" }).format(new Date());
+const metrics = computed(() => overview.value ? [
+  { label: "LGAs in scope", value: overview.value.lga_count, detail: overview.value.scope, tone: "green", icon: Building2 },
+  { label: "Staff accounts", value: overview.value.user_count, detail: "Authorized scope only", tone: "blue", icon: ShieldCheck },
+  { label: "Active accounts", value: overview.value.active_user_count, detail: "Enabled system users", tone: "green", icon: UserRoundCheck },
+  { label: "Disabled accounts", value: overview.value.disabled_user_count, detail: `${overview.value.unassigned_role_count} without platform role`, tone: "red", icon: UserRoundX },
+] : []);
+
+async function loadOverview() {
+  loading.value = true;
+  error.value = "";
+  try {
+    const company = session.activeLga ? `?company=${encodeURIComponent(session.activeLga)}` : "";
+    overview.value = await apiRequest<Overview>(`/api/method/dtmgp.api.v1.overview.get_overview${company}`);
+  } catch (reason) {
+    error.value = reason instanceof Error ? reason.message : "Unable to load overview";
+  } finally {
+    loading.value = false;
+  }
+}
+
+watch(() => session.activeLga, loadOverview, { immediate: true });
 </script>
 
 <template>
   <section class="page-heading">
-    <div><p class="eyebrow">State operations</p><h1>Good morning, Amina</h1><p>Monday, 14 September 2026 · Statewide overview</p></div>
-    <button class="primary-action">Create report <ArrowRight :size="17" /></button>
+    <div>
+      <p class="eyebrow">{{ overview?.scope || "Authorized operations" }}</p>
+      <h1>Good morning, {{ greeting }}</h1>
+      <p>{{ dateLabel }} · Access-controlled overview</p>
+    </div>
+    <RouterLink v-if="overview?.can_manage_users" class="primary-action action-link" to="/administration">
+      Open administration <ArrowRight :size="17" />
+    </RouterLink>
   </section>
 
-  <section class="metrics-grid" aria-label="Operational summary">
-    <article v-for="metric in metrics" :key="metric.label" class="metric" :class="`metric--${metric.tone}`">
-      <span>{{ metric.label }}</span><strong>{{ metric.value }}</strong><small>{{ metric.detail }}</small>
-    </article>
-  </section>
+  <p v-if="error" class="login-error" role="alert">{{ error }}</p>
+  <section v-if="loading" class="panel loading-panel">Loading authorized overview...</section>
+  <template v-else-if="overview">
+    <section class="metrics-grid" aria-label="Authorized operational summary">
+      <article v-for="metric in metrics" :key="metric.label" class="metric" :class="`metric--${metric.tone}`">
+        <span class="metric-heading"><component :is="metric.icon" :size="17" />{{ metric.label }}</span>
+        <strong>{{ metric.value }}</strong>
+        <small>{{ metric.detail }}</small>
+      </article>
+    </section>
 
-  <div class="overview-grid">
-    <section class="panel action-panel">
-      <header class="panel-header"><div><h2>Attention required</h2><p>Items needing action across the state</p></div><button class="text-action">View all <ArrowRight :size="15" /></button></header>
-      <div class="action-list">
-        <button v-for="action in actions" :key="action.title" class="action-row">
-          <span class="action-icon"><component :is="action.icon" :size="20" /></span>
-          <span class="action-copy"><strong>{{ action.title }}</strong><small>{{ action.detail }}</small></span>
-          <span class="status-badge">{{ action.type }}</span><ArrowRight :size="17" />
-        </button>
+    <section class="panel access-summary">
+      <header class="panel-header"><div><h2>Your access boundary</h2><p>Calculated by the server from your roles and Company permissions</p></div></header>
+      <div class="access-summary-body">
+        <ShieldCheck :size="30" />
+        <div><strong>{{ overview.scope }}</strong><p>{{ overview.is_statewide ? "State role recognized. Metrics remain filtered by the active LGA selection." : "Your account is locked to its assigned Local Government Area." }}</p></div>
       </div>
     </section>
-
-    <section class="panel reporting-panel">
-      <header class="panel-header"><div><h2>Reporting status</h2><p>Current reporting cycle</p></div></header>
-      <div class="progress-ring"><strong>91%</strong><span>submitted</span></div>
-      <div class="reporting-legend"><p><CheckCircle2 :size="17" />21 submitted</p><p><CircleAlert :size="17" />2 outstanding</p></div>
-      <button class="secondary-action">Open compliance dashboard</button>
-    </section>
-  </div>
+  </template>
 </template>

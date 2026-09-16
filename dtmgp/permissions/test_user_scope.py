@@ -3,7 +3,9 @@ from uuid import uuid4
 import frappe
 from frappe.tests.utils import FrappeTestCase
 
-from dtmgp.api.v1.users import create_user, list_users
+from dtmgp.api.v1.administration import get_dashboard
+from dtmgp.api.v1.overview import get_overview
+from dtmgp.api.v1.users import create_user, list_users, update_user
 from dtmgp.permissions.scope import get_allowed_companies
 from dtmgp.permissions.user import has_permission
 from dtmgp.setup.organization import BENUE_LGAS
@@ -54,6 +56,38 @@ class TestUserScope(FrappeTestCase):
 
 		with self.assertRaises(frappe.PermissionError):
 			create_user(f"staff-{uuid4().hex}@example.com", "Other", "HR Officer", self.gboko)
+
+	def test_overview_is_scoped_and_administration_requires_admin_role(self):
+		staff = self._make_user("HR Officer", self.makurdi)
+		frappe.set_user(staff.name)
+
+		overview = get_overview()
+		self.assertEqual(overview["scope"], self.makurdi)
+		self.assertFalse(overview["is_statewide"])
+		self.assertGreaterEqual(overview["user_count"], 2)
+		with self.assertRaises(frappe.PermissionError):
+			get_dashboard()
+
+	def test_administration_dashboard_and_update_remain_in_lga_scope(self):
+		staff = self._make_user("HR Officer", self.makurdi)
+		frappe.set_user(self.makurdi_admin.name)
+
+		dashboard = get_dashboard()
+		self.assertEqual(dashboard["scope"], self.makurdi)
+		self.assertGreaterEqual(dashboard["active_user_count"], 2)
+		updated = update_user(staff.name, "Updated", "Treasurer", self.makurdi, "Officer")
+		self.assertEqual(updated["role"], "Treasurer")
+		self.assertEqual(frappe.db.get_value("User", staff.name, "dtmgp_lga"), self.makurdi)
+
+		with self.assertRaises(frappe.PermissionError):
+			update_user(self.gboko_admin.name, "Outside", "Treasurer", self.makurdi)
+		with self.assertRaises(frappe.PermissionError):
+			update_user(staff.name, "Outside", "Treasurer", self.gboko)
+
+	def test_requested_overview_company_must_be_in_scope(self):
+		frappe.set_user(self.makurdi_admin.name)
+		with self.assertRaises(frappe.PermissionError):
+			get_overview(self.gboko)
 
 	def _make_user(self, role, company):
 		email = f"scope-{uuid4().hex}@example.com"

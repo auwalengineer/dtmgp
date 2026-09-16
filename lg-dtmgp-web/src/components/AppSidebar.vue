@@ -18,7 +18,7 @@ const session = useSessionStore();
 
 const navigation = [
   { label: "Overview", to: "/", icon: LayoutDashboard },
-  { label: "Administration", to: "/administration/users", icon: Building2, userAdmin: true },
+  { label: "Administration", to: "/administration", icon: Building2, userAdmin: true },
   { label: "People & HR", to: "/people", icon: UsersRound },
   { label: "Finance & Revenue", to: "/finance", icon: CircleDollarSign },
   { label: "Projects & Assets", to: "/projects", icon: FolderKanban },

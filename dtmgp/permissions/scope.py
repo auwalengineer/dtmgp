@@ -42,6 +42,36 @@ def get_allowed_companies(user=None):
 	)
 
 
+def get_requested_companies(company=None, user=None):
+	companies = get_allowed_companies(user)
+	if not company:
+		return companies
+	if company not in companies:
+		frappe.throw("LGA is outside your permitted scope", frappe.PermissionError)
+	return [company]
+
+
+def get_scoped_user_names(user=None, companies=None):
+	companies = companies if companies is not None else get_allowed_companies(user)
+	if not companies:
+		return []
+	return list(
+		dict.fromkeys(
+			frappe.get_all(
+				"User Permission",
+				filters={"allow": "Company", "for_value": ["in", companies]},
+				pluck="user",
+			)
+		)
+	)
+
+
+def require_authenticated_user():
+	if frappe.session.user == "Guest":
+		frappe.throw("Authentication required", frappe.AuthenticationError)
+
+
 def require_user_admin():
+	require_authenticated_user()
 	if not can_manage_users():
 		frappe.throw("You are not permitted to manage users", frappe.PermissionError)

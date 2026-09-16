@@ -1,12 +1,11 @@
 import frappe
 
-from dtmgp.permissions.scope import can_manage_users, get_allowed_companies, is_state_user
+from dtmgp.permissions.scope import can_manage_users, get_allowed_companies, is_state_user, require_authenticated_user
 
 
 @frappe.whitelist()
 def get_current_user_context():
-	if frappe.session.user == "Guest":
-		frappe.throw("Authentication required", frappe.AuthenticationError)
+	require_authenticated_user()
 	user = frappe.get_cached_doc("User", frappe.session.user)
 	companies = get_allowed_companies()
 	default_company = frappe.defaults.get_user_default("Company")
