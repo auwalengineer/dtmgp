@@ -23,6 +23,7 @@ async function bootstrap() {
     if (to.meta.public && session.authenticated) return "/";
     if (!to.meta.public && !session.authenticated) return { name: "login", query: { redirect: to.fullPath } };
     if (to.meta.requiresUserAdmin && !session.canManageUsers) return { name: "overview" };
+    if (to.meta.requiresHrAccess && !session.canViewHr) return { name: "overview" };
   });
   await router.isReady();
   app.mount("#app");

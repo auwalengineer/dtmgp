@@ -1,6 +1,13 @@
 import frappe
 
-from dtmgp.permissions.scope import can_manage_users, get_allowed_companies, is_state_user, require_authenticated_user
+from dtmgp.permissions.scope import (
+	can_manage_hr,
+	can_manage_users,
+	can_view_hr,
+	get_allowed_companies,
+	is_state_user,
+	require_authenticated_user,
+)
 
 
 @frappe.whitelist()
@@ -16,5 +23,7 @@ def get_current_user_context():
 		"active_lga": active_company,
 		"can_change_lga": is_state_user() and len(companies) > 1,
 		"can_manage_users": can_manage_users(),
+		"can_view_hr": can_view_hr(),
+		"can_manage_hr": can_manage_hr(),
 		"csrf_token": frappe.session.data.csrf_token,
 	}

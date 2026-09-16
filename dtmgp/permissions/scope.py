@@ -5,6 +5,11 @@ from dtmgp.setup.organization import PARENT_COMPANY
 
 STATE_ROLES = {"System Manager", "State Administrator", "State Executive Viewer", "State Auditor"}
 USER_ADMIN_ROLES = {"System Manager", "State Administrator", "LGA Administrator"}
+HR_VIEW_ROLES = {
+	"System Manager", "State Administrator", "State Executive Viewer", "State Auditor",
+	"LGA Administrator", "LGA Chairman", "LGA Secretary", "HR Officer", "Internal Auditor", "Read-only Officer",
+}
+HR_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "HR Officer"}
 
 
 def get_user_roles(user=None):
@@ -20,6 +25,16 @@ def is_state_user(user=None):
 def can_manage_users(user=None):
 	user = user or frappe.session.user
 	return user == "Administrator" or bool(get_user_roles(user) & USER_ADMIN_ROLES)
+
+
+def can_view_hr(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & HR_VIEW_ROLES)
+
+
+def can_manage_hr(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & HR_MANAGE_ROLES)
 
 
 def get_allowed_companies(user=None):
@@ -75,3 +90,10 @@ def require_user_admin():
 	require_authenticated_user()
 	if not can_manage_users():
 		frappe.throw("You are not permitted to manage users", frappe.PermissionError)
+
+
+def require_hr_access(write=False):
+	require_authenticated_user()
+	allowed = can_manage_hr() if write else can_view_hr()
+	if not allowed:
+		frappe.throw("You are not permitted to access People and HR", frappe.PermissionError)

@@ -12,7 +12,7 @@ export const router = createRouter({
   routes: [
     { path: "/login", name: "login", component: LoginView, meta: { public: true } },
     { path: "/", name: "overview", component: OverviewView, meta: { title: "Overview" } },
-    { path: "/people", name: "people", component: PeopleHrView, meta: { title: "People & HR" } },
+    { path: "/people", name: "people", component: PeopleHrView, meta: { title: "People & HR", requiresHrAccess: true } },
     { path: "/administration", name: "administration", component: AdministrationView, meta: { title: "Administration", requiresUserAdmin: true } },
     { path: "/administration/users", name: "users", component: UsersView, meta: { title: "Users", requiresUserAdmin: true } },
     {

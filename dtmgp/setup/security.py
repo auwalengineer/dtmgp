@@ -2,6 +2,8 @@ import frappe
 
 ADMIN_ROLES = ("State Administrator", "LGA Administrator")
 USER_LGA_FIELD = "dtmgp_lga"
+EMPLOYEE_GRADE_FIELD = "dtmgp_grade_level"
+EMPLOYEE_VERIFICATION_FIELD = "dtmgp_verification_status"
 PLATFORM_ROLES = (
 	"State Administrator",
 	"State Executive Viewer",
@@ -28,6 +30,8 @@ def seed_security_setup():
 		_ensure_user_permission(role_name)
 
 	_ensure_user_lga_field()
+	_ensure_employee_fields()
+	_ensure_hr_permissions()
 
 
 def _ensure_user_permission(role_name):
@@ -61,3 +65,65 @@ def _ensure_user_lga_field():
 			"description": "Controls the user's LGA data access.",
 		}
 	).insert()
+
+
+def _ensure_employee_fields():
+	fields = (
+		{
+			"fieldname": EMPLOYEE_GRADE_FIELD,
+			"label": "Grade Level",
+			"fieldtype": "Data",
+			"insert_after": "designation",
+			"in_list_view": 1,
+		},
+		{
+			"fieldname": EMPLOYEE_VERIFICATION_FIELD,
+			"label": "Verification Status",
+			"fieldtype": "Select",
+			"options": "Pending\nVerified\nReview Due",
+			"default": "Pending",
+			"insert_after": EMPLOYEE_GRADE_FIELD,
+			"in_list_view": 1,
+		},
+	)
+	for field in fields:
+		if not frappe.db.exists("Custom Field", {"dt": "Employee", "fieldname": field["fieldname"]}):
+			frappe.get_doc({"doctype": "Custom Field", "dt": "Employee", **field}).insert()
+
+
+def _ensure_hr_permissions():
+	permissions = {
+		"Employee": {
+			"State Administrator": (1, 1, 1),
+			"LGA Administrator": (1, 1, 1),
+			"HR Officer": (1, 1, 1),
+			"LGA Chairman": (1, 0, 0),
+			"LGA Secretary": (1, 0, 0),
+			"Internal Auditor": (1, 0, 0),
+			"Read-only Officer": (1, 0, 0),
+		},
+		"Department": {
+			"State Administrator": (1, 1, 1),
+			"LGA Administrator": (1, 1, 1),
+			"HR Officer": (1, 1, 1),
+		},
+		"Leave Application": {
+			"State Administrator": (1, 1, 1),
+			"LGA Administrator": (1, 1, 0),
+			"HR Officer": (1, 1, 1),
+			"LGA Chairman": (1, 0, 0),
+		},
+	}
+	for doctype, roles in permissions.items():
+		for role, (read, write, create) in roles.items():
+			filters = {"parent": doctype, "role": role, "permlevel": 0}
+			if not frappe.db.exists("Custom DocPerm", filters):
+				frappe.get_doc(
+					{
+						"doctype": "Custom DocPerm",
+						**filters,
+						"read": read,
+						"write": write,
+						"create": create,
+					}
+				).insert()
