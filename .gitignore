@@ -9,5 +9,6 @@ dist
 .env.*.local
 playwright-report
 test-results
+lg-dtmgp-web/public/version.json
 *.tsbuildinfo
 __pycache__

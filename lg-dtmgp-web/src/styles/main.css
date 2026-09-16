@@ -17,6 +17,7 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
+.version-banner { align-items: center; background: #fff4db; border-bottom: 1px solid #e2c267; color: #614800; display: flex; font-size: .75rem; gap: 14px; justify-content: center; min-height: 38px; padding: 6px 16px; position: sticky; top: 0; z-index: 60; }.version-banner button { background: transparent; border: 0; color: var(--green-700); cursor: pointer; font-weight: 800; padding: 5px; }
 button, input { font: inherit; }
 button { color: inherit; }
 .app-shell { display: grid; grid-template-columns: 292px minmax(0, 1fr); min-height: 100vh; }
