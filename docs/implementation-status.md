@@ -2,7 +2,7 @@
 
 Last reconciled: 2026-09-16  
 Branch: `develop`  
-Latest reviewed milestone: `9c4755f`
+Latest reviewed milestone: `406c34c`
 
 ## Status definitions
 
@@ -25,7 +25,10 @@ Latest reviewed milestone: `9c4755f`
 | Overview foundation | Complete | Server-derived account and workforce metrics filtered by active authorized LGA |
 | HR staff directory foundation | Complete | ERPNext Employee reuse, search, pagination, filters, create/edit, verification status, leave list and department headcounts |
 | HR metadata deployment | Complete | Idempotent custom fields/permissions for clean install and existing-site migration |
-| CI baseline | Complete | Clean-site install, backend tests, Vue type-check/tests/build, asset verification and production dependency audit |
+| LGA registry | Complete | One-to-one LGA Profile records, immutable official codes, Company validation, clean-site seed and duplicate-link tests |
+| Security audit foundation | Complete | Append-only audit events for user/permission changes and authorization denials with sensitive-value redaction |
+| Runtime release detection | Complete | Build metadata publication, periodic version polling and non-blocking refresh notification |
+| CI baseline | Complete | Clean-site install, repeatable migration, backend/unit/browser/accessibility checks, secret scan, Vue build, asset verification and production dependency audit |
 
 ## Partially complete backlog
 
@@ -33,10 +36,12 @@ Latest reviewed milestone: `9c4755f`
 | --- | --- | --- |
 | FND-003 Roles and Role Profiles | All approved roles are seeded | Create approved Role Profiles and test reproducible profile assignment |
 | FND-005 Isolation test harness | User, navigation and Employee APIs have multi-LGA denial tests | Add direct document, submit/cancel, report, export, attachment and private-file denial coverage |
+| FND-006 Audit event foundation | User/permission changes and authorization denials are recorded append-only | Add workflow-transition and export events as those capabilities are implemented |
 | FND-008 Session lifecycle | Login, logout, CSRF and unauthorized guest behavior work | Add automated expired-session, disabled-user and concurrent-session journeys |
-| FND-010 Delivery gates | Clean install and core backend/frontend checks run in CI | Add browser tests, secret scanning, migration test, immutable artifact and required-branch protection evidence |
+| FND-010 Delivery gates | Browser, critical axe, secret-scan and repeatable-migration gates are configured in CI | Add immutable artifact publishing and required-branch protection evidence |
 | UI-001 Responsive shell | Desktop/mobile shell and principal pages are responsive | Perform browser viewport and keyboard acceptance checks for state, LGA and self-service users |
 | UI-003 Data tables and filters | Employee list has server pagination/search/filtering | Build shared component, allowlisted sorting and URL-preserved filter state |
+| UI-005 Accessibility baseline | Critical axe checks run on desktop/mobile authorization journeys | Complete keyboard journeys and broaden WCAG checks across principal workflows |
 | UI-006 Low-bandwidth behavior | Hashed build is small and lists paginate | Define budget, add measurements, upload progress/retry and non-blocking skeleton patterns |
 | HR-001 Scoped staff directory | Core approved Employee fields and LGA scope are live | Approve production field allowlist, add restricted-field denial tests and staging acceptance |
 | HR-002 Staff verification | Verification status and authorized verify action exist | Implement exercise/record model, reviewer separation, evidence, exceptions, reasons, audit trail and Restricted-file controls |
@@ -46,17 +51,17 @@ Latest reviewed milestone: `9c4755f`
 
 ### P0 foundation
 
-1. **FND-002 LGA Profile and stable code**: create the one-to-one LGA Profile model, immutable code validation and duplicate-link tests.
-2. **FND-006 Audit event foundation**: record privileged access, permission changes, workflow transitions, exports and authorization denials without sensitive payloads.
-3. **FND-009 Runtime version detection**: publish version/commit/build time and show a non-blocking refresh notification when a newer deployment is available.
-4. **API contract foundation**: standardize envelopes and errors, document `/api/v1` methods, and add an OpenAPI reference plus Bruno/Postman collection.
+1. **FND-005 Expanded isolation harness**: add direct document, submit/cancel, report, export, attachment and private-file cross-LGA denial coverage as each capability becomes available.
+2. **API contract foundation**: standardize envelopes and errors, document `/api/v1` methods, and add an OpenAPI reference plus Bruno/Postman collection.
+3. **FND-003 Role Profiles**: create approved Role Profiles and test reproducible assignment.
+4. **FND-008 Session lifecycle tests**: cover expired sessions, disabled users and concurrent-session behavior.
 
 ### P1 shared frontend
 
 1. **UI-002 Shared form controls**: accessible text, select, date, number, checkbox, file, validation, disabled, loading and error components.
 2. **UI-004 Workflow components**: timeline, approval panel, rejection reason, confirmation and pending-action components.
-3. **UI-005 Accessibility baseline**: automated WCAG checks and complete keyboard journeys.
-4. Add Playwright coverage for login/logout, LGA switching, user administration, navigation denial and HR workflows.
+3. **UI-005 Accessibility completion**: broaden automated WCAG checks and complete keyboard journeys.
+4. Expand Playwright coverage from authorization denial to login/logout, LGA switching, user administration and HR workflows.
 5. Implement global search, notifications, calendar, tasks, approvals, recently viewed, saved items, help and profile workflows; these are currently registered navigation workspaces only.
 
 ### P1 first-release domains
@@ -84,12 +89,12 @@ Finance/revenue, procurement, payroll, chieftaincy, external integrations and of
 
 ## Recommended next milestone
 
-Complete the remaining P0 foundation in this order:
+Complete the remaining foundation in this order:
 
-1. LGA Profile and immutable codes.
-2. Audit event foundation.
-3. Expanded isolation test harness.
-4. Runtime version detection.
-5. Browser and security delivery gates.
+1. Standardized API contracts and reference documentation.
+2. Expanded isolation test harness.
+3. Role Profiles and assignment tests.
+4. Session lifecycle browser tests.
+5. Immutable artifact publishing and branch-protection evidence.
 
 After that gate passes, implement the governance domain beginning with correspondence, council meetings, resolutions/actions and statutory returns.
