@@ -80,6 +80,25 @@ def seed_lga_companies():
 	return {"parent": parent.name, "created": created, "updated": updated}
 
 
+def seed_lga_profiles():
+	"""Create the immutable one-to-one registry for all approved LGA Companies."""
+	created = []
+	for lga in BENUE_LGAS:
+		if frappe.db.exists("LGA Profile", lga.abbr):
+			continue
+		frappe.get_doc(
+			{
+				"doctype": "LGA Profile",
+				"lga_name": lga.name,
+				"lga_code": lga.abbr,
+				"company": lga.company_name,
+				"enabled": 1,
+			}
+		).insert()
+		created.append(lga.abbr)
+	return {"created": created}
+
+
 def _ensure_parent_company():
 	if frappe.db.exists("Company", PARENT_COMPANY):
 		parent = frappe.get_doc("Company", PARENT_COMPANY)

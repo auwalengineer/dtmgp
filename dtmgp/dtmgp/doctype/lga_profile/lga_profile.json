@@ -1,0 +1,56 @@
+{
+ "actions": [],
+ "autoname": "field:lga_code",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["lga_name", "lga_code", "company", "enabled"],
+ "fields": [
+  {
+   "fieldname": "lga_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "LGA Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "lga_code",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "LGA Code",
+   "reqd": 1,
+   "set_only_once": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "company",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "LGA Company",
+   "options": "Company",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "enabled",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Enabled"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "module": "dtmgp",
+ "name": "LGA Profile",
+ "naming_rule": "By fieldname",
+ "permissions": [
+  {"create": 1, "delete": 1, "email": 1, "export": 1, "print": 1, "read": 1, "report": 1, "role": "State Administrator", "share": 1, "write": 1},
+  {"export": 1, "print": 1, "read": 1, "report": 1, "role": "State Auditor"},
+  {"read": 1, "report": 1, "role": "State Executive Viewer"},
+  {"read": 1, "role": "LGA Administrator"}
+ ],
+ "sort_field": "lga_name",
+ "sort_order": "ASC",
+ "states": [],
+ "track_changes": 1
+}
