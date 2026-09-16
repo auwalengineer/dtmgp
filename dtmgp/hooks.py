@@ -132,17 +132,24 @@ after_install = "dtmgp.install.after_install"
 # permission_query_conditions = {
 permission_query_conditions = {
 	"User": "dtmgp.permissions.user.get_permission_query_conditions",
+	"DTMGP Audit Event": "dtmgp.permissions.audit_event.get_permission_query_conditions",
 }
 #
 has_permission = {
 	"User": "dtmgp.permissions.user.has_permission",
+	"DTMGP Audit Event": "dtmgp.permissions.audit_event.has_permission",
 }
 
 doc_events = {
 	"User": {
 		"validate": "dtmgp.permissions.user_events.validate_user_scope",
-		"after_insert": "dtmgp.permissions.user_events.sync_user_lga_permission",
-		"on_update": "dtmgp.permissions.user_events.sync_user_lga_permission",
+		"on_update": ["dtmgp.permissions.user_events.sync_user_lga_permission", "dtmgp.audit.audit_user_change"],
+		"after_insert": ["dtmgp.permissions.user_events.sync_user_lga_permission", "dtmgp.audit.audit_user_change"],
+	},
+	"User Permission": {
+		"after_insert": "dtmgp.audit.audit_user_permission",
+		"on_update": "dtmgp.audit.audit_user_permission",
+		"on_trash": "dtmgp.audit.audit_user_permission",
 	}
 }
 

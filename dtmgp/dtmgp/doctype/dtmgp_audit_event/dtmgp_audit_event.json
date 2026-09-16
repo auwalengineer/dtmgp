@@ -1,0 +1,33 @@
+{
+ "actions": [],
+ "autoname": "UUID",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": ["occurred_at", "event_type", "outcome", "actor", "company", "reference_doctype", "reference_name", "summary", "metadata_json", "request_id", "ip_address"],
+ "fields": [
+  {"fieldname": "occurred_at", "fieldtype": "Datetime", "in_list_view": 1, "label": "Occurred At", "reqd": 1},
+  {"fieldname": "event_type", "fieldtype": "Data", "in_list_view": 1, "label": "Event Type", "reqd": 1},
+  {"fieldname": "outcome", "fieldtype": "Select", "in_list_view": 1, "label": "Outcome", "options": "Success\nDenied\nFailure", "reqd": 1},
+  {"fieldname": "actor", "fieldtype": "Data", "in_list_view": 1, "label": "Actor", "reqd": 1},
+  {"fieldname": "company", "fieldtype": "Link", "label": "LGA", "options": "Company"},
+  {"fieldname": "reference_doctype", "fieldtype": "Link", "label": "Reference DocType", "options": "DocType"},
+  {"fieldname": "reference_name", "fieldtype": "Data", "label": "Reference Name", "read_only": 1},
+  {"fieldname": "summary", "fieldtype": "Small Text", "label": "Summary", "reqd": 1},
+  {"fieldname": "metadata_json", "fieldtype": "Code", "label": "Redacted Metadata", "options": "JSON", "read_only": 1},
+  {"fieldname": "request_id", "fieldtype": "Data", "label": "Request ID", "read_only": 1},
+  {"fieldname": "ip_address", "fieldtype": "Data", "label": "IP Address", "read_only": 1}
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "module": "dtmgp",
+ "name": "DTMGP Audit Event",
+ "permissions": [
+  {"export": 1, "read": 1, "report": 1, "role": "State Auditor"},
+  {"export": 1, "read": 1, "report": 1, "role": "State Administrator"},
+  {"read": 1, "report": 1, "role": "Internal Auditor"}
+ ],
+ "sort_field": "occurred_at",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

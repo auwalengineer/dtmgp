@@ -62,6 +62,9 @@ def get_requested_companies(company=None, user=None):
 	if not company:
 		return companies
 	if company not in companies:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Requested LGA is outside the user's scope", company=company)
 		frappe.throw("LGA is outside your permitted scope", frappe.PermissionError)
 	return [company]
 
@@ -83,12 +86,18 @@ def get_scoped_user_names(user=None, companies=None):
 
 def require_authenticated_user():
 	if frappe.session.user == "Guest":
+		from dtmgp.audit import record_denial
+
+		record_denial("authentication_required", "Guest attempted to access an authenticated service")
 		frappe.throw("Authentication required", frappe.AuthenticationError)
 
 
 def require_user_admin():
 	require_authenticated_user()
 	if not can_manage_users():
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "User administration access denied")
 		frappe.throw("You are not permitted to manage users", frappe.PermissionError)
 
 
@@ -96,4 +105,7 @@ def require_hr_access(write=False):
 	require_authenticated_user()
 	allowed = can_manage_hr() if write else can_view_hr()
 	if not allowed:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "People and HR access denied")
 		frappe.throw("You are not permitted to access People and HR", frappe.PermissionError)
