@@ -23,6 +23,9 @@ async function bootstrap() {
     if (!to.meta.public && !session.authenticated) return { name: "login", query: { redirect: to.fullPath } };
     if (to.meta.requiresUserAdmin && !session.canManageUsers) return { name: "overview" };
     if (to.meta.requiresHrAccess && !session.canViewHr) return { name: "overview" };
+    if (to.meta.requiresGovernanceAccess && !session.canViewGovernance) return { name: "overview" };
+    if (to.meta.requiresTraditionalAccess && !session.navigation.some((module) => module.id === "traditional")) return { name: "overview" };
+    if (to.meta.requiresFinanceAccess && !session.canViewFinance) return { name: "overview" };
     if (to.name === "workspace") {
       const routes = session.navigation.flatMap(module => module.children.flatMap(section => [section.to, ...(section.children || []).map(item => item.to)]));
       if (![...routes, ...session.globalMenu.map(item => item.to)].includes(to.path)) return { name: "overview" };
