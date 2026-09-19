@@ -38,7 +38,7 @@ NAVIGATION = (
 	{
 		"id": "governance", "label": "Administration & Governance", "icon": "landmark", "roles": GOVERNANCE,
 		"children": [
-			_section("governance", "Overview", to="/"),
+			_section("governance", "Overview", to="/governance"),
 			_section("governance", "Correspondence", "Incoming Correspondence|Outgoing Correspondence|Internal Memos|Dispatch Register|Assigned Correspondence"),
 			_section("governance", "Meetings", "Meeting Calendar|Council Meetings|Committee Meetings|Meeting Agendas|Attendance|Minutes"),
 			_section("governance", "Resolutions", "Resolution Register|Assigned Actions|Action Progress|Overdue Actions"),

@@ -1,8 +1,8 @@
 # Implementation Status and Pending Work
 
-Last reconciled: 2026-09-16  
+Last reconciled: 2026-09-19  
 Branch: `develop`  
-Latest reviewed milestone: `406c34c`
+Latest reviewed milestone: `f7b1489` plus uncommitted HR extensions and Governance Phase 1 (Correspondence, Departments & Units) work
 
 ## Status definitions
 
@@ -30,13 +30,20 @@ Latest reviewed milestone: `406c34c`
 | Runtime release detection | Complete | Build metadata publication, periodic version polling and non-blocking refresh notification |
 | CI baseline | Complete | Clean-site install, repeatable migration, backend/unit/browser/accessibility checks, secret scan, Vue build, asset verification and production dependency audit |
 | Finance, revenue and procurement foundation | Complete | Eight LGA-scoped governance DocTypes, ERPNext accounting/purchasing integration, controlled transitions, amount-based approvals, audit events, APIs and Vue cockpit |
+| GOV-001a Correspondence and departments (Governance Phase 1) | Complete | `DTMGP Correspondence` (Incoming/Outgoing/Internal Memo, Draft→Registered→Dispatched→Closed) reusing ERPNext `Department` for Departments & Units rather than a new DocType, scoped API (`dtmgp/api/v1/governance.py`), audit-event wiring, cross-LGA denial tests (`dtmgp/permissions/test_governance_scope.py`, `dtmgp/permissions/test_governance_isolation.py`) and a Vue workspace at `/governance` |
+| FND-003 Roles and Role Profiles | Complete | All approved roles are seeded; a one-role Role Profile per platform role is seeded idempotently and reproducible-assignment is tested (`dtmgp/setup/test_security.py`) |
+| HR-002 Staff verification | Complete | `DTMGP Staff Verification Exercise`/`Record` model with reviewer-cannot-equal-preparer enforcement, exception reasons, an evidence attachment field and audit-event wiring (`dtmgp/hr.py`, `dtmgp/api/v1/hr.py`, `dtmgp/permissions/test_hr_extensions.py`); biometric capture is a manual confirmation flag pending device-integration scope |
+| HR-003 Establishment control | Complete | ERPNext `Staffing Plan`/`Staffing Plan Detail` (not a new dtmgp DocType) extended with platform-role Custom DocPerm; live filled/vacant/overstaffed computed from `Staffing Plan Detail`'s own `current_count`/`number_of_positions`, scoped CRUD, tests |
+| HR-004 Postings, transfers and promotions | Complete | HRMS `Employee Transfer` (posting and cross-LGA transfer in one submittable doctype; `company`/`new_company` both exempted from Frappe's automatic per-field Company filtering via Property Setters so the destination LGA can act on an inbound transfer) and `Employee Promotion`, both extended with Custom DocPerm and a no-self-submit guard in the API layer; submission updates the Employee record via each doctype's native controller |
+| HR-005 Retirement and exit | Complete | HRMS `Employee Separation` (its native Project/Task-based boarding-activity checklist, extended with Task/Project Custom DocPerm and Task scoped through its Project's company) gates completion; marks the Employee `Left` with a relieving date once every activity task is completed; plus a retirement forecast report over Employee's existing `date_of_retirement` field |
+| HR-006 Attendance and leave decisions | Complete | Scoped attendance summary/list over ERPNext `Attendance`; leave balance, calendar and approve/reject actions over `Leave Application` with a no-self-approval guard |
+| HR-007 Payroll and staff-audit visibility | Complete | Count-only Payroll overview (Treasurer/state roles) and a Staff Audit exceptions report (unverified/duplicate/missing-grade, Internal Auditor/state roles); payroll amounts, bank and tax detail remain deferred as Restricted data pending sign-off |
 
 ## Partially complete backlog
 
 | Backlog | Current state | Remaining acceptance work |
 | --- | --- | --- |
-| FND-003 Roles and Role Profiles | All approved roles are seeded | Create approved Role Profiles and test reproducible profile assignment |
-| FND-005 Isolation test harness | User, navigation and Employee APIs have multi-LGA denial tests | Add direct document, submit/cancel, report, export, attachment and private-file denial coverage |
+| FND-005 Isolation test harness | User, navigation, Employee and the extended native HR doctypes (Staffing Plan, Employee Transfer/Promotion/Separation, Project, Task) have multi-LGA denial tests; direct document read/write, submit/cancel, raw report/list query, export-permission, private-attachment and dual-LGA-visibility (Employee Transfer's `company`/`new_company`) denial are proven against the `has_permission`/`permission_query_conditions` hooks directly (`dtmgp/permissions/test_isolation.py`, `dtmgp/permissions/test_hr_extensions.py`) | Extend the same direct-hook coverage to procurement and audit-query record types as their dedicated UI is built |
 | FND-006 Audit event foundation | User/permission changes and authorization denials are recorded append-only | Add workflow-transition and export events as those capabilities are implemented |
 | FND-008 Session lifecycle | Login, logout, CSRF and unauthorized guest behavior work | Add automated expired-session, disabled-user and concurrent-session journeys |
 | FND-010 Delivery gates | Browser, critical axe, secret-scan and repeatable-migration gates are configured in CI | Add immutable artifact publishing and required-branch protection evidence |
@@ -45,7 +52,6 @@ Latest reviewed milestone: `406c34c`
 | UI-005 Accessibility baseline | Critical axe checks run on desktop/mobile authorization journeys | Complete keyboard journeys and broaden WCAG checks across principal workflows |
 | UI-006 Low-bandwidth behavior | Hashed build is small and lists paginate | Define budget, add measurements, upload progress/retry and non-blocking skeleton patterns |
 | HR-001 Scoped staff directory | Core approved Employee fields and LGA scope are live | Approve production field allowlist, add restricted-field denial tests and staging acceptance |
-| HR-002 Staff verification | Verification status and authorized verify action exist | Implement exercise/record model, reviewer separation, evidence, exceptions, reasons, audit trail and Restricted-file controls |
 | DSH-001 LGA operational dashboard | Scoped workforce/account metrics exist | Add metric source, reporting period, freshness, drill-down and approved governance/project indicators |
 | FIN-001 Finance and treasury | Payment requests, budget/account/cost-center links, scoped dashboard and ERPNext ledger permissions are live | Configure chart-of-accounts policy, bank signatories, voucher print formats and staging acceptance |
 | REV-001 Revenue administration | Revenue heads, assessments, submitted receipts, reconciliation totals and Revenue Officer role are live | Approve lawful revenue-head catalogue, rates, payment gateway and enforcement process |
@@ -55,10 +61,9 @@ Latest reviewed milestone: `406c34c`
 
 ### P0 foundation
 
-1. **FND-005 Expanded isolation harness**: add direct document, submit/cancel, report, export, attachment and private-file cross-LGA denial coverage as each capability becomes available.
+1. **FND-005 Expanded isolation harness**: extend the proven direct document/submit-cancel/report/export/attachment denial coverage to HR, procurement and audit-query record types as each capability becomes available.
 2. **API contract foundation**: standardize envelopes and errors, document `/api/v1` methods, and add an OpenAPI reference plus Bruno/Postman collection.
-3. **FND-003 Role Profiles**: create approved Role Profiles and test reproducible assignment.
-4. **FND-008 Session lifecycle tests**: cover expired sessions, disabled users and concurrent-session behavior.
+3. **FND-008 Session lifecycle tests**: cover expired sessions, disabled users and concurrent-session behavior.
 
 ### P1 shared frontend
 
@@ -70,16 +75,16 @@ Latest reviewed milestone: `406c34c`
 
 ### P1 first-release domains
 
-1. **Governance**: Government Correspondence, meetings/agendas/attendance/minutes, resolutions/actions, statutory returns, compliance and approval workflows.
+1. **Governance**: council/committee meetings (agendas/attendance/minutes), resolutions and assigned actions, statutory returns, compliance and a cross-cutting approvals inbox with delegation remain pending; Government Correspondence and Departments & Units are complete (see GOV-001a above).
 2. **Projects and assets**: project register, milestones, inspections, evidence, exception review and scoped reports.
-3. **HR completion**: verification exercises, personnel files, establishment positions, posting/transfers, promotions, attendance, retirement/exit and approved reports.
+3. **HR restricted-data records**: digital personnel files, next-of-kin and staff-document storage remain pending a named HR/records-legal field-classification and retention sign-off (external production condition 6) — the operational HR workflows (verification, establishment, postings/transfers, promotions, attendance, leave decisions, exit/retirement, reports) are complete.
 4. **Dashboards**: complete LGA dashboard and build the approved statewide comparison dashboard without ranking stale/incomplete periods.
 5. **Notifications**: deduplicated reminders and escalations for overdue returns, actions and inspections.
 6. **Authorized exports**: purpose capture, scoped fields, classification markings and export audit records.
 
 ### Deferred domains
 
-Payroll, chieftaincy, external integrations and offline/PWA remain deferred until their approved entry conditions are met. Finance/revenue and procurement now have operational foundations; functions beyond the records and controls listed above remain pending until their business configuration is approved.
+Full payroll processing (bank, tax and deduction detail), chieftaincy, external integrations and offline/PWA remain deferred until their approved entry conditions are met; a count-only Payroll overview is live (see HR-007). Finance/revenue and procurement now have operational foundations; functions beyond the records and controls listed above remain pending until their business configuration is approved.
 
 ## External production conditions
 
@@ -96,9 +101,8 @@ Payroll, chieftaincy, external integrations and offline/PWA remain deferred unti
 Complete the remaining foundation in this order:
 
 1. Standardized API contracts and reference documentation.
-2. Expanded isolation test harness.
-3. Role Profiles and assignment tests.
-4. Session lifecycle browser tests.
-5. Immutable artifact publishing and branch-protection evidence.
+2. Isolation test harness coverage for the remaining domains (HR, procurement, audit query).
+3. Session lifecycle browser tests.
+4. Immutable artifact publishing and branch-protection evidence.
 
 After that gate passes, implement the governance domain beginning with correspondence, council meetings, resolutions/actions and statutory returns.

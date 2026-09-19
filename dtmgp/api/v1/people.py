@@ -118,16 +118,65 @@ def save_employee(
 	return {"name": doc.name, "employee_name": doc.employee_name}
 
 
-@frappe.whitelist(methods=["POST"])
-def set_verification(employee, verification_status):
-	require_hr_access(write=True)
-	if verification_status not in {"Pending", "Verified", "Review Due"}:
-		frappe.throw("Invalid verification status")
+@frappe.whitelist()
+def get_employee_profile(employee):
+	"""Consolidated read view backing the Staff Profiles / Digital Personnel File /
+	Employment History / Next of Kin nav items: the employee's own record plus the
+	native Employee child tables (internal/external work history) and emergency
+	contact fields already on core Employee — no new Restricted-data store."""
+	require_hr_access()
 	doc = frappe.get_doc("Employee", employee)
 	_validate_company(doc.company)
-	doc.set(EMPLOYEE_VERIFICATION_FIELD, verification_status)
-	doc.save()
-	return {"name": doc.name, "verification_status": verification_status}
+	return {
+		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company,
+		"department": doc.department, "designation": doc.designation, "status": doc.status,
+		"gender": doc.gender, "date_of_birth": doc.date_of_birth, "date_of_joining": doc.date_of_joining,
+		"grade_level": doc.get(EMPLOYEE_GRADE_FIELD), "verification_status": doc.get(EMPLOYEE_VERIFICATION_FIELD),
+		"cell_number": doc.cell_number, "personal_email": doc.personal_email,
+		"emergency_contact": {
+			"person_to_be_contacted": doc.person_to_be_contacted,
+			"relation": doc.relation,
+			"emergency_phone_number": doc.emergency_phone_number,
+		},
+		"internal_work_history": [
+			{"department": row.department, "designation": row.designation, "branch": row.branch, "from_date": row.from_date, "to_date": row.to_date}
+			for row in doc.internal_work_history
+		],
+		"external_work_history": [
+			{"company_name": row.company_name, "designation": row.designation, "contact": row.contact, "total_experience": row.total_experience}
+			for row in doc.external_work_history
+		],
+	}
+
+
+@frappe.whitelist()
+def list_employee_documents(employee):
+	"""Staff Documents: exposes the generic, already-scoped Frappe file-attachment
+	feature for the Employee record (contracts, certificates, ID scans) rather than
+	a new Restricted personnel-file store — File permission inherits from the
+	attached Employee, which is already LGA-scoped."""
+	require_hr_access()
+	doc = frappe.get_doc("Employee", employee)
+	_validate_company(doc.company)
+	return frappe.get_all(
+		"File", filters={"attached_to_doctype": "Employee", "attached_to_name": employee},
+		fields=["name", "file_name", "file_url", "is_private", "creation"], order_by="creation desc",
+	)
+
+
+@frappe.whitelist()
+def list_former_staff(company=None, page=1, page_size=25):
+	require_hr_access()
+	companies = get_requested_companies(company)
+	page, page_size = max(cint(page), 1), min(max(cint(page_size), 1), 100)
+	filters = {"company": ["in", companies], "status": "Left"} if companies else {"name": ""}
+	items = frappe.get_all(
+		"Employee", filters=filters,
+		fields=["name", "employee_name", "company", "department", "designation", "relieving_date", "reason_for_leaving"],
+		start=(page - 1) * page_size, page_length=page_size, order_by="relieving_date desc",
+	)
+	total = frappe.db.count("Employee", filters=filters)
+	return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
 @frappe.whitelist()

@@ -4,6 +4,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from dtmgp.api.v1.administration import get_dashboard
+from dtmgp.api.v1.context import get_current_user_context
 from dtmgp.api.v1.overview import get_overview
 from dtmgp.api.v1.users import create_user, list_users, update_user
 from dtmgp.navigation import get_navigation
@@ -105,6 +106,26 @@ class TestUserScope(FrappeTestCase):
 		lga_admin_modules = {module["id"] for module in get_navigation(self.makurdi_admin.name)["modules"]}
 		self.assertIn("system", lga_admin_modules)
 		self.assertNotIn("traditional", {module["id"] for module in get_navigation(hr_officer.name)["modules"]})
+
+	def test_context_exposes_payroll_and_staff_audit_visibility(self):
+		treasurer = self._make_user("Treasurer", self.makurdi)
+		internal_auditor = self._make_user("Internal Auditor", self.makurdi)
+		hr_officer = self._make_user("HR Officer", self.makurdi)
+
+		frappe.set_user(treasurer.name)
+		context = get_current_user_context()
+		self.assertTrue(context["can_view_payroll"])
+		self.assertFalse(context["can_view_staff_audit"])
+
+		frappe.set_user(internal_auditor.name)
+		context = get_current_user_context()
+		self.assertFalse(context["can_view_payroll"])
+		self.assertTrue(context["can_view_staff_audit"])
+
+		frappe.set_user(hr_officer.name)
+		context = get_current_user_context()
+		self.assertFalse(context["can_view_payroll"])
+		self.assertFalse(context["can_view_staff_audit"])
 
 	def test_sensitive_navigation_sections_are_state_only(self):
 		lga_navigation = get_navigation(self.makurdi_admin.name)

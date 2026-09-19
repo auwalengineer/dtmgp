@@ -30,6 +30,7 @@
     "@types/node": "18.19.130",
     "@vitejs/plugin-vue": "5.2.1",
     "@vue/test-utils": "2.4.6",
+    "jsdom": "^26.1.0",
     "typescript": "5.7.2",
     "vite": "5.4.21",
     "vitest": "3.2.6",

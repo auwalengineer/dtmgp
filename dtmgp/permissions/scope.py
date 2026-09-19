@@ -10,11 +10,18 @@ HR_VIEW_ROLES = {
 	"LGA Administrator", "LGA Chairman", "LGA Secretary", "HR Officer", "Internal Auditor", "Read-only Officer",
 }
 HR_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "HR Officer"}
+STAFF_AUDIT_ROLES = {"System Manager", "State Administrator", "State Auditor", "Internal Auditor"}
+PAYROLL_ROLES = STATE_ROLES | {"Treasurer"}
 FINANCE_VIEW_ROLES = STATE_ROLES | {
 	"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "Revenue Officer",
 	"Procurement Officer", "Internal Auditor", "Read-only Officer",
 }
 FINANCE_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "LGA Chairman", "Treasurer", "Revenue Officer", "Procurement Officer", "Internal Auditor", "State Auditor"}
+GOVERNANCE_VIEW_ROLES = STATE_ROLES | {
+	"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "HR Officer",
+	"Procurement Officer", "Project Officer", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer",
+}
+GOVERNANCE_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "LGA Chairman", "LGA Secretary"}
 
 
 def get_user_roles(user=None):
@@ -52,6 +59,16 @@ def can_manage_finance(user=None):
 	return user == "Administrator" or bool(get_user_roles(user) & FINANCE_MANAGE_ROLES)
 
 
+def can_view_governance(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & GOVERNANCE_VIEW_ROLES)
+
+
+def can_manage_governance(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & GOVERNANCE_MANAGE_ROLES)
+
+
 def require_finance_access(write=False):
 	require_authenticated_user()
 	allowed = can_manage_finance() if write else can_view_finance()
@@ -60,6 +77,16 @@ def require_finance_access(write=False):
 
 		record_denial("authorization_denied", "Finance, Revenue and Procurement access denied")
 		frappe.throw("You are not permitted to access Finance, Revenue and Procurement", frappe.PermissionError)
+
+
+def require_governance_access(write=False):
+	require_authenticated_user()
+	allowed = can_manage_governance() if write else can_view_governance()
+	if not allowed:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Administration and Governance access denied")
+		frappe.throw("You are not permitted to access Administration and Governance", frappe.PermissionError)
 
 
 def get_allowed_companies(user=None):
@@ -134,3 +161,31 @@ def require_hr_access(write=False):
 
 		record_denial("authorization_denied", "People and HR access denied")
 		frappe.throw("You are not permitted to access People and HR", frappe.PermissionError)
+
+
+def can_view_staff_audit(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & STAFF_AUDIT_ROLES)
+
+
+def can_view_payroll(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & PAYROLL_ROLES)
+
+
+def require_staff_audit_access(user=None):
+	require_authenticated_user()
+	if not can_view_staff_audit(user):
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Staff audit access denied")
+		frappe.throw("You are not permitted to access staff audit records", frappe.PermissionError)
+
+
+def require_payroll_access(user=None):
+	require_authenticated_user()
+	if not can_view_payroll(user):
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Payroll access denied")
+		frappe.throw("You are not permitted to access payroll records", frappe.PermissionError)

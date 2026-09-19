@@ -1,0 +1,28 @@
+{
+ "actions": [], "autoname": "format:VER-{YYYY}-{#####}", "creation": "2026-09-19 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","exercise","employee","prepared_by","prepared_on","biometric_captured","review_status","reviewed_by","reviewed_on","exception_reason","evidence"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"exercise","fieldtype":"Link","in_list_view":1,"label":"Verification Exercise","options":"DTMGP Staff Verification Exercise","reqd":1},
+  {"fieldname":"employee","fieldtype":"Link","in_list_view":1,"label":"Employee","options":"Employee","reqd":1},
+  {"fieldname":"prepared_by","fieldtype":"Link","label":"Prepared By","options":"User","read_only":1},
+  {"fieldname":"prepared_on","fieldtype":"Datetime","label":"Prepared On","read_only":1},
+  {"default":"0","fieldname":"biometric_captured","fieldtype":"Check","label":"Biometric Captured"},
+  {"default":"Pending","fieldname":"review_status","fieldtype":"Select","in_list_view":1,"label":"Review Status","options":"Pending\nVerified\nException","reqd":1},
+  {"fieldname":"reviewed_by","fieldtype":"Link","label":"Reviewed By","options":"User","read_only":1},
+  {"fieldname":"reviewed_on","fieldtype":"Datetime","label":"Reviewed On","read_only":1},
+  {"fieldname":"exception_reason","fieldtype":"Small Text","label":"Exception Reason"},
+  {"fieldname":"evidence","fieldtype":"Attach","label":"Evidence"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-19 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Staff Verification Record","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"HR Officer","share":1,"write":1},
+  {"read":1,"role":"LGA Chairman"},
+  {"read":1,"role":"LGA Secretary"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"read":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[],"track_changes":1
+}

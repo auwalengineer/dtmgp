@@ -75,7 +75,19 @@ def audit_user_change(doc, method=None):
 
 
 def audit_finance_change(doc, method=None):
-	event_type = "workflow_transition" if doc.has_value_changed("status") else "financial_record_change"
+	_audit_scoped_record_change(doc, method, "financial_record_change")
+
+
+def audit_hr_change(doc, method=None):
+	_audit_scoped_record_change(doc, method, "hr_record_change")
+
+
+def audit_governance_change(doc, method=None):
+	_audit_scoped_record_change(doc, method, "governance_record_change")
+
+
+def _audit_scoped_record_change(doc, method, default_event_type):
+	event_type = "workflow_transition" if doc.has_value_changed("status") else default_event_type
 	previous = doc.get_doc_before_save()
 	metadata = {"operation": method, "docstatus": doc.docstatus}
 	if previous and previous.get("status") != doc.get("status"):

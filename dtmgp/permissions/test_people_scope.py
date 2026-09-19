@@ -23,6 +23,11 @@ class TestPeopleScope(FrappeTestCase):
 		super().tearDown()
 
 	def test_hr_officer_can_create_and_list_employee_in_assigned_lga(self):
+		# Count deltas rather than an absolute total: this LGA may already carry
+		# real, persistent Employee records (e.g. from dtmgp.setup.demo_data)
+		# outside this test's own transaction.
+		verified_before = get_dashboard(self.makurdi)["verified"]
+
 		frappe.set_user(self.hr_officer.name)
 		gender = frappe.get_all("Gender", pluck="name", limit=1)[0]
 		created = save_employee(
@@ -39,7 +44,7 @@ class TestPeopleScope(FrappeTestCase):
 		items = list_employees(self.makurdi, search=created["name"])["items"]
 		self.assertEqual(len(items), 1)
 		self.assertEqual(items[0].company, self.makurdi)
-		self.assertEqual(get_dashboard(self.makurdi)["verified"], 1)
+		self.assertEqual(get_dashboard(self.makurdi)["verified"], verified_before + 1)
 
 	def test_non_hr_role_cannot_access_people_api(self):
 		frappe.set_user(self.treasurer.name)

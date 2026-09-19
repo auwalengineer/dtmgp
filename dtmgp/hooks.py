@@ -141,6 +141,19 @@ permission_query_conditions = {
 	"DTMGP Procurement Case": "dtmgp.permissions.finance.procurement_case_query",
 	"DTMGP Payment Request": "dtmgp.permissions.finance.payment_request_query",
 	"DTMGP Audit Query": "dtmgp.permissions.finance.audit_query_query",
+	"DTMGP Staff Verification Exercise": "dtmgp.permissions.hr.verification_exercise_query",
+	"DTMGP Staff Verification Record": "dtmgp.permissions.hr.verification_record_query",
+	"DTMGP Correspondence": "dtmgp.permissions.governance.correspondence_query",
+	# Employee Transfer has two Company-Link fields (`company`, `new_company`); its
+	# custom query condition ORs across both so the destination LGA can see an
+	# inbound transfer. See dtmgp.setup.security.seed_employee_transfer_property_setters
+	# for why `new_company` is exempted from Frappe's automatic per-field filtering.
+	"Employee Transfer": "dtmgp.permissions.hr.employee_transfer_query",
+	# Project/Task back the Employee Separation exit-clearance checklist; Task has no
+	# company field of its own, so it's scoped through its Project.
+	"Project": "dtmgp.permissions.hr.project_query",
+	"Task": "dtmgp.permissions.hr.task_query",
+	"Shift Assignment": "dtmgp.permissions.hr.shift_assignment_query",
 }
 #
 has_permission = {
@@ -154,6 +167,13 @@ has_permission = {
 	"DTMGP Procurement Case": "dtmgp.permissions.finance.has_permission",
 	"DTMGP Payment Request": "dtmgp.permissions.finance.has_permission",
 	"DTMGP Audit Query": "dtmgp.permissions.finance.has_permission",
+	"DTMGP Staff Verification Exercise": "dtmgp.permissions.hr.has_permission",
+	"DTMGP Staff Verification Record": "dtmgp.permissions.hr.has_permission",
+	"DTMGP Correspondence": "dtmgp.permissions.governance.has_permission",
+	"Employee Transfer": "dtmgp.permissions.hr.employee_transfer_has_permission",
+	"Project": "dtmgp.permissions.hr.has_permission",
+	"Task": "dtmgp.permissions.hr.task_has_permission",
+	"Shift Assignment": "dtmgp.permissions.hr.has_permission",
 }
 
 doc_events = {
@@ -175,6 +195,13 @@ doc_events = {
 	"DTMGP Procurement Case": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
 	"DTMGP Payment Request": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
 	"DTMGP Audit Query": {"on_update": "dtmgp.audit.audit_finance_change", "after_insert": "dtmgp.audit.audit_finance_change"},
+	"DTMGP Staff Verification Exercise": {"on_update": "dtmgp.audit.audit_hr_change", "after_insert": "dtmgp.audit.audit_hr_change"},
+	"DTMGP Staff Verification Record": {"on_update": "dtmgp.audit.audit_hr_change", "after_insert": "dtmgp.audit.audit_hr_change"},
+	"DTMGP Correspondence": {"on_update": "dtmgp.audit.audit_governance_change", "after_insert": "dtmgp.audit.audit_governance_change", "on_trash": "dtmgp.audit.audit_governance_change"},
+	"Staffing Plan": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
+	"Employee Transfer": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
+	"Employee Promotion": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
+	"Employee Separation": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
 }
 
 # DocType Class
