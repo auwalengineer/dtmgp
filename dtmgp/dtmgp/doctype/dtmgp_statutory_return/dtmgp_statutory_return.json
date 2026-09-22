@@ -1,0 +1,31 @@
+{
+ "actions": [], "creation": "2026-09-21 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","return_type","period","due_date","status","prepared_by","submitted_date","attachment","state_review_notes"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"return_type","fieldtype":"Link","in_list_view":1,"label":"Return Type","options":"DTMGP Statutory Return Type","reqd":1},
+  {"fieldname":"period","fieldtype":"Data","in_list_view":1,"label":"Period","reqd":1},
+  {"default":"Today","fieldname":"due_date","fieldtype":"Date","in_list_view":1,"label":"Due Date","reqd":1},
+  {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nPrepared\nSubmitted\nState Reviewed\nReturned","reqd":1},
+  {"fieldname":"prepared_by","fieldtype":"Link","label":"Prepared By","options":"User"},
+  {"fieldname":"submitted_date","fieldtype":"Date","label":"Submitted Date"},
+  {"fieldname":"attachment","fieldtype":"Attach","label":"Attachment"},
+  {"fieldname":"state_review_notes","fieldtype":"Small Text","label":"State Review Notes"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Statutory Return","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Treasurer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"HR Officer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Procurement Officer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Project Officer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"},
+  {"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Auditor","write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

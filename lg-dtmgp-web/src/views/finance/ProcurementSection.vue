@@ -1,15 +1,18 @@
 <script setup lang="ts">
-import { FilePlus2, PackageSearch } from "@lucide/vue";
+import { FilePlus2 } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import { apiRequest } from "@/services/api";
+import { useSessionStore } from "@/stores/session";
+
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
 import { money } from "./types";
-import type { ProcurementCase, ProcurementPlan } from "./types";
+import type { ProcurementCase, ProcurementPlan, PurchaseReceiptRow } from "./types";
 
 const props = defineProps<{ procurementPlans: ProcurementPlan[]; procurementCases: ProcurementCase[]; canManage: boolean }>();
 defineEmits<{ "new-plan": []; "advance-plan": [name: string, target: string]; "advance-case": [name: string, target: string] }>();
+const session = useSessionStore();
 
 const PLAN_NEXT_STATUS: Record<string, string> = { Draft: "Pending Approval", "Pending Approval": "Approved" };
 const CASE_NEXT_STATUS: Record<string, string> = { Initiated: "Solicitation", Solicitation: "Bid Opening", "Bid Opening": "Evaluation", Evaluation: "Evaluated", Evaluated: "Pending Approval", "Pending Approval": "Approved", Approved: "Awarded", Awarded: "Completed" };
@@ -18,6 +21,15 @@ const DEFAULT_ITEM = "procurement-plans";
 const route = useRoute();
 const activeItem = ref(String(route.params.item || "") in ITEM_LABELS ? String(route.params.item) : DEFAULT_ITEM);
 watch(() => route.params.item, (item) => { activeItem.value = item && String(item) in ITEM_LABELS ? String(item) : DEFAULT_ITEM; });
+
+const purchaseReceipts = ref<PurchaseReceiptRow[]>([]);
+const receiptsLoaded = ref(false);
+async function loadPurchaseReceipts() {
+  if (receiptsLoaded.value || !session.activeLga) return;
+  receiptsLoaded.value = true;
+  purchaseReceipts.value = (await apiRequest<{ items: PurchaseReceiptRow[] }>(`/api/method/dtmgp.api.v1.finance.list_purchase_receipts?company=${encodeURIComponent(session.activeLga)}`)).items;
+}
+watch(activeItem, (item) => { if (item === "goods-received") loadPurchaseReceipts(); }, { immediate: true });
 
 const casesByStatus = (statuses: string[]) => computed(() => props.procurementCases.filter((c) => statuses.includes(c.status)));
 const purchaseRequestCases = casesByStatus(["Initiated"]);
@@ -61,7 +73,7 @@ const approvalPlans = computed(() => props.procurementPlans.filter((p) => p.stat
   </template>
 
   <template v-else-if="activeItem === 'goods-received'">
-    <PreviewCard :icon="PackageSearch" title="Goods received" body="Goods-received notes aren't modeled yet — a procurement case tracks a purchase order reference but not a separate receiving record." />
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Receipt</th><th>Date</th><th>Supplier</th><th>Total</th><th>Status</th></tr></thead><tbody><tr v-for="item in purchaseReceipts" :key="item.name"><td><strong>{{ item.name }}</strong></td><td>{{ item.posting_date }}</td><td>{{ item.supplier }}</td><td>{{ money(item.grand_total) }}</td><td><span class="table-status neutral">{{ item.status }}</span></td></tr></tbody></table><p v-if="!purchaseReceipts.length" class="users-empty">No goods-received notes (ERPNext Purchase Receipts) recorded for this LGA yet.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'procurement-approvals'">

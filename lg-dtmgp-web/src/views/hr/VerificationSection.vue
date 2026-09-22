@@ -7,8 +7,6 @@ import ItemTabs from "../shared/ItemTabs.vue";
 import PreviewCard from "../shared/PreviewCard.vue";
 import type { Exercise, VerificationRecord } from "./types";
 
-interface BiometricRow { employee_name: string; prepared_by: string; biometric_captured: number }
-
 const props = defineProps<{ exercises: Exercise[]; activeExercise: string; verificationRecords: VerificationRecord[]; canManage: boolean }>();
 defineEmits<{ "new-exercise": []; "select-exercise": [name: string]; "transition-exercise": [name: string, target: string]; "new-record": []; "review-record": [name: string, status: "Verified" | "Exception"] }>();
 
@@ -21,7 +19,6 @@ watch(() => route.params.item, (item) => { activeItem.value = item && String(ite
 const pendingRecords = computed(() => props.verificationRecords.filter((record) => record.review_status === "Pending"));
 const verifiedRecords = computed(() => props.verificationRecords.filter((record) => record.review_status === "Verified"));
 const exceptionRecords = computed(() => props.verificationRecords.filter((record) => record.review_status === "Exception"));
-const biometricEnrolments = ref<BiometricRow[]>([]);
 </script>
 
 <template>
@@ -47,7 +44,8 @@ const biometricEnrolments = ref<BiometricRow[]>([]);
   </template>
 
   <template v-else-if="activeItem === 'biometric-enrolment'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Staff member</th><th>Prepared by</th><th>Biometric</th></tr></thead><tbody><tr v-for="(row, index) in biometricEnrolments" :key="index"><td>{{ row.employee_name }}</td><td>{{ row.prepared_by }}</td><td>{{ row.biometric_captured ? 'Captured' : 'Pending' }}</td></tr></tbody></table><p v-if="!biometricEnrolments.length" class="users-empty">Biometric enrolment is currently a manual confirmation flag on the verification record; a device-linked enrolment workflow is not yet available.</p></div>
+    <p class="users-empty" style="text-align:left;padding:12px 20px 0">Biometric enrolment is currently a manual confirmation flag on the verification record; a device-linked enrolment workflow isn't available yet.</p>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Staff member</th><th>Prepared by</th><th>Biometric</th></tr></thead><tbody><tr v-for="record in verificationRecords" :key="record.name"><td>{{ record.employee }}</td><td>{{ record.prepared_by }}</td><td><span class="table-status" :class="record.biometric_captured ? 'success' : 'neutral'">{{ record.biometric_captured ? 'Captured' : 'Pending' }}</span></td></tr></tbody></table><p v-if="!verificationRecords.length" class="users-empty">No verification records for this exercise.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'verification-exceptions'">

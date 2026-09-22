@@ -1,0 +1,23 @@
+{
+ "actions":[],"autoname":"format:CTR-{YYYY}-{#####}","creation":"2026-09-21 00:00:00.000000","doctype":"DocType","engine":"InnoDB",
+ "field_order":["company","title","procurement_case","contractor","contract_value","start_date","end_date","status","completion_certificate_reference","milestones","description"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"title","fieldtype":"Data","in_list_view":1,"label":"Title","reqd":1},
+  {"fieldname":"procurement_case","fieldtype":"Link","in_list_view":1,"label":"Procurement Case","options":"DTMGP Procurement Case","reqd":1},
+  {"fieldname":"contractor","fieldtype":"Link","in_list_view":1,"label":"Contractor","options":"Supplier","reqd":1},
+  {"fieldname":"contract_value","fieldtype":"Currency","in_list_view":1,"label":"Contract Value","non_negative":1,"reqd":1},
+  {"fieldname":"start_date","fieldtype":"Date","label":"Start Date","reqd":1},
+  {"fieldname":"end_date","fieldtype":"Date","label":"End Date"},
+  {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nActive\nSuspended\nCompleted\nTerminated","reqd":1},
+  {"fieldname":"completion_certificate_reference","fieldtype":"Data","label":"Completion Certificate Reference"},
+  {"fieldname":"milestones","fieldtype":"Table","label":"Milestones","options":"DTMGP Contract Milestone"},
+  {"fieldname":"description","fieldtype":"Small Text","label":"Description"}
+ ],"index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Contract","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Procurement Officer","share":1,"write":1},
+  {"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Treasurer","write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[],"track_changes":1
+}

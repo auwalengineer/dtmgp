@@ -1,0 +1,33 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","institution","respondent_institution","petitioner_name","petition_type","petition_date","description","status","hearing_date","panel_reference","decision","decision_date","litigation_reference","appeal_date","appeal_outcome"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"institution","fieldtype":"Link","in_list_view":1,"label":"Institution","options":"DTMGP Traditional Institution","reqd":1},
+  {"fieldname":"respondent_institution","fieldtype":"Link","label":"Respondent Institution","options":"DTMGP Traditional Institution"},
+  {"fieldname":"petitioner_name","fieldtype":"Data","in_list_view":1,"label":"Petitioner Name","reqd":1},
+  {"fieldname":"petition_type","fieldtype":"Select","in_list_view":1,"label":"Petition Type","options":"Rival Claim\nEligibility Challenge\nMisconduct\nOther","reqd":1},
+  {"default":"Today","fieldname":"petition_date","fieldtype":"Date","label":"Petition Date","reqd":1},
+  {"fieldname":"description","fieldtype":"Text","label":"Description","reqd":1},
+  {"default":"Filed","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Filed\nCouncil Hearing\nPanel of Inquiry\nExco Review\nDecided\nAppealed\nClosed","reqd":1},
+  {"fieldname":"hearing_date","fieldtype":"Date","label":"Hearing Date"},
+  {"fieldname":"panel_reference","fieldtype":"Data","label":"Panel of Inquiry Reference"},
+  {"fieldname":"decision","fieldtype":"Text","label":"Decision"},
+  {"fieldname":"decision_date","fieldtype":"Date","label":"Decision Date"},
+  {"fieldname":"litigation_reference","fieldtype":"Data","label":"Litigation Reference"},
+  {"fieldname":"appeal_date","fieldtype":"Date","label":"Appeal Date"},
+  {"fieldname":"appeal_outcome","fieldtype":"Small Text","label":"Appeal Outcome"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Chieftaincy Petition","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

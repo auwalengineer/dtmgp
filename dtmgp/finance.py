@@ -142,6 +142,38 @@ class DTMGPAuditQuery(ScopedFinanceDocument):
 			frappe.throw("Response Due Date cannot be before Query Date")
 
 
+class DTMGPAllocation(ScopedFinanceDocument):
+	def validate_record(self):
+		if flt(self.amount) <= 0:
+			frappe.throw("Allocation amount must be greater than zero")
+		if self.expected_date and self.received_date and getdate(self.received_date) < getdate(self.expected_date):
+			frappe.throw("Received Date cannot be before Expected Date")
+		distributed = sum(flt(row.amount) for row in self.distributions)
+		if distributed > flt(self.amount):
+			frappe.throw("Distributed amount cannot exceed the allocation amount")
+
+
+class DTMGPContract(ScopedFinanceDocument):
+	allowed_roles = PROCUREMENT_WRITE_ROLES
+
+	def validate_record(self):
+		_validate_company_link(self, "procurement_case", "DTMGP Procurement Case")
+		if flt(self.contract_value) <= 0:
+			frappe.throw("Contract value must be greater than zero")
+		if self.end_date and getdate(self.end_date) < getdate(self.start_date):
+			frappe.throw("End Date cannot be before Start Date")
+		milestone_total = sum(flt(row.amount) for row in self.milestones)
+		if milestone_total > flt(self.contract_value):
+			frappe.throw("Milestone amounts cannot exceed the contract value")
+
+
+class DTMGPContractVariation(ScopedFinanceDocument):
+	allowed_roles = PROCUREMENT_WRITE_ROLES
+
+	def validate_record(self):
+		_validate_company_link(self, "contract", "DTMGP Contract")
+
+
 def _validate_company_link(doc, fieldname, doctype):
 	value = doc.get(fieldname)
 	if value and frappe.db.get_value(doctype, value, "company") != doc.company:

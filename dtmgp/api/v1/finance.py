@@ -12,6 +12,12 @@ RECORD_FIELDS = {
 	"DTMGP Procurement Case": ["company", "title", "procurement_plan", "estimated_amount", "status", "recommended_supplier", "evaluated_amount", "purchase_order"],
 	"DTMGP Payment Request": ["company", "request_date", "payee", "description", "amount", "status", "payment_entry"],
 	"DTMGP Audit Query": ["company", "query_date", "query_type", "severity", "subject", "assigned_to", "response_due_date", "status"],
+	"DTMGP Allocation": ["company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "status"],
+	"DTMGP Contract": ["company", "title", "procurement_case", "contractor", "contract_value", "start_date", "end_date", "status", "completion_certificate_reference"],
+	"DTMGP Contract Variation": ["company", "contract", "variation_type", "requested_date", "amount_change", "days_change", "status"],
+	# Consumed by _validate_approval_limit below but had no CRUD surface anywhere --
+	# System Administration's Workflow Setup section is the entry point for it.
+	"DTMGP Approval Limit": ["company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"],
 }
 EDITABLE_FIELDS = {
 	"DTMGP Revenue Head": {"company", "revenue_code", "revenue_name", "legal_authority", "collection_frequency", "rate_type", "default_rate", "income_account", "valid_from", "valid_to", "disabled"},
@@ -21,6 +27,10 @@ EDITABLE_FIELDS = {
 	"DTMGP Procurement Case": {"company", "title", "procurement_plan", "material_request", "request_for_quotation", "estimated_amount", "bid_opening_date", "recommended_supplier", "evaluated_amount", "approval_reference", "purchase_order", "contract_end_date", "description"},
 	"DTMGP Payment Request": {"company", "request_date", "requesting_department", "payee_type", "payee", "description", "amount", "expense_account", "cost_center", "procurement_case", "purchase_invoice", "approval_reference", "payment_entry", "justification"},
 	"DTMGP Audit Query": {"company", "query_date", "query_type", "severity", "reference_doctype", "reference_name", "subject", "finding", "recommendation", "assigned_to", "response_due_date", "management_response", "resolution"},
+	"DTMGP Allocation": {"company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "bank_reference", "distributions", "remarks"},
+	"DTMGP Contract": {"company", "title", "procurement_case", "contractor", "contract_value", "start_date", "end_date", "completion_certificate_reference", "milestones", "description"},
+	"DTMGP Contract Variation": {"company", "contract", "variation_type", "requested_date", "amount_change", "days_change", "description", "approval_reference"},
+	"DTMGP Approval Limit": {"company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"},
 }
 
 TRANSITIONS = {
@@ -54,6 +64,30 @@ TRANSITIONS = {
 		("Under Review", "Resolved"): {"Internal Auditor", "State Auditor"},
 		("Resolved", "Closed"): {"Internal Auditor", "State Auditor"},
 	},
+	"DTMGP Allocation": {
+		("Expected", "Received"): {"Treasurer"},
+		("Received", "Distributed"): {"Treasurer"},
+	},
+	"DTMGP Contract": {
+		("Draft", "Active"): {"Procurement Officer", "Treasurer"},
+		("Active", "Suspended"): {"Procurement Officer", "Treasurer"},
+		("Suspended", "Active"): {"Procurement Officer", "Treasurer"},
+		("Active", "Completed"): {"Procurement Officer", "Treasurer"},
+		("Active", "Terminated"): {"Procurement Officer", "Treasurer"},
+		("Suspended", "Terminated"): {"Procurement Officer", "Treasurer"},
+	},
+	"DTMGP Contract Variation": {
+		("Draft", "Pending Approval"): {"Procurement Officer", "Treasurer"},
+		("Pending Approval", "Approved"): None,
+		("Pending Approval", "Rejected"): None,
+	},
+}
+
+TRANSACTION_TYPE_BY_DOCTYPE = {
+	"DTMGP Payment Request": "Payment Request",
+	"DTMGP Procurement Plan": "Procurement Plan",
+	"DTMGP Procurement Case": "Procurement Award",
+	"DTMGP Contract Variation": "Contract Variation",
 }
 
 
@@ -171,8 +205,10 @@ def _validate_approval_limit(doc, target_status, roles):
 		return
 	if frappe.session.user == "Administrator" or "State Administrator" in roles:
 		return
-	transaction_type = "Payment Request" if doc.doctype == "DTMGP Payment Request" else ("Procurement Plan" if doc.doctype == "DTMGP Procurement Plan" else "Procurement Award")
+	transaction_type = TRANSACTION_TYPE_BY_DOCTYPE.get(doc.doctype, "Procurement Award")
 	amount = flt(doc.get("amount") or doc.get("estimated_amount"))
+	if not amount and doc.doctype == "DTMGP Contract Variation":
+		amount = abs(flt(doc.get("amount_change")))
 	limits = frappe.get_all("DTMGP Approval Limit", filters={"company": doc.company, "transaction_type": transaction_type, "active": 1}, fields=["approving_role", "minimum_amount", "maximum_amount"])
 	if not any(limit.approving_role in roles and flt(limit.minimum_amount) <= amount <= flt(limit.maximum_amount) for limit in limits):
 		frappe.throw("No active approval limit authorizes your role for this amount", frappe.PermissionError)
@@ -210,3 +246,283 @@ def _payment_summary(companies):
 def _audit_summary(companies):
 	filters = {"company": ["in", companies], "status": ["not in", ["Resolved", "Closed"]]} if companies else {"name": ""}
 	return {"open_queries": frappe.db.count("DTMGP Audit Query", filters=filters), "overdue_queries": frappe.db.count("DTMGP Audit Query", filters={**filters, "response_due_date": ["<", nowdate()]})}
+
+
+def _selected_company(company, companies):
+	return companies[0] if len(companies) == 1 else (company if company in companies else None)
+
+
+@frappe.whitelist()
+def list_allocations(company=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	if not companies:
+		return {"items": []}
+	allocations = frappe.get_all(
+		"DTMGP Allocation", filters={"company": ["in", companies]},
+		fields=["name", "company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "bank_reference", "status"],
+		order_by="modified desc",
+	)
+	if allocations:
+		totals = frappe.db.sql(
+			"""select parent, coalesce(sum(amount), 0) as total from `tabDTMGP Allocation Distribution`
+			where parent in %(names)s group by parent""",
+			{"names": [allocation.name for allocation in allocations]}, as_dict=True,
+		)
+		totals_by_name = {row.parent: row.total for row in totals}
+		for allocation in allocations:
+			allocation["distributed_total"] = flt(totals_by_name.get(allocation.name))
+	return {"items": allocations}
+
+
+@frappe.whitelist()
+def get_allocation_distributions(company=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	if not companies:
+		return {"items": []}
+	return {"items": frappe.db.sql(
+		"""select d.name, d.parent as allocation, d.department, d.purpose, d.amount, a.company, a.status
+		from `tabDTMGP Allocation Distribution` d
+		join `tabDTMGP Allocation` a on a.name = d.parent
+		where a.company in %(companies)s
+		order by d.modified desc""",
+		{"companies": companies}, as_dict=True,
+	)}
+
+
+@frappe.whitelist()
+def get_contract_milestones(company=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	if not companies:
+		return {"items": []}
+	return {"items": frappe.db.sql(
+		"""select m.name, m.parent as contract, m.title, m.due_date, m.amount, m.status, m.certified_date, m.payment_request, c.company
+		from `tabDTMGP Contract Milestone` m
+		join `tabDTMGP Contract` c on c.name = m.parent
+		where c.company in %(companies)s
+		order by m.idx""",
+		{"companies": companies}, as_dict=True,
+	)}
+
+
+@frappe.whitelist()
+def get_accounts_tree(company=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	selected = _selected_company(company, companies)
+	if not selected:
+		return {"items": []}
+	return {"items": frappe.get_all(
+		"Account", filters={"company": selected},
+		fields=["name", "account_name", "parent_account", "is_group", "root_type", "account_type"],
+		order_by="lft",
+	)}
+
+
+@frappe.whitelist()
+def list_journal_entries(company=None, page=1, page_size=25):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	page, page_size = max(cint(page), 1), min(max(cint(page_size), 1), 100)
+	if not companies:
+		return {"items": [], "total": 0, "page": page, "page_size": page_size}
+	filters = {"company": ["in", companies], "docstatus": 1}
+	items = frappe.get_all(
+		"Journal Entry", filters=filters,
+		fields=["name", "posting_date", "voucher_type", "company", "total_debit", "user_remark"],
+		order_by="posting_date desc", start=(page - 1) * page_size, page_length=page_size,
+	)
+	return {"items": items, "total": frappe.db.count("Journal Entry", filters=filters), "page": page, "page_size": page_size}
+
+
+@frappe.whitelist()
+def list_gl_entries(company=None, account=None, from_date=None, to_date=None, page=1, page_size=50):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	page, page_size = max(cint(page), 1), min(max(cint(page_size), 1), 200)
+	if not companies:
+		return {"items": [], "total": 0, "page": page, "page_size": page_size}
+	filters = [["company", "in", companies], ["is_cancelled", "=", 0]]
+	if account:
+		filters.append(["account", "=", account])
+	if from_date:
+		filters.append(["posting_date", ">=", from_date])
+	if to_date:
+		filters.append(["posting_date", "<=", to_date])
+	items = frappe.get_all(
+		"GL Entry", filters=filters,
+		fields=["name", "posting_date", "account", "debit", "credit", "against", "voucher_type", "voucher_no", "company"],
+		order_by="posting_date desc", start=(page - 1) * page_size, page_length=page_size,
+	)
+	return {"items": items, "total": frappe.db.count("GL Entry", filters=filters), "page": page, "page_size": page_size}
+
+
+@frappe.whitelist()
+def get_trial_balance(company=None, fiscal_year=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	selected = _selected_company(company, companies)
+	if not selected:
+		return {"rows": [], "total_debit": 0, "total_credit": 0}
+	conditions = "ge.company=%(company)s and ge.is_cancelled=0"
+	values = {"company": selected}
+	if fiscal_year:
+		year = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"], as_dict=True)
+		if year:
+			conditions += " and ge.posting_date between %(start)s and %(end)s"
+			values.update({"start": year.year_start_date, "end": year.year_end_date})
+	rows = frappe.db.sql(
+		f"""select ge.account, acc.root_type, sum(ge.debit) as debit, sum(ge.credit) as credit
+		from `tabGL Entry` ge join `tabAccount` acc on acc.name = ge.account
+		where {conditions} group by ge.account order by ge.account""",
+		values, as_dict=True,
+	)
+	return {"rows": rows, "total_debit": sum(flt(row.debit) for row in rows), "total_credit": sum(flt(row.credit) for row in rows)}
+
+
+@frappe.whitelist()
+def get_cash_flow(company=None, fiscal_year=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	selected = _selected_company(company, companies)
+	if not selected:
+		return {"inflow": 0, "outflow": 0, "net": 0}
+	inflow_extra, outflow_extra = {}, {}
+	if fiscal_year:
+		year = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"], as_dict=True)
+		if year:
+			inflow_extra["posting_date"] = ["between", [year.year_start_date, year.year_end_date]]
+			outflow_extra["request_date"] = ["between", [year.year_start_date, year.year_end_date]]
+	inflow = _sum("DTMGP Revenue Receipt", "amount", [selected], {"docstatus": 1, **inflow_extra})
+	outflow = _sum("DTMGP Payment Request", "amount", [selected], {"status": "Paid", **outflow_extra})
+	return {"inflow": inflow, "outflow": outflow, "net": inflow - outflow}
+
+
+@frappe.whitelist()
+def get_budget_performance(company=None, fiscal_year=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	selected = _selected_company(company, companies)
+	if not selected or not fiscal_year:
+		return {"rows": []}
+	budget_names = frappe.get_all("Budget", filters={"company": selected, "fiscal_year": fiscal_year, "docstatus": 1}, pluck="name")
+	if not budget_names:
+		return {"rows": []}
+	budget_rows = frappe.get_all("Budget Account", filters={"parent": ["in", budget_names]}, fields=["account", "budget_amount"])
+	budget_by_account = {}
+	for row in budget_rows:
+		budget_by_account[row.account] = budget_by_account.get(row.account, 0) + flt(row.budget_amount)
+	year = frappe.db.get_value("Fiscal Year", fiscal_year, ["year_start_date", "year_end_date"], as_dict=True)
+	actuals = frappe.db.sql(
+		"""select account, sum(debit) - sum(credit) as actual from `tabGL Entry`
+		where company=%(company)s and is_cancelled=0 and posting_date between %(start)s and %(end)s
+		and account in %(accounts)s group by account""",
+		{"company": selected, "start": year.year_start_date, "end": year.year_end_date, "accounts": list(budget_by_account) or [""]},
+		as_dict=True,
+	) if year else []
+	actual_by_account = {row.account: flt(row.actual) for row in actuals}
+	rows = [
+		{"account": account, "budget": amount, "actual": actual_by_account.get(account, 0), "variance": amount - actual_by_account.get(account, 0)}
+		for account, amount in budget_by_account.items()
+	]
+	return {"rows": rows}
+
+
+@frappe.whitelist()
+def list_purchase_receipts(company=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	if not companies:
+		return {"items": []}
+	return {"items": frappe.get_all(
+		"Purchase Receipt", filters={"company": ["in", companies], "docstatus": 1},
+		fields=["name", "posting_date", "supplier", "grand_total", "status"],
+		order_by="posting_date desc",
+	)}
+
+
+@frappe.whitelist()
+def list_budgets(company=None, fiscal_year=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	if not companies:
+		return {"items": []}
+	filters = {"company": ["in", companies]}
+	if fiscal_year:
+		filters["fiscal_year"] = fiscal_year
+	budgets = frappe.get_all(
+		"Budget", filters=filters,
+		fields=["name", "company", "fiscal_year", "budget_against", "cost_center", "project", "docstatus", "amended_from"],
+		order_by="modified desc",
+	)
+	if budgets:
+		totals = frappe.db.sql(
+			"""select parent, coalesce(sum(budget_amount), 0) as total from `tabBudget Account`
+			where parent in %(names)s group by parent""",
+			{"names": [budget.name for budget in budgets]}, as_dict=True,
+		)
+		totals_by_name = {row.parent: row.total for row in totals}
+		for budget in budgets:
+			budget["total_budget"] = flt(totals_by_name.get(budget.name))
+	return {"items": budgets}
+
+
+@frappe.whitelist(methods=["POST"])
+def save_budget(company, fiscal_year, budget_against, cost_center=None, project=None, accounts=None, name=None):
+	require_finance_access(write=True)
+	if company not in get_requested_companies(company):
+		frappe.throw("LGA is outside your permitted scope", frappe.PermissionError)
+	accounts = frappe.parse_json(accounts) if isinstance(accounts, str) else (accounts or [])
+	if name:
+		doc = frappe.get_doc("Budget", name)
+		if doc.company not in get_requested_companies():
+			frappe.throw("Record is outside your permitted scope", frappe.PermissionError)
+		if doc.docstatus == 1:
+			frappe.throw("A submitted budget cannot be edited directly -- cancel and amend it instead")
+	else:
+		doc = frappe.new_doc("Budget")
+	doc.company = company
+	doc.fiscal_year = fiscal_year
+	doc.budget_against = budget_against
+	doc.cost_center = cost_center
+	doc.project = project
+	doc.set("accounts", [{"account": row.get("account"), "budget_amount": row.get("budget_amount")} for row in accounts])
+	doc.save()
+	return {"name": doc.name, "docstatus": doc.docstatus}
+
+
+@frappe.whitelist(methods=["POST"])
+def submit_budget(name):
+	require_finance_access(write=True)
+	doc = frappe.get_doc("Budget", name)
+	if doc.company not in get_requested_companies():
+		frappe.throw("Record is outside your permitted scope", frappe.PermissionError)
+	doc.submit()
+	return {"name": doc.name, "docstatus": doc.docstatus}
+
+
+@frappe.whitelist(methods=["POST"])
+def cancel_budget(name):
+	require_finance_access(write=True)
+	doc = frappe.get_doc("Budget", name)
+	if doc.company not in get_requested_companies():
+		frappe.throw("Record is outside your permitted scope", frappe.PermissionError)
+	doc.cancel()
+	return {"name": doc.name, "docstatus": doc.docstatus}
+
+
+@frappe.whitelist(methods=["POST"])
+def amend_budget(name):
+	require_finance_access(write=True)
+	source = frappe.get_doc("Budget", name)
+	if source.company not in get_requested_companies():
+		frappe.throw("Record is outside your permitted scope", frappe.PermissionError)
+	if source.docstatus != 2:
+		frappe.throw("Only a cancelled budget can be amended")
+	amended = frappe.copy_doc(source)
+	amended.amended_from = source.name
+	amended.docstatus = 0
+	amended.insert()
+	return {"name": amended.name, "docstatus": amended.docstatus}

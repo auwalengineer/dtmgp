@@ -123,15 +123,15 @@ async function advanceQuery(name: string, target: string) { error.value = ""; tr
     <section class="hr-workspace">
       <nav class="hr-tabs" aria-label="Finance views"><button v-for="tab in TAB_LABELS" :key="tab" :class="{ active: activeTab === tab }" @click="selectTab(tab)">{{ tab }}</button></nav>
 
-      <BudgetSection v-if="activeTab === 'Budget'" />
+      <BudgetSection v-if="activeTab === 'Budget'" :can-manage="dashboard.can_manage" :fiscal-years="options.fiscal_years" :cost-centers="options.cost_centers" :chart-accounts="options.accounts" />
       <RevenueSection v-else-if="activeTab === 'Revenue'" :revenue-heads="revenueHeads" :revenue-assessments="revenueAssessments" :revenue-receipts="revenueReceipts" :dashboard="dashboard" :can-manage="dashboard.can_manage" @new-receipt="openForm('receipt', { assessment: '', posting_date: today(), amount: 0, payment_channel: 'Cash', remarks: '' })" @submit-receipt="submitReceipt" />
-      <AllocationsSection v-else-if="activeTab === 'Allocations'" />
+      <AllocationsSection v-else-if="activeTab === 'Allocations'" :can-manage="dashboard.can_manage" :fiscal-years="options.fiscal_years" :departments="options.departments" />
       <ExpenditureSection v-else-if="activeTab === 'Expenditure'" :payment-requests="paymentRequests" :can-manage="dashboard.can_manage" @new-payment-request="openForm('payment', { request_date: today(), requesting_department: '', payee_type: 'Supplier', payee: '', description: '', amount: 0, expense_account: '', cost_center: '', justification: '' })" @advance-payment="advancePayment" />
-      <AccountingSection v-else-if="activeTab === 'Accounting'" />
+      <AccountingSection v-else-if="activeTab === 'Accounting'" :fiscal-years="options.fiscal_years" />
       <ProcurementSection v-else-if="activeTab === 'Procurement'" :procurement-plans="procurementPlans" :procurement-cases="procurementCases" :can-manage="dashboard.can_manage" @new-plan="openForm('plan', { fiscal_year: '', title: '', requesting_department: '', procurement_category: 'Goods', procurement_method: 'Open Competitive Bidding', estimated_amount: 0, budget_account: '', planned_start_date: today(), planned_end_date: today(), description: '' })" @advance-plan="advancePlan" @advance-case="advanceCase" />
-      <ContractsSection v-else-if="activeTab === 'Contracts'" />
+      <ContractsSection v-else-if="activeTab === 'Contracts'" :can-manage="dashboard.can_manage" />
       <AuditControlSection v-else-if="activeTab === 'Audit & Control'" :audit-queries="auditQueries" :can-manage="dashboard.can_manage" @new-query="openForm('query', { query_date: today(), query_type: 'Finance', severity: 'Medium', subject: '', finding: '', recommendation: '', assigned_to: session.user.email, response_due_date: today() })" @advance-query="advanceQuery" />
-      <FinancialReportsSection v-else-if="activeTab === 'Financial Reports'" :dashboard="dashboard" />
+      <FinancialReportsSection v-else-if="activeTab === 'Financial Reports'" :dashboard="dashboard" :fiscal-years="options.fiscal_years" />
     </section>
   </template>
 

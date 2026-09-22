@@ -1,0 +1,25 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","house_name","institution","rotation_order","is_eligible","last_occupied_from","notes"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"house_name","fieldtype":"Data","in_list_view":1,"label":"Ruling House Name","reqd":1},
+  {"fieldname":"institution","fieldtype":"Link","in_list_view":1,"label":"Institution","options":"DTMGP Traditional Institution","reqd":1},
+  {"default":"0","fieldname":"rotation_order","fieldtype":"Int","label":"Rotation Order"},
+  {"default":"1","fieldname":"is_eligible","fieldtype":"Check","in_list_view":1,"label":"Currently Eligible"},
+  {"fieldname":"last_occupied_from","fieldtype":"Date","label":"Last Occupied From"},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Notes"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Ruling House","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

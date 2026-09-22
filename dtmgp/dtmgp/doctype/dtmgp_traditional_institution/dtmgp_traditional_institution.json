@@ -1,0 +1,27 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","institution_name","institution_type","rank_class","parent_institution","seat_location","status","founding_basis","history"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"institution_name","fieldtype":"Data","in_list_view":1,"label":"Institution Name","reqd":1},
+  {"fieldname":"institution_type","fieldtype":"Select","in_list_view":1,"label":"Institution Type","options":"State Council of Chiefs\nArea Traditional Council\nLGA Traditional Council\nParamount Stool\nFirst Class Stool\nSecond Class Stool\nThird Class Stool\nDistrict Headship\nClan/Ward Headship","reqd":1},
+  {"fieldname":"rank_class","fieldtype":"Select","in_list_view":1,"label":"Rank / Class","options":"\nFirst Class\nSecond Class\nThird Class"},
+  {"fieldname":"parent_institution","fieldtype":"Link","label":"Parent Institution","options":"DTMGP Traditional Institution"},
+  {"fieldname":"seat_location","fieldtype":"Data","label":"Seat Location"},
+  {"default":"Active","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Active\nVacant\nSuspended\nDissolved","reqd":1},
+  {"fieldname":"founding_basis","fieldtype":"Text","label":"Founding Basis"},
+  {"fieldname":"history","fieldtype":"Text Editor","label":"Historical Records"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Traditional Institution","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

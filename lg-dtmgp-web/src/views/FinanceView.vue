@@ -26,6 +26,7 @@ const loading = ref(true);
 const error = ref("");
 const showForm = ref(false);
 const saving = ref(false);
+const today = () => new Date().toISOString().slice(0, 10);
 const form = ref<Record<string, string | number>>(emptyForm("Revenue"));
 
 const columns = computed(() => {
@@ -34,7 +35,6 @@ const columns = computed(() => {
   if (active.value.label === "Payments") return [["payee", "Payee"], ["description", "Description"], ["amount", "Amount"], ["request_date", "Requested"], ["status", "Status"]];
   return [["subject", "Subject"], ["query_type", "Area"], ["severity", "Severity"], ["response_due_date", "Due"], ["status", "Status"]];
 });
-const today = () => new Date().toISOString().slice(0, 10);
 const money = (value: unknown) => new Intl.NumberFormat("en-NG", { style: "currency", currency: "NGN", maximumFractionDigits: 0 }).format(Number(value || 0));
 const isMoney = (field: string) => ["amount", "amount_paid", "estimated_amount"].includes(field);
 

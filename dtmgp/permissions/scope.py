@@ -5,6 +5,10 @@ from dtmgp.setup.organization import PARENT_COMPANY
 
 STATE_ROLES = {"System Manager", "State Administrator", "State Executive Viewer", "State Auditor"}
 USER_ADMIN_ROLES = {"System Manager", "State Administrator", "LGA Administrator"}
+# Narrower than STATE_ROLES: excludes State Executive Viewer/State Auditor, matching
+# navigation.py's STATE_ONLY nav-role set for System Administration's Workflow Setup,
+# Communication Setup, Reference Data and Security & Audit sections.
+STATE_ONLY_ROLES = {"System Manager", "State Administrator"}
 HR_VIEW_ROLES = {
 	"System Manager", "State Administrator", "State Executive Viewer", "State Auditor",
 	"LGA Administrator", "LGA Chairman", "LGA Secretary", "HR Officer", "Internal Auditor", "Read-only Officer",
@@ -22,6 +26,26 @@ GOVERNANCE_VIEW_ROLES = STATE_ROLES | {
 	"Procurement Officer", "Project Officer", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer",
 }
 GOVERNANCE_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "LGA Chairman", "LGA Secretary"}
+TRADITIONAL_VIEW_ROLES = STATE_ROLES | {
+	"LGA Administrator", "LGA Chairman", "LGA Secretary", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer",
+}
+TRADITIONAL_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "LGA Chairman", "LGA Secretary", "Traditional Affairs Officer"}
+PROJECTS_VIEW_ROLES = STATE_ROLES | {
+	"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer",
+	"Procurement Officer", "Project Officer", "Internal Auditor", "Read-only Officer",
+}
+# Per docs/role-permission-matrix.md's "Projects/assets" column: Project Officer is
+# the sole CRUSA (full) role; State Administrator, LGA Chairman and LGA Secretary are
+# RA (approve existing records, not create); LGA Administrator, Treasurer and
+# Procurement Officer are R only here even though they write elsewhere (Finance,
+# HR). PROJECTS_CREATE_ROLES (dtmgp/projects.py) narrows this further to who may
+# create a new record; PROJECTS_MANAGE_ROLES is the broader "may call a write
+# endpoint at all" gate covering create *and* approve.
+PROJECTS_MANAGE_ROLES = {"System Manager", "State Administrator", "Project Officer", "LGA Chairman", "LGA Secretary"}
+ANALYTICS_VIEW_ROLES = STATE_ROLES | {
+	"LGA Administrator", "LGA Chairman", "LGA Secretary", "Treasurer", "Revenue Officer", "HR Officer",
+	"Procurement Officer", "Project Officer", "Traditional Affairs Officer", "Internal Auditor", "Read-only Officer",
+}
 
 
 def get_user_roles(user=None):
@@ -37,6 +61,16 @@ def is_state_user(user=None):
 def can_manage_users(user=None):
 	user = user or frappe.session.user
 	return user == "Administrator" or bool(get_user_roles(user) & USER_ADMIN_ROLES)
+
+
+def can_manage_system_config(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & STATE_ONLY_ROLES)
+
+
+def can_manage_system_operations(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or "System Manager" in get_user_roles(user)
 
 
 def can_view_hr(user=None):
@@ -69,6 +103,45 @@ def can_manage_governance(user=None):
 	return user == "Administrator" or bool(get_user_roles(user) & GOVERNANCE_MANAGE_ROLES)
 
 
+def can_view_traditional(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & TRADITIONAL_VIEW_ROLES)
+
+
+def can_manage_traditional(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & TRADITIONAL_MANAGE_ROLES)
+
+
+def can_view_projects(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & PROJECTS_VIEW_ROLES)
+
+
+def can_manage_projects(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & PROJECTS_MANAGE_ROLES)
+
+
+def can_view_analytics(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & ANALYTICS_VIEW_ROLES)
+
+
+def can_compare_lgas(user=None):
+	return is_state_user(user)
+
+
+def require_analytics_access(statewide=False):
+	require_authenticated_user()
+	allowed = can_compare_lgas() if statewide else can_view_analytics()
+	if not allowed:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Executive analytics access denied", metadata={"statewide": statewide})
+		frappe.throw("You are not permitted to access Executive Dashboard and Analytics", frappe.PermissionError)
+
+
 def require_finance_access(write=False):
 	require_authenticated_user()
 	allowed = can_manage_finance() if write else can_view_finance()
@@ -87,6 +160,26 @@ def require_governance_access(write=False):
 
 		record_denial("authorization_denied", "Administration and Governance access denied")
 		frappe.throw("You are not permitted to access Administration and Governance", frappe.PermissionError)
+
+
+def require_traditional_access(write=False):
+	require_authenticated_user()
+	allowed = can_manage_traditional() if write else can_view_traditional()
+	if not allowed:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Chieftaincy and Traditional Institutions access denied")
+		frappe.throw("You are not permitted to access Chieftaincy and Traditional Institutions", frappe.PermissionError)
+
+
+def require_projects_access(write=False):
+	require_authenticated_user()
+	allowed = can_manage_projects() if write else can_view_projects()
+	if not allowed:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Projects, Assets and Field Monitoring access denied")
+		frappe.throw("You are not permitted to access Projects, Assets and Field Monitoring", frappe.PermissionError)
 
 
 def get_allowed_companies(user=None):
@@ -151,6 +244,24 @@ def require_user_admin():
 
 		record_denial("authorization_denied", "User administration access denied")
 		frappe.throw("You are not permitted to manage users", frappe.PermissionError)
+
+
+def require_state_admin():
+	require_authenticated_user()
+	if not can_manage_system_config():
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "State-level system administration access denied")
+		frappe.throw("You are not permitted to manage this system configuration", frappe.PermissionError)
+
+
+def require_system_manager():
+	require_authenticated_user()
+	if not can_manage_system_operations():
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "System operations access denied")
+		frappe.throw("You are not permitted to access system operations", frappe.PermissionError)
 
 
 def require_hr_access(write=False):

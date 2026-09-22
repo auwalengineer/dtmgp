@@ -26,6 +26,8 @@ async function bootstrap() {
     if (to.meta.requiresGovernanceAccess && !session.canViewGovernance) return { name: "overview" };
     if (to.meta.requiresTraditionalAccess && !session.navigation.some((module) => module.id === "traditional")) return { name: "overview" };
     if (to.meta.requiresFinanceAccess && !session.canViewFinance) return { name: "overview" };
+    if (to.meta.requiresProjectsAccess && !session.canViewProjects) return { name: "overview" };
+    if (to.meta.requiresAnalyticsAccess && !session.canViewAnalytics) return { name: "overview" };
     if (to.name === "workspace") {
       const routes = session.navigation.flatMap(module => module.children.flatMap(section => [section.to, ...(section.children || []).map(item => item.to)]));
       if (![...routes, ...session.globalMenu.map(item => item.to)].includes(to.path)) return { name: "overview" };

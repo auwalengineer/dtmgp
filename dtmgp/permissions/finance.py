@@ -27,3 +27,6 @@ def procurement_plan_query(user=None): return _conditions("DTMGP Procurement Pla
 def procurement_case_query(user=None): return _conditions("DTMGP Procurement Case", user)
 def payment_request_query(user=None): return _conditions("DTMGP Payment Request", user)
 def audit_query_query(user=None): return _conditions("DTMGP Audit Query", user)
+def allocation_query(user=None): return _conditions("DTMGP Allocation", user)
+def contract_query(user=None): return _conditions("DTMGP Contract", user)
+def contract_variation_query(user=None): return _conditions("DTMGP Contract Variation", user)

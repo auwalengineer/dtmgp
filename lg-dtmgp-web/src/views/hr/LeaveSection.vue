@@ -2,15 +2,19 @@
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import { apiRequest } from "@/services/api";
+import { useSessionStore } from "@/stores/session";
+
 import ItemTabs from "../shared/ItemTabs.vue";
 import type { Leave, LeaveBalance } from "./types";
 
-interface CalendarRow { employee_name: string; leave_type: string; from_date: string; to_date: string }
-interface OnLeaveRow { employee_name: string; leave_type: string; to_date: string }
+interface CalendarRow { name: string; employee: string; employee_name: string; leave_type: string; from_date: string; to_date: string; status: string }
 
+const CALENDAR_ITEMS = new Set(["leave-calendar", "staff-on-leave"]);
 const props = defineProps<{ leave: Leave[]; leaveBalances: LeaveBalance[]; canManage: boolean }>();
 defineEmits<{ "decide-leave": [name: string, decision: "Approved" | "Rejected"] }>();
 
+const session = useSessionStore();
 const ITEM_LABELS: Record<string, string> = { "leave-requests": "Leave Requests", "leave-approvals": "Leave Approvals", "leave-balances": "Leave Balances", "leave-calendar": "Leave Calendar", "staff-on-leave": "Staff on Leave" };
 const DEFAULT_ITEM = "leave-requests";
 const route = useRoute();
@@ -19,7 +23,18 @@ watch(() => route.params.item, (item) => { activeItem.value = item && String(ite
 
 const pendingLeave = computed(() => props.leave.filter((item) => item.status === "Open" || item.status === "Draft"));
 const calendarRows = ref<CalendarRow[]>([]);
-const onLeaveRows = ref<OnLeaveRow[]>([]);
+const calendarLoading = ref(false);
+const calendarLoaded = ref(false);
+async function loadCalendar() {
+  if (calendarLoaded.value) return;
+  calendarLoading.value = true;
+  try { calendarRows.value = await apiRequest<CalendarRow[]>(`/api/method/dtmgp.api.v1.hr.list_leave_calendar?company=${encodeURIComponent(session.activeLga)}`); calendarLoaded.value = true; }
+  finally { calendarLoading.value = false; }
+}
+watch(activeItem, (item) => { if (CALENDAR_ITEMS.has(item)) loadCalendar(); }, { immediate: true });
+
+function today() { return new Date().toISOString().slice(0, 10); }
+const onLeaveToday = computed(() => calendarRows.value.filter((row) => row.from_date <= today() && row.to_date >= today()));
 </script>
 
 <template>
@@ -38,10 +53,10 @@ const onLeaveRows = ref<OnLeaveRow[]>([]);
   </template>
 
   <template v-else-if="activeItem === 'leave-calendar'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Leave type</th><th>From</th><th>To</th></tr></thead><tbody><tr v-for="(row, index) in calendarRows" :key="index"><td>{{ row.employee_name }}</td><td>{{ row.leave_type }}</td><td>{{ row.from_date }}</td><td>{{ row.to_date }}</td></tr></tbody></table><p v-if="!calendarRows.length" class="users-empty">A month-view leave calendar will appear here once connected.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Leave type</th><th>From</th><th>To</th></tr></thead><tbody><tr v-for="row in calendarRows" :key="row.name"><td>{{ row.employee_name }}</td><td>{{ row.leave_type }}</td><td>{{ row.from_date }}</td><td>{{ row.to_date }}</td></tr></tbody></table><p v-if="calendarLoading" class="users-empty">Loading this month's leave calendar...</p><p v-else-if="!calendarRows.length" class="users-empty">No approved leave overlapping this month.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'staff-on-leave'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Leave type</th><th>Returns</th></tr></thead><tbody><tr v-for="(row, index) in onLeaveRows" :key="index"><td>{{ row.employee_name }}</td><td>{{ row.leave_type }}</td><td>{{ row.to_date }}</td></tr></tbody></table><p v-if="!onLeaveRows.length" class="users-empty">Staff currently on leave will appear here once connected; the workforce summary above shows a same-day count only.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Leave type</th><th>Returns</th></tr></thead><tbody><tr v-for="row in onLeaveToday" :key="row.name"><td>{{ row.employee_name }}</td><td>{{ row.leave_type }}</td><td>{{ row.to_date }}</td></tr></tbody></table><p v-if="calendarLoading" class="users-empty">Loading...</p><p v-else-if="!onLeaveToday.length" class="users-empty">No staff currently on approved leave.</p></div>
   </template>
 </template>

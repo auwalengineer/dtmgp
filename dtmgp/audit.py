@@ -86,6 +86,14 @@ def audit_governance_change(doc, method=None):
 	_audit_scoped_record_change(doc, method, "governance_record_change")
 
 
+def audit_traditional_change(doc, method=None):
+	_audit_scoped_record_change(doc, method, "traditional_record_change")
+
+
+def audit_projects_change(doc, method=None):
+	_audit_scoped_record_change(doc, method, "projects_record_change")
+
+
 def _audit_scoped_record_change(doc, method, default_event_type):
 	event_type = "workflow_transition" if doc.has_value_changed("status") else default_event_type
 	previous = doc.get_doc_before_save()

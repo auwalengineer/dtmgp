@@ -1,0 +1,31 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","project","scheduled_date","inspector","status","latitude","longitude","photo_evidence","findings","recommendation","exception_reason"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"project","fieldtype":"Link","in_list_view":1,"label":"Project","options":"Project","reqd":1},
+  {"fieldname":"scheduled_date","fieldtype":"Date","in_list_view":1,"label":"Scheduled Date","reqd":1},
+  {"fieldname":"inspector","fieldtype":"Link","in_list_view":1,"label":"Inspector","options":"Employee"},
+  {"default":"Scheduled","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Scheduled\nIn Progress\nCompleted\nException","reqd":1},
+  {"fieldname":"latitude","fieldtype":"Float","label":"Latitude","precision":"6"},
+  {"fieldname":"longitude","fieldtype":"Float","label":"Longitude","precision":"6"},
+  {"fieldname":"photo_evidence","fieldtype":"Attach Image","label":"Photo Evidence"},
+  {"fieldname":"findings","fieldtype":"Small Text","label":"Findings"},
+  {"fieldname":"recommendation","fieldtype":"Small Text","label":"Recommendation"},
+  {"fieldname":"exception_reason","fieldtype":"Small Text","label":"Exception Reason"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Project Inspection","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Project Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Treasurer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Procurement Officer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

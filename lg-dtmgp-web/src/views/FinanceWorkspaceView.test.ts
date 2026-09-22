@@ -11,10 +11,11 @@ const API_RESPONSES: Record<string, unknown> = {
   "dtmgp.api.v1.finance.get_dashboard": DASHBOARD,
   "dtmgp.api.v1.finance.get_form_options": OPTIONS,
 };
+const EMPTY_FALLBACK = { items: [], rows: [], total_debit: 0, total_credit: 0, inflow: 0, outflow: 0, net: 0 };
 const apiRequest = vi.fn((path: string, _options?: RequestInit) => {
-  if (path.includes("list_records")) return Promise.resolve({ items: [] });
   const key = Object.keys(API_RESPONSES).find((candidate) => path.includes(candidate));
-  return Promise.resolve(key ? API_RESPONSES[key] : {});
+  if (key) return Promise.resolve(API_RESPONSES[key]);
+  return Promise.resolve(EMPTY_FALLBACK);
 });
 vi.mock("@/services/api", () => ({ apiRequest: (...args: [string, RequestInit?]) => apiRequest(...args) }));
 
@@ -66,7 +67,7 @@ describe("FinanceWorkspaceView", () => {
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("DTMGP%20Procurement%20Case"));
   });
 
-  it("shows a distinct planned-content card for a no-backend item like Chart of Accounts", async () => {
+  it("shows the Accounting section's Chart of Accounts by default", async () => {
     activateSession();
     const wrapper = mount(FinanceWorkspaceView);
     await flushPromises();
@@ -75,6 +76,7 @@ describe("FinanceWorkspaceView", () => {
     await tab?.trigger("click");
     await flushPromises();
 
-    expect(wrapper.text()).toContain("ERPNext's Account list already exists");
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("get_accounts_tree"));
+    expect(wrapper.text()).toContain("No accounts found for this LGA");
   });
 });

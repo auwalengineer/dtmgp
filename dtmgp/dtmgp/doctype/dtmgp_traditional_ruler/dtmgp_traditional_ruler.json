@@ -1,0 +1,30 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","ruler_name","institution","ruling_house","gender","date_of_birth","appointment_date","installation_date","gazette_reference","status","reign_end_date","reign_end_reason"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"ruler_name","fieldtype":"Data","in_list_view":1,"label":"Ruler Name","reqd":1},
+  {"fieldname":"institution","fieldtype":"Link","in_list_view":1,"label":"Institution","options":"DTMGP Traditional Institution","reqd":1},
+  {"fieldname":"ruling_house","fieldtype":"Link","label":"Ruling House","options":"DTMGP Ruling House"},
+  {"fieldname":"gender","fieldtype":"Link","label":"Gender","options":"Gender"},
+  {"fieldname":"date_of_birth","fieldtype":"Date","label":"Date of Birth"},
+  {"fieldname":"appointment_date","fieldtype":"Date","label":"Appointment Date","reqd":1},
+  {"fieldname":"installation_date","fieldtype":"Date","label":"Installation Date"},
+  {"fieldname":"gazette_reference","fieldtype":"Data","label":"Gazette Reference"},
+  {"default":"Reigning","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Reigning\nSuspended\nDeposed\nDeceased\nAbdicated","reqd":1},
+  {"fieldname":"reign_end_date","fieldtype":"Date","label":"Reign End Date"},
+  {"fieldname":"reign_end_reason","fieldtype":"Small Text","label":"Reign End Reason"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Traditional Ruler","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

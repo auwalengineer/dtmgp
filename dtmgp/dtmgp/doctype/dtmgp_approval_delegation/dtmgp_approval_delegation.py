@@ -1,0 +1,1 @@
+from dtmgp.governance import DTMGPApprovalDelegation

@@ -1,11 +1,17 @@
-import { mount } from "@vue/test-utils";
-import { describe, expect, it, vi } from "vitest";
+import { flushPromises, mount } from "@vue/test-utils";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let mockRouteParams: Record<string, string> = {};
 vi.mock("vue-router", () => ({ useRoute: () => ({ params: mockRouteParams }) }));
 
-const apiRequest = vi.fn();
-vi.mock("@/services/api", () => ({ apiRequest: (...args: unknown[]) => apiRequest(...args) }));
+const PROFILE = { name: "HR-0001", employee_name: "Amina Bello", company: "Makurdi Local Government Area", department: "Finance", designation: "Officer", status: "Active", gender: "Female", date_of_birth: "1990-01-01", date_of_joining: "2020-01-01", grade_level: "GL 08", verification_status: "Verified", cell_number: "0800", personal_email: "amina@example.com", emergency_contact: { person_to_be_contacted: "Bala Bello", relation: "Spouse", emergency_phone_number: "0801" }, internal_work_history: [], external_work_history: [] };
+const DOCUMENTS = [{ name: "FILE-1", file_name: "contract.pdf", file_url: "/files/contract.pdf", is_private: 1, creation: "2026-01-01" }];
+const apiRequest = vi.fn((path: string, _options?: RequestInit) => {
+  if (path.includes("get_employee_profile")) return Promise.resolve(PROFILE);
+  if (path.includes("list_employee_documents")) return Promise.resolve(DOCUMENTS);
+  return Promise.resolve({});
+});
+vi.mock("@/services/api", () => ({ apiRequest: (...args: [string, RequestInit?]) => apiRequest(...args) }));
 
 import StaffSection from "./StaffSection.vue";
 import type { Employee } from "./types";
@@ -18,6 +24,8 @@ function mountSection(routeItem?: string) {
 }
 
 describe("StaffSection", () => {
+  beforeEach(() => { apiRequest.mockClear(); });
+
   it("defaults to Staff Directory when no item is in the route", () => {
     const wrapper = mountSection();
     expect(wrapper.find(".hr-item-tabs button.active").text()).toBe("Staff Directory");
@@ -31,13 +39,32 @@ describe("StaffSection", () => {
     expect(labels).toEqual(["Staff Directory", "Staff Profiles", "Digital Personnel Files", "Employment History", "Next of Kin", "Staff Documents"]);
   });
 
-  it("shows an honest empty state for a not-yet-wired item instead of directory data", async () => {
+  it("prompts for a staff member and makes no API call until one is picked", () => {
     const wrapper = mountSection("next-of-kin");
-    expect(wrapper.text()).toContain("Only a single emergency contact per staff member is currently recorded");
-    expect(wrapper.text()).not.toContain("Amina Bello");
+    expect(wrapper.text()).toContain("Select a staff member above to view their record.");
+    expect(apiRequest).not.toHaveBeenCalled();
   });
 
-  it("switches items without ever calling the API", async () => {
+  it("fetches the real employee profile once a staff member is picked and shows the next-of-kin caveat", async () => {
+    const wrapper = mountSection("next-of-kin");
+    await wrapper.find("select").setValue("HR-0001");
+    await flushPromises();
+
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("get_employee_profile?employee=HR-0001"));
+    expect(wrapper.text()).toContain("Only a single emergency contact per staff member is currently recorded");
+    expect(wrapper.text()).toContain("Bala Bello");
+  });
+
+  it("fetches documents for Staff Documents once a staff member is picked", async () => {
+    const wrapper = mountSection("staff-documents");
+    await wrapper.find("select").setValue("HR-0001");
+    await flushPromises();
+
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("list_employee_documents?employee=HR-0001"));
+    expect(wrapper.text()).toContain("contract.pdf");
+  });
+
+  it("switches between already-wired items without ever calling the API", async () => {
     const wrapper = mountSection();
     const tabs = wrapper.findAll(".hr-item-tabs button");
     for (const tab of tabs) await tab.trigger("click");

@@ -1,0 +1,22 @@
+{
+ "actions": [], "autoname": "format:DEL-{#####}", "creation": "2026-09-21 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","delegator","delegate","role","start_date","end_date","active"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"delegator","fieldtype":"Link","in_list_view":1,"label":"Delegator","options":"User","reqd":1},
+  {"fieldname":"delegate","fieldtype":"Link","in_list_view":1,"label":"Delegate","options":"User","reqd":1},
+  {"fieldname":"role","fieldtype":"Link","in_list_view":1,"label":"Delegated Role","options":"Role","reqd":1},
+  {"default":"Today","fieldname":"start_date","fieldtype":"Date","in_list_view":1,"label":"Start Date","reqd":1},
+  {"fieldname":"end_date","fieldtype":"Date","in_list_view":1,"label":"End Date","reqd":1},
+  {"default":"1","fieldname":"active","fieldtype":"Check","in_list_view":1,"label":"Active"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Approval Delegation","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

@@ -1,0 +1,36 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","institution","candidate_name","ruling_house","application_date","status","kingmakers_selection_date","council_endorsement_date","ministry_vetting_date","exco_approval_date","governor_approval_date","gazette_reference","gazette_date","installation_date","certificate_number","recognition_status","suspension_reason","withdrawal_reason"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"institution","fieldtype":"Link","in_list_view":1,"label":"Institution","options":"DTMGP Traditional Institution","reqd":1},
+  {"fieldname":"candidate_name","fieldtype":"Data","in_list_view":1,"label":"Candidate Name","reqd":1},
+  {"fieldname":"ruling_house","fieldtype":"Link","label":"Ruling House","options":"DTMGP Ruling House"},
+  {"default":"Today","fieldname":"application_date","fieldtype":"Date","label":"Application Date","reqd":1},
+  {"default":"Nominated","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Nominated\nKingmakers Selection\nCouncil Endorsed\nMinistry Vetting\nExco Approved\nGovernor Approved\nGazetted\nInstalled","reqd":1},
+  {"fieldname":"kingmakers_selection_date","fieldtype":"Date","label":"Kingmakers Selection Date"},
+  {"fieldname":"council_endorsement_date","fieldtype":"Date","label":"Council Endorsement Date"},
+  {"fieldname":"ministry_vetting_date","fieldtype":"Date","label":"Ministry Vetting Date"},
+  {"fieldname":"exco_approval_date","fieldtype":"Date","label":"Exco Approval Date"},
+  {"fieldname":"governor_approval_date","fieldtype":"Date","label":"Governor Approval Date"},
+  {"fieldname":"gazette_reference","fieldtype":"Data","label":"Gazette Reference"},
+  {"fieldname":"gazette_date","fieldtype":"Date","label":"Gazette Date"},
+  {"fieldname":"installation_date","fieldtype":"Date","label":"Installation Date"},
+  {"fieldname":"certificate_number","fieldtype":"Data","label":"Certificate Number"},
+  {"default":"Pending","fieldname":"recognition_status","fieldtype":"Select","in_list_view":1,"label":"Recognition Status","options":"Pending\nApproved\nSuspended\nWithdrawn","reqd":1},
+  {"fieldname":"suspension_reason","fieldtype":"Small Text","label":"Suspension Reason"},
+  {"fieldname":"withdrawal_reason","fieldtype":"Small Text","label":"Withdrawal Reason"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Traditional Appointment","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

@@ -229,6 +229,32 @@ class TestHRExtensions(FrappeTestCase):
 		summary = get_attendance_summary(self.makurdi)
 		self.assertEqual(summary["present"], before + 1)
 
+	def test_shift_assignments_are_scoped_to_the_requested_lga(self):
+		# Shift Assignment has no dedicated dtmgp API wrapper yet (the frontend surfaces
+		# it via the desk-style Custom DocPerm + permission_query_conditions hooks
+		# only), so this exercises dtmgp.permissions.hr.shift_assignment_query/
+		# has_permission directly, the same way test_isolation.py covers other
+		# hook-only doctypes.
+		frappe.set_user("Administrator")
+		shift_type = frappe.db.get_value("Shift Type", {}, "name") or frappe.get_doc(
+			{"doctype": "Shift Type", "name": "Test Shift", "start_time": "09:00:00", "end_time": "17:00:00"}
+		).insert(ignore_permissions=True).name
+		makurdi_assignment = frappe.get_doc({
+			"doctype": "Shift Assignment", "employee": self.employee, "company": self.makurdi,
+			"shift_type": shift_type, "start_date": today(),
+		}).insert(ignore_permissions=True)
+
+		gboko_hr_officer = self._make_user("HR Officer", self.gboko)
+		frappe.set_user(gboko_hr_officer.name)
+		names = frappe.get_list("Shift Assignment", pluck="name")
+		self.assertNotIn(makurdi_assignment.name, names)
+		self.assertFalse(frappe.has_permission("Shift Assignment", "read", doc=makurdi_assignment.name, user=gboko_hr_officer.name))
+
+		frappe.set_user(self.hr_officer.name)
+		names = frappe.get_list("Shift Assignment", pluck="name")
+		self.assertIn(makurdi_assignment.name, names)
+		self.assertTrue(frappe.has_permission("Shift Assignment", "read", doc=makurdi_assignment.name, user=self.hr_officer.name))
+
 	def test_employee_cannot_decide_their_own_leave_application(self):
 		frappe.set_user("Administrator")
 		user = frappe.get_doc({

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowRight, Building2, ShieldCheck, UserRoundCheck, UserRoundX, UsersRound } from "@lucide/vue";
+import { ArrowRight, Building2, Settings, ShieldCheck, UserRoundCheck, UserRoundX, UsersRound } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
 
@@ -46,7 +46,10 @@ watch(() => session.activeLga, loadDashboard, { immediate: true });
 <template>
   <section class="page-heading">
     <div><p class="eyebrow">Administration</p><h1>Access administration</h1><p>{{ dashboard?.scope || session.activeLga }}</p></div>
-    <RouterLink class="primary-action action-link" to="/administration/users">Manage users <ArrowRight :size="17" /></RouterLink>
+    <div style="display: flex; gap: 10px">
+      <RouterLink class="secondary-action action-link" to="/workspace/system/user-management"><Settings :size="16" /> System Administration</RouterLink>
+      <RouterLink class="primary-action action-link" to="/administration/users">Manage users <ArrowRight :size="17" /></RouterLink>
+    </div>
   </section>
   <p v-if="error" class="login-error" role="alert">{{ error }}</p>
   <section v-if="loading" class="panel loading-panel">Loading administration...</section>

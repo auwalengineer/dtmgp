@@ -1,0 +1,26 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","asset","verification_date","verified_by","condition","remarks"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"asset","fieldtype":"Link","in_list_view":1,"label":"Asset","options":"Asset","reqd":1},
+  {"fieldname":"verification_date","fieldtype":"Date","in_list_view":1,"label":"Verification Date","reqd":1},
+  {"fieldname":"verified_by","fieldtype":"Link","in_list_view":1,"label":"Verified By","options":"Employee"},
+  {"default":"Good","fieldname":"condition","fieldtype":"Select","in_list_view":1,"label":"Condition","options":"Good\nFair\nDamaged\nMissing","reqd":1},
+  {"fieldname":"remarks","fieldtype":"Small Text","label":"Remarks"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Asset Verification","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Project Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Treasurer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Procurement Officer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

@@ -1,0 +1,23 @@
+{
+ "actions":[],"autoname":"format:ALC-{YYYY}-{#####}","creation":"2026-09-21 00:00:00.000000","doctype":"DocType","engine":"InnoDB",
+ "field_order":["company","fiscal_year","tier","source","tranche_period","amount","expected_date","received_date","bank_reference","status","distributions","remarks"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"fiscal_year","fieldtype":"Link","in_list_view":1,"label":"Fiscal Year","options":"Fiscal Year","reqd":1},
+  {"fieldname":"tier","fieldtype":"Select","in_list_view":1,"label":"Tier","options":"Federal Allocation\nState Allocation\nInternally Generated Support\nOther","reqd":1},
+  {"fieldname":"source","fieldtype":"Data","label":"Source","reqd":1},
+  {"fieldname":"tranche_period","fieldtype":"Data","label":"Tranche Period","reqd":1},
+  {"fieldname":"amount","fieldtype":"Currency","in_list_view":1,"label":"Amount","non_negative":1,"reqd":1},
+  {"fieldname":"expected_date","fieldtype":"Date","label":"Expected Date"},
+  {"fieldname":"received_date","fieldtype":"Date","label":"Received Date"},
+  {"fieldname":"bank_reference","fieldtype":"Data","label":"Bank Reference"},
+  {"default":"Expected","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Expected\nReceived\nDistributed","reqd":1},
+  {"fieldname":"distributions","fieldtype":"Table","label":"Distributions","options":"DTMGP Allocation Distribution"},
+  {"fieldname":"remarks","fieldtype":"Small Text","label":"Remarks"}
+ ],"index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Allocation","naming_rule":"Expression","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Treasurer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[],"track_changes":1
+}

@@ -1,0 +1,11 @@
+{
+ "actions": [], "creation": "2026-09-21 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB", "istable":1,
+ "field_order":["attendee_name","role","present"],
+ "fields":[
+  {"fieldname":"attendee_name","fieldtype":"Data","in_list_view":1,"label":"Attendee","reqd":1},
+  {"fieldname":"role","fieldtype":"Data","in_list_view":1,"label":"Role / Designation"},
+  {"default":"0","fieldname":"present","fieldtype":"Check","in_list_view":1,"label":"Present"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Meeting Attendee","owner":"Administrator",
+ "permissions":[],"sort_field":"modified","sort_order":"DESC","states":[]
+}

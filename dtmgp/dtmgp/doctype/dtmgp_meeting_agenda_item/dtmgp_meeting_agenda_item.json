@@ -1,0 +1,11 @@
+{
+ "actions": [], "creation": "2026-09-21 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB", "istable":1,
+ "field_order":["agenda_item","presenter","notes"],
+ "fields":[
+  {"fieldname":"agenda_item","fieldtype":"Data","in_list_view":1,"label":"Agenda Item","reqd":1},
+  {"fieldname":"presenter","fieldtype":"Data","in_list_view":1,"label":"Presenter"},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Notes"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Meeting Agenda Item","owner":"Administrator",
+ "permissions":[],"sort_field":"modified","sort_order":"DESC","states":[]
+}

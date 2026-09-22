@@ -1,0 +1,20 @@
+{
+ "actions": [], "autoname": "field:requirement_name", "creation": "2026-09-21 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["requirement_name","category","frequency","description","disabled"],
+ "fields":[
+  {"fieldname":"requirement_name","fieldtype":"Data","in_list_view":1,"label":"Requirement Name","reqd":1,"unique":1},
+  {"fieldname":"category","fieldtype":"Data","in_list_view":1,"label":"Category"},
+  {"default":"Annually","fieldname":"frequency","fieldtype":"Select","in_list_view":1,"label":"Frequency","options":"Monthly\nQuarterly\nAnnually\nAd-hoc","reqd":1},
+  {"fieldname":"description","fieldtype":"Small Text","label":"Description"},
+  {"default":"0","fieldname":"disabled","fieldtype":"Check","label":"Disabled"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Compliance Requirement","naming_rule":"By fieldname","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

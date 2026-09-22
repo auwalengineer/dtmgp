@@ -1,0 +1,28 @@
+{
+ "actions": [], "creation": "2026-09-20 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","institution","vacancy_date","vacancy_reason","status","eligible_ruling_house","candidates","selected_candidate","resulting_appointment","closed_date"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"institution","fieldtype":"Link","in_list_view":1,"label":"Institution","options":"DTMGP Traditional Institution","reqd":1},
+  {"default":"Today","fieldname":"vacancy_date","fieldtype":"Date","label":"Vacancy Date","reqd":1},
+  {"fieldname":"vacancy_reason","fieldtype":"Select","label":"Vacancy Reason","options":"Death\nDeposition\nAbdication\nResignation","reqd":1},
+  {"default":"Open","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Open\nCandidates Nominated\nKingmakers Deliberation\nSelected\nClosed","reqd":1},
+  {"fieldname":"eligible_ruling_house","fieldtype":"Link","label":"Eligible Ruling House","options":"DTMGP Ruling House"},
+  {"fieldname":"candidates","fieldtype":"Small Text","label":"Nominated Candidates"},
+  {"fieldname":"selected_candidate","fieldtype":"Data","label":"Selected Candidate"},
+  {"fieldname":"resulting_appointment","fieldtype":"Link","label":"Resulting Appointment","options":"DTMGP Traditional Appointment"},
+  {"fieldname":"closed_date","fieldtype":"Date","label":"Closed Date"}
+ ],
+ "index_web_pages_for_search":0,"links":[],"modified":"2026-09-20 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Succession Case","naming_rule":"By script","owner":"Administrator",
+ "permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Chairman","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"LGA Secretary","share":1,"write":1},
+  {"create":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"Traditional Affairs Officer","share":1,"write":1},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Executive Viewer"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"State Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Internal Auditor"},
+  {"export":1,"print":1,"read":1,"report":1,"role":"Read-only Officer"}
+ ],"sort_field":"modified","sort_order":"DESC","states":[]
+}

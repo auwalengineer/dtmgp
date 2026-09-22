@@ -3,14 +3,18 @@ import { LogOut } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import { apiRequest } from "@/services/api";
+import { useSessionStore } from "@/stores/session";
+
 import ItemTabs from "../shared/ItemTabs.vue";
 import type { RetirementItem, Separation } from "./types";
 
-interface FormerStaffRow { employee_name: string; department: string | null; relieving_date: string | null; reason: string | null }
+interface FormerStaffRow { name: string; employee_name: string; department: string | null; designation: string | null; relieving_date: string | null; reason_for_leaving: string | null }
 
 const props = defineProps<{ retirementForecast: RetirementItem[]; separations: Separation[]; canManage: boolean }>();
 defineEmits<{ "new-exit-case": []; "submit-separation": [name: string]; "open-separation-detail": [name: string] }>();
 
+const session = useSessionStore();
 const ITEM_LABELS: Record<string, string> = { "upcoming-retirements": "Upcoming Retirements", "retirement-processing": "Retirement Processing", resignations: "Resignations", terminations: "Terminations", "exit-clearance": "Exit Clearance", "former-staff": "Former Staff" };
 const DEFAULT_ITEM = "upcoming-retirements";
 const route = useRoute();
@@ -21,6 +25,15 @@ const retirementCases = computed(() => props.separations.filter((s) => s.dtmgp_e
 const resignationCases = computed(() => props.separations.filter((s) => s.dtmgp_exit_type === "Resignation"));
 const terminationCases = computed(() => props.separations.filter((s) => s.dtmgp_exit_type === "Termination"));
 const formerStaff = ref<FormerStaffRow[]>([]);
+const formerStaffLoading = ref(false);
+const formerStaffLoaded = ref(false);
+async function loadFormerStaff() {
+  if (formerStaffLoaded.value) return;
+  formerStaffLoading.value = true;
+  try { formerStaff.value = (await apiRequest<{ items: FormerStaffRow[] }>(`/api/method/dtmgp.api.v1.people.list_former_staff?company=${encodeURIComponent(session.activeLga)}&page_size=100`)).items; formerStaffLoaded.value = true; }
+  finally { formerStaffLoading.value = false; }
+}
+watch(activeItem, (item) => { if (item === "former-staff") loadFormerStaff(); }, { immediate: true });
 </script>
 
 <template>
@@ -51,6 +64,6 @@ const formerStaff = ref<FormerStaffRow[]>([]);
   </template>
 
   <template v-else-if="activeItem === 'former-staff'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Department</th><th>Relieving date</th><th>Reason</th></tr></thead><tbody><tr v-for="(row, index) in formerStaff" :key="index"><td>{{ row.employee_name }}</td><td>{{ row.department || '-' }}</td><td>{{ row.relieving_date || '-' }}</td><td>{{ row.reason || '-' }}</td></tr></tbody></table><p v-if="!formerStaff.length" class="users-empty">Former staff records will appear here once connected to the employee record service.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Department</th><th>Relieving date</th><th>Reason</th></tr></thead><tbody><tr v-for="row in formerStaff" :key="row.name"><td>{{ row.employee_name }}</td><td>{{ row.department || '-' }}</td><td>{{ row.relieving_date || '-' }}</td><td>{{ row.reason_for_leaving || '-' }}</td></tr></tbody></table><p v-if="formerStaffLoading" class="users-empty">Loading former staff...</p><p v-else-if="!formerStaff.length" class="users-empty">No former staff recorded for this LGA.</p></div>
   </template>
 </template>
