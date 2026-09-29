@@ -4,6 +4,7 @@ import frappe
 from frappe.tests.utils import FrappeTestCase
 
 from dtmgp.api.v1.administration import (
+	get_dashboard,
 	get_document_numbering_reference,
 	get_system_health,
 	list_audit_events,
@@ -57,6 +58,21 @@ class TestAdministrationScope(FrappeTestCase):
 		finally:
 			self._delete_session(self.makurdi_admin.name)
 			self._delete_session(self.gboko_admin.name)
+
+	def test_explicitly_requesting_another_lgas_company_param_is_denied(self):
+		"""test_lga_administrator_sees_only_own_lga_access/_sessions above only prove
+		the *implicit* scope (no company argument) filters correctly; this covers the
+		get_requested_companies denial path itself -- an LGA Administrator explicitly
+		passing another LGA's company name, the record-detail-style guessed-parameter
+		attack this backlog item is about -- for every administration.py function that
+		accepts one."""
+		frappe.set_user(self.makurdi_admin.name)
+		with self.assertRaises(frappe.PermissionError):
+			list_lga_access(self.gboko)
+		with self.assertRaises(frappe.PermissionError):
+			list_user_sessions(self.gboko)
+		with self.assertRaises(frappe.PermissionError):
+			get_dashboard(self.gboko)
 
 	def test_non_admin_role_denied_user_management_reads(self):
 		frappe.set_user(self.hr_officer.name)

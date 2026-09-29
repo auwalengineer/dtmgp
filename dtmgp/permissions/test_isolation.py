@@ -28,6 +28,8 @@ class TestCrossLGAIsolation(FrappeTestCase):
 		self.gboko_auditor = self._make_user("Internal Auditor", self.gboko)
 		self.makurdi_head = self._make_revenue_head(self.makurdi)
 		self.gboko_head = self._make_revenue_head(self.gboko)
+		self.makurdi_admin = self._make_user("LGA Administrator", self.makurdi)
+		self.gboko_admin = self._make_user("LGA Administrator", self.gboko)
 
 	def tearDown(self):
 		frappe.set_user("Administrator")
@@ -41,6 +43,21 @@ class TestCrossLGAIsolation(FrappeTestCase):
 		frappe.set_user(self.makurdi_treasurer.name)
 		result = client_get("DTMGP Revenue Head", self.makurdi_head.name)
 		self.assertEqual(result["name"], self.makurdi_head.name)
+
+	def test_direct_user_read_by_guessed_name_is_denied_across_lga(self):
+		"""System Administration's user-management reads (dtmgp/api/v1/users.py,
+		dtmgp/api/v1/administration.py) are already covered for their own API-layer
+		scoping (test_user_scope.py, test_administration.py) -- this proves the
+		underlying dtmgp.permissions.user has_permission/get_permission_query_conditions
+		hooks themselves deny a direct, guessed-name read of another LGA's User record,
+		the same "Stage 2" guarantee test_isolation.py already gives Revenue Head."""
+		frappe.set_user(self.gboko_admin.name)
+		with self.assertRaises(frappe.PermissionError):
+			client_get("User", self.makurdi_admin.name)
+
+		frappe.set_user(self.makurdi_admin.name)
+		result = client_get("User", self.makurdi_admin.name)
+		self.assertEqual(result["name"], self.makurdi_admin.name)
 
 	def test_direct_write_is_denied_across_lga_even_without_the_api_layer(self):
 		frappe.set_user(self.gboko_treasurer.name)

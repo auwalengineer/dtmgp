@@ -5,8 +5,12 @@ from frappe.tests.utils import FrappeTestCase
 
 from dtmgp.api.v1.projects import (
 	get_dashboard,
+	get_maps_data,
+	get_project_financials,
+	get_reports,
 	list_projects,
 	list_records,
+	list_vehicle_services,
 	save_project,
 	save_record,
 	transition_record,
@@ -103,6 +107,22 @@ class TestProjectsScope(FrappeTestCase):
 		frappe.set_user(unauthorized.name)
 		with self.assertRaises(frappe.PermissionError):
 			get_dashboard(self.makurdi)
+
+	def test_record_detail_apis_reject_an_out_of_scope_company(self):
+		"""Record-detail/aggregate endpoints (as opposed to list_records-style item
+		queries) must reject an explicitly requested out-of-scope company rather than
+		silently falling back to the caller's own allowed companies -- covers the
+		"record-detail APIs" isolation gap alongside the doctype-hook tests in
+		test_isolation.py/test_finance_isolation.py/test_hr_isolation.py."""
+		frappe.set_user(self.project_officer.name)
+		with self.assertRaises(frappe.PermissionError):
+			get_project_financials(self.gboko)
+		with self.assertRaises(frappe.PermissionError):
+			list_vehicle_services(company=self.gboko)
+		with self.assertRaises(frappe.PermissionError):
+			get_maps_data(self.gboko)
+		with self.assertRaises(frappe.PermissionError):
+			get_reports(self.gboko)
 
 	def _make_user(self, role, company):
 		return frappe.get_doc({

@@ -6,7 +6,7 @@ from frappe.tests.utils import FrappeTestCase
 from dtmgp.api.v1.administration import get_dashboard
 from dtmgp.api.v1.context import get_current_user_context
 from dtmgp.api.v1.overview import get_overview
-from dtmgp.api.v1.users import create_user, list_users, update_user
+from dtmgp.api.v1.users import create_user, list_users, set_user_enabled, update_user
 from dtmgp.navigation import get_navigation
 from dtmgp.permissions.scope import get_allowed_companies
 from dtmgp.permissions.user import has_permission
@@ -85,6 +85,24 @@ class TestUserScope(FrappeTestCase):
 			update_user(self.gboko_admin.name, "Outside", "Treasurer", self.makurdi)
 		with self.assertRaises(frappe.PermissionError):
 			update_user(staff.name, "Outside", "Treasurer", self.gboko)
+
+	def test_set_user_enabled_is_scoped_to_the_administrators_lga(self):
+		"""set_user_enabled shares _require_user_in_scope with update_user (already
+		covered by test_administration_dashboard_and_update_remain_in_lga_scope above)
+		but had no test of its own anywhere in the repo."""
+		staff = self._make_user("HR Officer", self.makurdi)
+		frappe.set_user(self.makurdi_admin.name)
+
+		disabled = set_user_enabled(staff.name, 0)
+		self.assertEqual(disabled["enabled"], 0)
+		self.assertEqual(frappe.db.get_value("User", staff.name, "enabled"), 0)
+		enabled = set_user_enabled(staff.name, 1)
+		self.assertEqual(enabled["enabled"], 1)
+
+		with self.assertRaises(frappe.PermissionError):
+			set_user_enabled(self.gboko_admin.name, 0)
+		with self.assertRaises(frappe.ValidationError):
+			set_user_enabled(self.makurdi_admin.name, 0)  # cannot disable self (checked before scope)
 
 	def test_requested_overview_company_must_be_in_scope(self):
 		frappe.set_user(self.makurdi_admin.name)
