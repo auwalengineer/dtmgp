@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { FileStack } from "@lucide/vue";
+import { FilePlus2 } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
-import type { Contractor, ContractorPerformance } from "./types";
+import type { Contractor, ContractorDocument, ContractorPerformance } from "./types";
 
-const props = defineProps<{ contractors: Contractor[]; performance: ContractorPerformance[]; canManage: boolean }>();
-const emit = defineEmits<{ "set-hold": [supplier: string, onHold: boolean] }>();
+const props = defineProps<{ contractors: Contractor[]; performance: ContractorPerformance[]; documents: ContractorDocument[]; canManage: boolean }>();
+const emit = defineEmits<{ "set-hold": [supplier: string, onHold: boolean]; "new-document": [] }>();
 
 const ITEM_LABELS: Record<string, string> = { "contractor-register": "Contractor Register", "contractor-documents": "Contractor Documents", "contractor-performance": "Contractor Performance", "blacklisted-contractors": "Blacklisted Contractors" };
 const DEFAULT_ITEM = "contractor-register";
@@ -27,7 +26,8 @@ const blacklisted = computed(() => props.contractors.filter((c) => c.disabled ||
   </template>
 
   <template v-else-if="activeItem === 'contractor-documents'">
-    <PreviewCard :icon="FileStack" title="Contractor documents" body="Storage of contractor registration certificates, tax clearance and other compliance documents isn't available yet -- this class of record also awaits the same records/legal retention sign-off noted for HR personnel files." />
+    <div class="directory-toolbar"><h3 style="margin:0;flex:1">Contractor documents</h3><button v-if="canManage" class="secondary-action" @click="emit('new-document')"><FilePlus2 :size="15" /> New document</button></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Contractor</th><th>Type</th><th>Reference</th><th>Expiry</th><th>Verification</th><th>File</th></tr></thead><tbody><tr v-for="item in documents" :key="item.name" v-record="{ doctype: 'DTMGP Contractor Document', name: item.name }"><td><strong>{{ item.supplier }}</strong></td><td>{{ item.document_type }}</td><td>{{ item.reference_number || '-' }}</td><td>{{ item.expiry_date || '-' }}</td><td>{{ item.verification_status }}</td><td><a :href="item.file" target="_blank" rel="noopener">Open private file</a></td></tr></tbody></table><p v-if="!documents.length" class="users-empty">No contractor documents recorded yet.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'contractor-performance'">

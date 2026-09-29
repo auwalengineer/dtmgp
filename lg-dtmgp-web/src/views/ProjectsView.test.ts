@@ -6,7 +6,7 @@ let mockRouteParams: Record<string, string> = {};
 vi.mock("vue-router", () => ({ useRoute: () => ({ params: mockRouteParams }) }));
 
 const DASHBOARD = { scope: "Makurdi Local Government Area", lga_count: 1, projects: { total: 3, ongoing: 2, completed: 1, delayed: 1, suspended: 0, abandoned: 0 }, inspections: { open: 1, exceptions: 0 }, assets: { registered: 4 }, fleet: { vehicles: 2, insurance_due: 1 }, can_manage: true };
-const OPTIONS = { employees: [], locations: [], asset_categories: [], items: [], open_projects: [] };
+const OPTIONS = { employees: [], locations: [], asset_categories: [], items: [], open_projects: [], vehicle_service_items: [], departments: [] };
 const PROJECTS = { items: [{ name: "PROJ-1", project_name: "Rural Road Rehabilitation", company: "Makurdi Local Government Area", status: "Open", percent_complete: 40, expected_start_date: "2026-01-01", expected_end_date: "2026-12-31", dtmgp_location: null, dtmgp_funding_source: null, department: null, priority: "Medium", creation: "2026-01-01 00:00:00" }] };
 const API_RESPONSES: Record<string, unknown> = {
   "dtmgp.api.v1.projects.get_dashboard": DASHBOARD,
@@ -70,7 +70,7 @@ describe("ProjectsView", () => {
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("list_records"));
   });
 
-  it("shows a distinct planned-content card for a no-backend item like Project Proposals", async () => {
+  it("renders a real record view (not a placeholder card) for Project Proposals", async () => {
     activateSession();
     const wrapper = mount(ProjectsView);
     await flushPromises();
@@ -79,6 +79,7 @@ describe("ProjectsView", () => {
     await tab?.trigger("click");
     await flushPromises();
 
-    expect(wrapper.text()).toContain("isn't modeled yet -- ERPNext's Project doctype only tracks a project once it exists");
+    expect(wrapper.text()).toContain("No project proposals recorded for this LGA.");
+    expect(wrapper.text()).not.toContain("Planned - not yet available");
   });
 });

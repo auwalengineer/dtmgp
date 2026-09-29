@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { FilePlus2, ScrollText } from "@lucide/vue";
+import { FilePlus2 } from "@lucide/vue";
 import { reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
-import type { Options, Project, Task } from "./types";
+import type { Options, Project, ProjectProposal, Task } from "./types";
 
-const props = defineProps<{ projects: Project[]; tasks: Task[]; milestones: Task[]; options: Options; canManage: boolean }>();
-const emit = defineEmits<{ "new-task": [isMilestone: number]; "save-project": [name: string, values: Record<string, string>] }>();
+const props = defineProps<{ projects: Project[]; tasks: Task[]; milestones: Task[]; proposals: ProjectProposal[]; options: Options; canManage: boolean }>();
+const emit = defineEmits<{ "new-task": [isMilestone: number]; "save-project": [name: string, values: Record<string, string>]; "new-proposal": [] }>();
 
 const ITEM_LABELS: Record<string, string> = { "project-proposals": "Project Proposals", "work-plans": "Work Plans", "project-locations": "Project Locations", "project-milestones": "Project Milestones", "funding-sources": "Funding Sources" };
 const DEFAULT_ITEM = "project-proposals";
@@ -25,7 +24,8 @@ watch(() => props.projects, (projects) => { for (const project of projects) { ed
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
 
   <template v-if="activeItem === 'project-proposals'">
-    <PreviewCard :icon="ScrollText" title="Project proposals" body="A pre-approval proposal intake distinct from the project register isn't modeled yet -- ERPNext's Project doctype only tracks a project once it exists, not a proposal awaiting approval." />
+    <div class="directory-toolbar"><h3 style="margin:0;flex:1">Project proposals</h3><button v-if="canManage" class="secondary-action" @click="emit('new-proposal')"><FilePlus2 :size="15" /> New proposal</button></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Title</th><th>Department</th><th>Funding source</th><th>Estimated cost</th><th>Status</th></tr></thead><tbody><tr v-for="item in proposals" :key="item.name" v-record="{ doctype: 'DTMGP Project Proposal', name: item.name }"><td><strong>{{ item.title }}</strong></td><td>{{ item.department || '-' }}</td><td>{{ item.funding_source || '-' }}</td><td>{{ item.estimated_cost.toLocaleString() }}</td><td><span class="table-status" :class="item.status === 'Approved' || item.status === 'Converted' ? 'success' : 'neutral'">{{ item.status }}</span></td></tr></tbody></table><p v-if="!proposals.length" class="users-empty">No project proposals recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'work-plans'">

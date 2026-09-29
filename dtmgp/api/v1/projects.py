@@ -108,7 +108,7 @@ def get_form_options(company=None):
 	companies = get_requested_companies(company)
 	selected = companies[0] if len(companies) == 1 else company
 	if not selected:
-		return {"employees": [], "locations": [], "asset_categories": [], "items": [], "open_projects": [], "vehicle_service_items": []}
+		return {"employees": [], "locations": [], "asset_categories": [], "items": [], "open_projects": [], "vehicle_service_items": [], "departments": []}
 	return {
 		"employees": frappe.get_all("Employee", filters={"company": selected, "status": "Active"}, fields=["name", "employee_name"], order_by="employee_name"),
 		"locations": frappe.get_all("Location", filters={"is_group": 0}, fields=["name", "latitude", "longitude"], order_by="location_name"),
@@ -116,6 +116,7 @@ def get_form_options(company=None):
 		"items": frappe.get_all("Item", filters={"is_fixed_asset": 1}, fields=["name", "item_name"], order_by="item_name"),
 		"open_projects": frappe.get_all("Project", filters={"company": selected, "status": ["!=", "Cancelled"]}, fields=["name", "project_name"], order_by="modified desc"),
 		"vehicle_service_items": frappe.get_all("Vehicle Service Item", pluck="name", order_by="name"),
+		"departments": frappe.get_all("Department", filters={"company": selected, "is_group": 0}, pluck="name", order_by="name"),
 	}
 
 
@@ -389,6 +390,37 @@ def save_vehicle_log(values, name=None):
 		})
 	doc.save()
 	return {"name": doc.name, "docstatus": doc.docstatus}
+
+
+@frappe.whitelist()
+def list_vehicle_services(company=None, license_plate=None, page=1, page_size=25):
+	"""Reads back the `service_detail` (Vehicle Service) child rows save_vehicle_log
+	already writes -- no new schema, just a display view over ERPNext's native child table."""
+	require_projects_access()
+	if license_plate:
+		vehicle_company = frappe.db.get_value("Vehicle", license_plate, "company")
+		if not vehicle_company or vehicle_company not in get_requested_companies():
+			frappe.throw("Vehicle is outside your permitted scope", frappe.PermissionError)
+		log_filters = {"license_plate": license_plate}
+	else:
+		companies = get_requested_companies(company)
+		vehicle_names = frappe.get_all("Vehicle", filters={"company": ["in", companies]}, pluck="name") if companies else []
+		log_filters = {"license_plate": ["in", vehicle_names or [""]]}
+	log_names = frappe.get_all("Vehicle Log", filters=log_filters, pluck="name")
+	page, page_size = max(cint(page), 1), min(max(cint(page_size), 1), 100)
+	filters = {"parent": ["in", log_names or [""]], "parenttype": "Vehicle Log"}
+	total = frappe.db.count("Vehicle Service", filters=filters)
+	items = frappe.get_all(
+		"Vehicle Service", filters=filters, fields=["name", "parent as vehicle_log", "service_item", "type", "frequency", "expense_amount"],
+		order_by="modified desc", start=(page - 1) * page_size, page_length=page_size,
+	)
+	if items:
+		logs = {log.name: log for log in frappe.get_all("Vehicle Log", filters={"name": ["in", [item.vehicle_log for item in items]]}, fields=["name", "license_plate", "date"])}
+		for item in items:
+			log = logs.get(item.vehicle_log)
+			item["license_plate"] = log.license_plate if log else None
+			item["date"] = log.date if log else None
+	return {"items": items, "total": total, "page": page, "page_size": page_size}
 
 
 @frappe.whitelist()

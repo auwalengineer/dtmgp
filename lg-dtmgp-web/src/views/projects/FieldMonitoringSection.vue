@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { FilePlus2, Smartphone } from "@lucide/vue";
+import { CloudOff, FilePlus2, WifiOff } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
 import { mapLink } from "./types";
 import type { InspectionRecord } from "./types";
 
-const props = defineProps<{ inspections: InspectionRecord[]; canManage: boolean }>();
+const props = defineProps<{ inspections: InspectionRecord[]; canManage: boolean; offlineQueueCount: number; isOnline: boolean }>();
 const emit = defineEmits<{ "new-inspection": []; transition: [name: string, target: string] }>();
 
 const ITEM_LABELS: Record<string, string> = { "inspection-schedule": "Inspection Schedule", "assigned-inspections": "Assigned Inspections", "mobile-inspections": "Mobile Inspections", "inspection-reports": "Inspection Reports", "gps-photo-evidence": "GPS & Photo Evidence", "inspection-exceptions": "Inspection Exceptions" };
@@ -43,7 +42,11 @@ const NEXT_ACTIONS: Record<string, { label: string; target: string }[]> = {
   </template>
 
   <template v-else-if="activeItem === 'mobile-inspections'">
-    <PreviewCard :icon="Smartphone" title="Mobile inspections" body="A dedicated offline-friendly mobile capture flow for field officers isn't built yet -- the same create form under Inspection Schedule works on a phone browser, but low-bandwidth/offline capture (UI-006 in the implementation backlog) hasn't been designed." />
+    <p class="users-empty" style="text-align:left;padding:0 20px">The "New inspection" form under Inspection Schedule is the mobile capture flow — it works on a phone browser and includes GPS coordinates and a photo upload. When the device is offline, entries are queued on-device (IndexedDB) and synced automatically the next time the connection returns.</p>
+    <div class="finance-metrics" aria-label="Offline capture status">
+      <article><span class="hr-metric-icon" :class="isOnline ? 'green' : 'red'"><WifiOff :size="19" /></span><div><small>Connection</small><strong>{{ isOnline ? 'Online' : 'Offline' }}</strong><p>{{ isOnline ? 'Inspections save directly' : 'New inspections are being queued on this device' }}</p></div></article>
+      <article><span class="hr-metric-icon" :class="offlineQueueCount ? 'gold' : 'blue'"><CloudOff :size="19" /></span><div><small>Queued inspections</small><strong>{{ offlineQueueCount }}</strong><p>{{ offlineQueueCount ? 'Will sync automatically when back online' : 'Nothing waiting to sync' }}</p></div></article>
+    </div>
   </template>
 
   <template v-else-if="activeItem === 'inspection-reports'">

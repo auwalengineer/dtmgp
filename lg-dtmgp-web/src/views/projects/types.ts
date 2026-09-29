@@ -15,6 +15,7 @@ export interface Options {
   items: { name: string; item_name: string }[];
   open_projects: { name: string; project_name: string }[];
   vehicle_service_items: string[];
+  departments: string[];
 }
 
 export interface Project {
@@ -53,6 +54,13 @@ export interface InspectionRecord { name: string; company: string; project: stri
 export interface AssetVerificationRecord { name: string; company: string; asset: string; verification_date: string; verified_by: string | null; condition: string; remarks?: string | null }
 export interface Contractor { name: string; supplier_name: string; supplier_type: string; supplier_group: string | null; disabled: number; on_hold: number; hold_type: string | null }
 export interface ContractorPerformance { supplier: string; cases: number; completed: number; estimated_total: number; evaluated_total: number }
+export interface ProjectProposal { name: string; company: string; title: string; department: string | null; location: string | null; funding_source: string | null; estimated_cost: number; expected_start_date: string | null; expected_end_date: string | null; status: string; approved_project: string | null; approval_reference: string | null }
+export interface AssetDisposalRecord { name: string; company: string; asset: string; request_date: string; disposal_method: string; valuation_amount: number; status: string; approval_reference: string | null; journal_entry: string | null; disposal_date: string | null; proceeds: number | null }
+export interface ContractorDocument { name: string; company: string; supplier: string; document_type: string; reference_number: string | null; issue_date: string | null; expiry_date: string | null; file: string; classification: string; retention_category: string; verification_status: string }
+export interface ProjectFinancialRow { name: string; project_name: string; company: string; budget: number; actual: number; drawdown: number }
+export interface ProjectVariation { name: string; project: string; contract: string; variation_type: string; amount_change: number; days_change: number; status: string; approval_reference: string | null }
+export interface ProjectFinancials { projects: ProjectFinancialRow[]; variations: ProjectVariation[] }
+export interface VehicleServiceRecord { name: string; vehicle_log: string; license_plate: string | null; date: string | null; service_item: string; type: string; frequency: string; expense_amount: number }
 
 export interface ReportsData {
   project_status: { total: number; ongoing: number; completed: number; delayed: number; suspended: number; abandoned: number };

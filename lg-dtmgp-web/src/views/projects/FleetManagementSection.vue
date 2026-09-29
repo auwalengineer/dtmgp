@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { FilePlus2, Wrench } from "@lucide/vue";
+import { FilePlus2 } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
-import type { VehicleLogRecord, VehicleRecord } from "./types";
+import type { VehicleLogRecord, VehicleRecord, VehicleServiceRecord } from "./types";
 
-const props = defineProps<{ vehicles: VehicleRecord[]; vehicleLogs: VehicleLogRecord[]; canManage: boolean }>();
+const props = defineProps<{ vehicles: VehicleRecord[]; vehicleLogs: VehicleLogRecord[]; vehicleServices: VehicleServiceRecord[]; canManage: boolean }>();
 const emit = defineEmits<{ "new-vehicle": []; "new-log": [] }>();
 
 const ITEM_LABELS: Record<string, string> = { "vehicle-register": "Vehicle Register", "vehicle-assignments": "Vehicle Assignments", "trip-records": "Trip Records", "fuel-records": "Fuel Records", "vehicle-maintenance": "Vehicle Maintenance", "insurance-licensing": "Insurance & Licensing", "driver-records": "Driver Records" };
@@ -43,7 +42,9 @@ const insuranceDueSoon = (endDate: string | null) => !!endDate && endDate <= new
   </template>
 
   <template v-else-if="activeItem === 'vehicle-maintenance'">
-    <PreviewCard :icon="Wrench" title="Vehicle maintenance" body="A dedicated service/maintenance record per vehicle isn't wired into this workspace yet -- ERPNext's Vehicle Log has a Vehicle Service child table for this, but the create form here doesn't expose it yet." />
+    <div class="directory-toolbar"><h3 style="margin:0;flex:1">Vehicle maintenance</h3><button v-if="canManage" class="secondary-action" @click="emit('new-log')"><FilePlus2 :size="15" /> New log entry</button></div>
+    <p class="users-empty" style="text-align:left;padding:0 20px">Service records are entered from "New log entry" in Trip Records — set a Service item there to log a maintenance event against the vehicle.</p>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Vehicle</th><th>Date</th><th>Service item</th><th>Type</th><th>Frequency</th><th>Expense</th></tr></thead><tbody><tr v-for="item in vehicleServices" :key="item.name"><td><strong>{{ item.license_plate || '-' }}</strong></td><td>{{ item.date || '-' }}</td><td>{{ item.service_item }}</td><td>{{ item.type }}</td><td>{{ item.frequency }}</td><td>{{ item.expense_amount.toLocaleString() }}</td></tr></tbody></table><p v-if="!vehicleServices.length" class="users-empty">No service/maintenance records logged for this LGA's fleet.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'insurance-licensing'">

@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { Archive, FilePlus2 } from "@lucide/vue";
+import { FilePlus2 } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
-import type { AssetMaintenanceRecord, AssetMovementRecord, AssetRecord, AssetVerificationRecord, Options } from "./types";
+import type { AssetDisposalRecord, AssetMaintenanceRecord, AssetMovementRecord, AssetRecord, AssetVerificationRecord, Options } from "./types";
 
-const props = defineProps<{ assets: AssetRecord[]; assetMovements: AssetMovementRecord[]; assetMaintenance: AssetMaintenanceRecord[]; assetVerifications: AssetVerificationRecord[]; options: Options; canManage: boolean }>();
-const emit = defineEmits<{ "new-asset": []; "new-verification": []; "new-movement": [purpose: string]; "submit-asset": [name: string] }>();
+const props = defineProps<{ assets: AssetRecord[]; assetMovements: AssetMovementRecord[]; assetMaintenance: AssetMaintenanceRecord[]; assetVerifications: AssetVerificationRecord[]; assetDisposals: AssetDisposalRecord[]; options: Options; canManage: boolean }>();
+const emit = defineEmits<{ "new-asset": []; "new-verification": []; "new-movement": [purpose: string]; "submit-asset": [name: string]; "new-disposal": [] }>();
 
 const ITEM_LABELS: Record<string, string> = { "asset-register": "Asset Register", "asset-categories": "Asset Categories", "asset-locations": "Asset Locations", "asset-assignments": "Asset Assignments", "asset-transfers": "Asset Transfers", "asset-maintenance": "Asset Maintenance", "asset-disposal": "Asset Disposal", "asset-verification": "Asset Verification" };
 const DEFAULT_ITEM = "asset-register";
@@ -51,7 +50,8 @@ const transfers = computed(() => props.assetMovements.filter((m) => ["Transfer",
   </template>
 
   <template v-else-if="activeItem === 'asset-disposal'">
-    <PreviewCard :icon="Archive" title="Asset disposal" body="A disposal workflow (write-off, sale, donation) isn't available yet -- ERPNext scraps an asset through a Journal Entry against a write-off account, which needs approved disposal accounting configuration first, the same reasoning Finance used to defer its Accounting tab." />
+    <div class="directory-toolbar"><h3 style="margin:0;flex:1">Asset disposal requests</h3><button v-if="canManage" class="secondary-action" @click="emit('new-disposal')"><FilePlus2 :size="15" /> New disposal request</button></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Asset</th><th>Method</th><th>Valuation</th><th>Status</th><th>Journal entry</th></tr></thead><tbody><tr v-for="item in assetDisposals" :key="item.name" v-record="{ doctype: 'DTMGP Asset Disposal', name: item.name }"><td><strong>{{ item.asset }}</strong></td><td>{{ item.disposal_method }}</td><td>{{ item.valuation_amount.toLocaleString() }}</td><td><span class="table-status" :class="item.status === 'Disposed' ? 'success' : 'neutral'">{{ item.status }}</span></td><td>{{ item.journal_entry || 'Not posted yet' }}</td></tr></tbody></table><p v-if="!assetDisposals.length" class="users-empty">No asset disposal requests recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'asset-verification'">

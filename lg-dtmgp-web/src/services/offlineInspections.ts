@@ -30,6 +30,18 @@ export async function queueInspection(values: Record<string, string | number>, p
   db.close();
 }
 
+export async function countQueuedInspections(): Promise<number> {
+  if (typeof indexedDB === "undefined") return 0;
+  const db = await database();
+  const count = await new Promise<number>((resolve, reject) => {
+    const request = db.transaction(STORE, "readonly").objectStore(STORE).count();
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+  db.close();
+  return count;
+}
+
 export async function drainInspectionQueue(sync: (entry: QueuedInspection) => Promise<void>) {
   if (typeof indexedDB === "undefined") return 0;
   const db = await database();
