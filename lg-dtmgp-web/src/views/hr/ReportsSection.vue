@@ -1,22 +1,35 @@
 <script setup lang="ts">
 import { ChartColumn, UserCheck } from "@lucide/vue";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import ReportActions from "@/components/ReportActions.vue";
+import { useSessionStore } from "@/stores/session";
 import ItemTabs from "../shared/ItemTabs.vue";
 import type { HRReports } from "./types";
 
-defineProps<{ hrReports: HRReports | null }>();
+const props = defineProps<{ hrReports: HRReports | null }>();
+const session = useSessionStore();
 
 const ITEM_LABELS: Record<string, string> = { "staff-strength-report": "Staff Strength Report", "staff-distribution-report": "Staff Distribution Report", "retirement-forecast": "Retirement Forecast", "leave-report": "Leave Report", "establishment-report": "Establishment Report" };
 const DEFAULT_ITEM = "staff-strength-report";
 const route = useRoute();
 const activeItem = ref(String(route.params.item || "") in ITEM_LABELS ? String(route.params.item) : DEFAULT_ITEM);
 watch(() => route.params.item, (item) => { activeItem.value = item && String(item) in ITEM_LABELS ? String(item) : DEFAULT_ITEM; });
+const exportData = computed(() => {
+  const report = props.hrReports;
+  if (!report) return { id: "hr.staff-strength", columns: ["Department", "Staff"], rows: [] as unknown[][] };
+  if (activeItem.value === "staff-distribution-report") return { id: "hr.staff-distribution", columns: ["Gender", "Staff"], rows: report.distribution_by_gender.map(row => [row.gender || "Unspecified", row.count]) };
+  if (activeItem.value === "retirement-forecast") return { id: "hr.retirement-forecast", columns: ["Measure", "Value"], rows: [["Retiring within 12 months", report.retirement_forecast_12m]] };
+  if (activeItem.value === "leave-report") return { id: "hr.leave", columns: ["Leave type", "Days taken"], rows: report.leave_by_type.map(row => [row.leave_type, row.days]) };
+  if (activeItem.value === "establishment-report") return { id: "hr.establishment", columns: ["Measure", "Value"], rows: [["Approved establishment", report.establishment.approved_total], ["Filled", report.establishment.filled_total], ["Vacant", report.establishment.vacant_count]] };
+  return { id: "hr.staff-strength", columns: ["Department", "Staff"], rows: report.strength_by_department.map(row => [row.department || "Unassigned", row.count]) };
+});
 </script>
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
+  <ReportActions v-if="hrReports" :report-id="exportData.id" :title="ITEM_LABELS[activeItem]" :columns="exportData.columns" :rows="exportData.rows" :company="session.activeLga" />
 
   <template v-if="activeItem === 'staff-strength-report' && hrReports">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Staff strength by department</h3></div>

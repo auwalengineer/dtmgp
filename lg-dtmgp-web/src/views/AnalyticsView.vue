@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Activity, AlertTriangle, BarChart3, CalendarRange, Database, Download, ExternalLink, MapPin, RefreshCw, ShieldCheck } from "@lucide/vue";
+import { Activity, AlertTriangle, BarChart3, CalendarRange, Database, Download, ExternalLink, MapPin, Printer, RefreshCw, ShieldCheck } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
@@ -13,6 +13,7 @@ const dashboard = ref<Dashboard | null>(null);
 const scorecards = ref<Scorecard[]>([]);
 const trends = ref<TrendMonth[]>([]);
 const alerts = ref<AlertItem[]>([]);
+function printReport() { window.print(); }
 const points = ref<MapPoint[]>([]);
 const loading = ref(true);
 const error = ref("");
@@ -65,7 +66,7 @@ watch([() => session.activeLga, () => route.fullPath], load, { immediate: true }
 </script>
 
 <template>
-  <section class="analytics-heading"><div><p class="eyebrow">{{ dashboard?.scope || session.activeLga }}</p><h1>{{ title }}</h1><p v-if="dashboard">{{ dashboard.period.label }} · refreshed {{ stamp(dashboard.generated_at) }}</p></div><div class="analytics-heading-actions"><button class="secondary-action" @click="load"><RefreshCw :size="16" /> Refresh</button><button class="primary-action" @click="exportOpen = true"><Download :size="16" /> Export</button></div></section>
+  <section class="analytics-heading"><div><p class="eyebrow">{{ dashboard?.scope || session.activeLga }}</p><h1>{{ title }}</h1><p v-if="dashboard">{{ dashboard.period.label }} · refreshed {{ stamp(dashboard.generated_at) }}</p></div><div class="analytics-heading-actions"><button class="secondary-action" @click="load"><RefreshCw :size="16" /> Refresh</button><button class="secondary-action" @click="printReport"><Printer :size="16" /> Print</button><button class="primary-action" @click="exportOpen = true"><Download :size="16" /> Export</button></div></section>
   <form class="analytics-period panel" @submit.prevent="load"><label><CalendarRange :size="16" /> From<input v-model="fromDate" type="date" required /></label><label>To<input v-model="toDate" type="date" required /></label><button class="secondary-action">Apply period</button><span v-if="dashboard" class="analytics-completeness" :class="dashboard.completeness.percent === 100 ? 'complete' : 'incomplete'"><Database :size="15" /> {{ dashboard.completeness.percent }}% data complete</span></form>
   <p v-if="error" class="login-error" role="alert">{{ error }}</p>
   <section v-if="loading" class="panel loading-panel">Preparing authorized analytics...</section>

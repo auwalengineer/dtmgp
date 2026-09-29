@@ -1,21 +1,34 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import ReportActions from "@/components/ReportActions.vue";
+import { useSessionStore } from "@/stores/session";
 import ItemTabs from "../shared/ItemTabs.vue";
 import type { ReportsData } from "./types";
 
 const props = defineProps<{ reports: ReportsData | null }>();
+const session = useSessionStore();
 
 const ITEM_LABELS: Record<string, string> = { "project-status-report": "Project Status Report", "project-performance-report": "Project Performance Report", "inspection-report": "Inspection Report", "asset-report": "Asset Report", "fleet-report": "Fleet Report" };
 const DEFAULT_ITEM = "project-status-report";
 const route = useRoute();
 const activeItem = ref(String(route.params.item || "") in ITEM_LABELS ? String(route.params.item) : DEFAULT_ITEM);
 watch(() => route.params.item, (item) => { activeItem.value = item && String(item) in ITEM_LABELS ? String(item) : DEFAULT_ITEM; });
+const exportData = computed(() => {
+  const report = props.reports;
+  if (!report) return { id: "projects.status", columns: ["Status", "Count"], rows: [] as unknown[][] };
+  if (activeItem.value === "project-performance-report") return { id: "projects.performance", columns: ["Measure", "Value"], rows: [["Average physical progress (%)", report.project_performance.average_percent_complete], ["Delayed projects", report.project_performance.delayed]] };
+  if (activeItem.value === "inspection-report") return { id: "projects.inspections", columns: ["Status", "Count"], rows: Object.entries(report.inspections) };
+  if (activeItem.value === "asset-report") return { id: "projects.assets", columns: ["Status", "Count"], rows: Object.entries(report.assets) };
+  if (activeItem.value === "fleet-report") return { id: "projects.fleet", columns: ["Measure", "Value"], rows: [["Vehicles", report.fleet.vehicle_count], ["Total fuel cost", report.fleet.total_fuel_cost]] };
+  return { id: "projects.status", columns: ["Status", "Count"], rows: Object.entries(report.project_status).map(([status, count]) => [status, count]) };
+});
 </script>
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
+  <ReportActions v-if="reports" :report-id="exportData.id" :title="ITEM_LABELS[activeItem]" :columns="exportData.columns" :rows="exportData.rows" :company="session.activeLga" />
   <p v-if="!reports" class="users-empty">Loading report data...</p>
   <template v-else>
     <template v-if="activeItem === 'project-status-report'">

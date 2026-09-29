@@ -3,6 +3,7 @@ import { Building2, CalendarCheck, ClipboardCheck, FilePlus2, FileText, Gavel, I
 import { computed, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 
+import ReportActions from "@/components/ReportActions.vue";
 import { apiRequest } from "@/services/api";
 import { useSessionStore } from "@/stores/session";
 
@@ -121,6 +122,13 @@ const createLabel = computed(() => ({
   correspondence: "correspondence", meetings: "meeting", resolutions: "resolution", actions: "action",
   returns: "statutory return", compliance: "compliance submission", delegations: "delegation", departments: "department",
 } as Record<string, string>)[mode.value] || "record");
+const reportRows = computed(() => reports.value ? [
+  ["Meetings", "Held", reports.value.meetings.held], ["Meetings", "Scheduled", reports.value.meetings.scheduled], ["Meetings", "Postponed", reports.value.meetings.postponed], ["Meetings", "Cancelled", reports.value.meetings.cancelled],
+  ["Resolutions", "Adopted", reports.value.resolutions.adopted], ["Resolutions", "Proposed", reports.value.resolutions.proposed], ["Resolutions", "Rejected", reports.value.resolutions.rejected],
+  ["Resolution actions", "Completed", reports.value.resolution_actions.completed], ["Resolution actions", "Pending", reports.value.resolution_actions.pending], ["Resolution actions", "Overdue", reports.value.resolution_actions.overdue],
+  ["Statutory returns", "Submitted", reports.value.statutory_returns.submitted], ["Statutory returns", "Overdue", reports.value.statutory_returns.overdue],
+  ["Compliance", "Verified", reports.value.compliance.verified], ["Compliance", "Pending", reports.value.compliance.pending], ["Compliance", "Non-compliant", reports.value.compliance.non_compliant],
+] : []);
 
 const correspondenceForm = ref(emptyCorrespondenceForm());
 const departmentForm = ref(emptyDepartmentForm());
@@ -349,13 +357,16 @@ watch(itemId, async () => { if (session.activeLga) await loadRecords(); });
         <p class="users-empty">State-managed reference catalogue — a starter set pending full business confirmation (see docs/implementation-status.md).</p>
       </div>
 
-      <div v-else-if="mode === 'reports' && reports" class="finance-metrics" aria-label="Governance reports">
+      <template v-else-if="mode === 'reports' && reports">
+      <ReportActions report-id="governance.summary" title="Governance Reports" :columns="['Area', 'Measure', 'Value']" :rows="reportRows" :company="session.activeLga" />
+      <div class="finance-metrics" aria-label="Governance reports">
         <article><span class="hr-metric-icon blue"><Landmark :size="19" /></span><div><small>Meetings</small><strong>{{ reports.meetings.held }} held</strong><p>{{ reports.meetings.scheduled }} scheduled &middot; {{ reports.meetings.postponed }} postponed &middot; {{ reports.meetings.cancelled }} cancelled</p></div></article>
         <article><span class="hr-metric-icon green"><Gavel :size="19" /></span><div><small>Resolutions</small><strong>{{ reports.resolutions.adopted }} adopted</strong><p>{{ reports.resolutions.proposed }} proposed &middot; {{ reports.resolutions.rejected }} rejected</p></div></article>
         <article><span class="hr-metric-icon gold"><UserCheck :size="19" /></span><div><small>Resolution actions</small><strong>{{ reports.resolution_actions.completed }} completed</strong><p>{{ reports.resolution_actions.pending }} pending &middot; {{ reports.resolution_actions.overdue }} overdue</p></div></article>
         <article><span class="hr-metric-icon red"><FileText :size="19" /></span><div><small>Statutory returns</small><strong>{{ reports.statutory_returns.submitted }} submitted</strong><p>{{ reports.statutory_returns.overdue }} overdue</p></div></article>
         <article><span class="hr-metric-icon green"><ShieldCheck :size="19" /></span><div><small>Compliance</small><strong>{{ reports.compliance.verified }} verified</strong><p>{{ reports.compliance.pending }} pending &middot; {{ reports.compliance.non_compliant }} non-compliant</p></div></article>
       </div>
+      </template>
     </section>
   </template>
 

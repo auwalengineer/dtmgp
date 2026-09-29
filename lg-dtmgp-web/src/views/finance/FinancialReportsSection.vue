@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { apiRequest } from "@/services/api";
 import { useSessionStore } from "@/stores/session";
+import ReportActions from "@/components/ReportActions.vue";
 
 import ItemTabs from "../shared/ItemTabs.vue";
 import { money } from "./types";
@@ -36,10 +37,19 @@ async function loadTab(item: string) {
 }
 watch(activeItem, (item) => loadTab(item), { immediate: true });
 watch(fiscalYear, () => { loaded.delete("trial-balance"); loadTab(activeItem.value); });
+const exportData = computed(() => {
+  if (activeItem.value === "revenue-performance-report" && props.dashboard) return { id: "finance.revenue-performance", columns: ["Measure", "Amount"], rows: [["Assessed", props.dashboard.revenue.assessed], ["Collected", props.dashboard.revenue.collected], ["Outstanding", props.dashboard.revenue.outstanding]] };
+  if (activeItem.value === "expenditure-report" && props.dashboard) return { id: "finance.expenditure", columns: ["Measure", "Amount"], rows: [["Pending payments", props.dashboard.payments.pending], ["Paid", props.dashboard.payments.paid]] };
+  if (activeItem.value === "cash-flow-report") return { id: "finance.cash-flow", columns: ["Measure", "Amount"], rows: cashFlow.value ? [["Inflow", cashFlow.value.inflow], ["Outflow", cashFlow.value.outflow], ["Net", cashFlow.value.net]] : [] };
+  if (activeItem.value === "trial-balance") return { id: "finance.trial-balance", columns: ["Account", "Root type", "Debit", "Credit"], rows: (trialBalance.value?.rows || []).map(row => [row.account, row.root_type, row.debit, row.credit]) };
+  if (activeItem.value === "general-ledger-report") return { id: "finance.general-ledger", columns: ["Date", "Account", "Debit", "Credit", "Voucher"], rows: glEntries.value.map(row => [row.posting_date, row.account, row.debit, row.credit, `${row.voucher_type} ${row.voucher_no}`]) };
+  return { id: "finance.budget-performance", columns: ["Account", "Budget", "Actual", "Variance"], rows: budgetPerformance.value.map(row => [row.account, row.budget, row.actual, row.variance]) };
+});
 </script>
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
+  <ReportActions :report-id="exportData.id" :title="ITEM_LABELS[activeItem]" :columns="exportData.columns" :rows="exportData.rows" :company="session.activeLga" />
 
   <template v-if="activeItem === 'budget-performance-report'">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Budget performance report</h3><label>Fiscal year<select v-model="fiscalYear"><option value="" disabled>Select year</option><option v-for="year in fiscalYears" :key="year">{{ year }}</option></select></label></div>

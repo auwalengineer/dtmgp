@@ -3,11 +3,14 @@ import { ClipboardList, ShieldAlert } from "@lucide/vue";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import ReportActions from "@/components/ReportActions.vue";
+import { useSessionStore } from "@/stores/session";
 import ItemTabs from "../shared/ItemTabs.vue";
 import PreviewCard from "../shared/PreviewCard.vue";
 import type { AuditExceptions } from "./types";
 
-defineProps<{ auditExceptions: AuditExceptions | null }>();
+const props = defineProps<{ auditExceptions: AuditExceptions | null }>();
+const session = useSessionStore();
 
 const ITEM_LABELS: Record<string, string> = { "audit-exercises": "Audit Exercises", "audit-exceptions": "Audit Exceptions", "duplicate-records": "Duplicate Records", "staff-audit-reports": "Staff Audit Reports" };
 const DEFAULT_ITEM = "audit-exceptions";
@@ -18,6 +21,7 @@ watch(() => route.params.item, (item) => { activeItem.value = item && String(ite
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
+  <ReportActions v-if="activeItem === 'staff-audit-reports' && auditExceptions" report-id="hr.staff-audit" title="Staff Audit Reports" :columns="['Exception', 'Count']" :rows="[['Unverified staff', props.auditExceptions!.unverified.length], ['Possible duplicates', props.auditExceptions!.duplicate_candidates.length], ['Missing grade level', props.auditExceptions!.missing_grade.length]]" :company="session.activeLga" />
 
   <template v-if="activeItem === 'audit-exercises'">
     <PreviewCard :icon="ClipboardList" title="Audit exercises" body="Staff audit is currently a stateless, on-demand report — there is no tracked audit-exercise entity (unlike staff verification, which runs as scheduled exercises)." />

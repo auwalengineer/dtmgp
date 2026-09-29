@@ -3,11 +3,14 @@ import { Banknote, ListChecks, Wallet } from "@lucide/vue";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
+import ReportActions from "@/components/ReportActions.vue";
+import { useSessionStore } from "@/stores/session";
 import ItemTabs from "../shared/ItemTabs.vue";
 import PreviewCard from "../shared/PreviewCard.vue";
 import type { PayrollOverview } from "./types";
 
-defineProps<{ payroll: PayrollOverview | null }>();
+const props = defineProps<{ payroll: PayrollOverview | null }>();
+const session = useSessionStore();
 
 const ITEM_LABELS: Record<string, string> = { "salary-structures": "Salary Structures", "payroll-processing": "Payroll Processing", "salary-slips": "Salary Slips", deductions: "Deductions", "payroll-reports": "Payroll Reports" };
 const DEFAULT_ITEM = "payroll-reports";
@@ -18,6 +21,7 @@ watch(() => route.params.item, (item) => { activeItem.value = item && String(ite
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
+  <ReportActions v-if="activeItem === 'payroll-reports' && payroll" report-id="hr.payroll" title="Payroll Reports" :columns="['Status', 'Salary slips']" :rows="[['Draft', props.payroll!.draft], ['Submitted', props.payroll!.submitted], ['Paid', props.payroll!.paid]]" :company="session.activeLga" />
 
   <template v-if="activeItem === 'salary-structures'">
     <PreviewCard :icon="ListChecks" title="Salary structures" body="Salary structure configuration (pay components, grade-level bands) isn't available yet — payroll amounts remain restricted pending finance/HR sign-off." />

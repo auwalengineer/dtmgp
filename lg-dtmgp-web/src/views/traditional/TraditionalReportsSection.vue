@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { apiRequest } from "@/services/api";
 import { useSessionStore } from "@/stores/session";
+import ReportActions from "@/components/ReportActions.vue";
 
 import ItemTabs from "../shared/ItemTabs.vue";
 import type { Reports } from "./types";
@@ -26,14 +27,27 @@ async function loadReports() {
   finally { loading.value = false; }
 }
 watch(() => session.activeLga, loadReports, { immediate: true });
+const exportData = computed(() => {
+  if (!reports.value) return { id: "traditional.institutions", columns: ["Type", "Count"], rows: [] as unknown[][] };
+  const mapping: Record<string, { id: string; columns: string[]; rows: { label: string; count: number }[] }> = {
+    "traditional-institution-report": { id: "traditional.institutions", columns: ["Type", "Count"], rows: reports.value.institutions_by_type },
+    "traditional-ruler-report": { id: "traditional.rulers", columns: ["Status", "Count"], rows: reports.value.rulers_by_status },
+    "appointment-report": { id: "traditional.appointments", columns: ["Stage", "Count"], rows: reports.value.appointments_by_stage },
+    "succession-report": { id: "traditional.succession", columns: ["Status", "Count"], rows: reports.value.succession_by_status },
+    "petition-dispute-report": { id: "traditional.petitions", columns: ["Status", "Count"], rows: reports.value.petitions_by_status },
+  };
+  const selected = mapping[activeItem.value];
+  return { id: selected.id, columns: selected.columns, rows: selected.rows.map(row => [row.label, row.count]) };
+});
 </script>
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
   <p v-if="error" class="login-error" role="alert">{{ error }}</p>
   <p v-if="loading" class="users-empty">Loading reports...</p>
+  <ReportActions v-if="reports" :report-id="exportData.id" :title="ITEM_LABELS[activeItem]" :columns="exportData.columns" :rows="exportData.rows" :company="session.activeLga" />
 
-  <template v-else-if="reports">
+  <template v-if="!loading && reports">
     <template v-if="activeItem === 'traditional-institution-report'">
       <div class="directory-toolbar"><h3 style="margin:0;flex:1">Institutions by type</h3></div>
       <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Type</th><th>Count</th></tr></thead><tbody><tr v-for="row in reports.institutions_by_type" :key="row.label"><td>{{ row.label }}</td><td>{{ row.count }}</td></tr></tbody></table><p v-if="!reports.institutions_by_type.length" class="users-empty">No institutions recorded for this LGA yet.</p></div>
