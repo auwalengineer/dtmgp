@@ -108,13 +108,14 @@ def get_form_options(company=None):
 	companies = get_requested_companies(company)
 	selected = companies[0] if len(companies) == 1 else company
 	if not selected:
-		return {"employees": [], "locations": [], "asset_categories": [], "items": [], "open_projects": []}
+		return {"employees": [], "locations": [], "asset_categories": [], "items": [], "open_projects": [], "vehicle_service_items": []}
 	return {
 		"employees": frappe.get_all("Employee", filters={"company": selected, "status": "Active"}, fields=["name", "employee_name"], order_by="employee_name"),
 		"locations": frappe.get_all("Location", filters={"is_group": 0}, fields=["name", "latitude", "longitude"], order_by="location_name"),
 		"asset_categories": frappe.get_all("Asset Category", pluck="name", order_by="name"),
 		"items": frappe.get_all("Item", filters={"is_fixed_asset": 1}, fields=["name", "item_name"], order_by="item_name"),
 		"open_projects": frappe.get_all("Project", filters={"company": selected, "status": ["!=", "Cancelled"]}, fields=["name", "project_name"], order_by="modified desc"),
+		"vehicle_service_items": frappe.get_all("Vehicle Service Item", pluck="name", order_by="name"),
 	}
 
 
@@ -381,6 +382,11 @@ def save_vehicle_log(values, name=None):
 	for field in VEHICLE_LOG_EDITABLE_FIELDS:
 		if field in values:
 			doc.set(field, values[field])
+	if values.get("service_item"):
+		doc.append("service_detail", {
+			"service_item": values["service_item"], "type": values.get("service_type") or "Service",
+			"frequency": values.get("service_frequency"), "expense_amount": flt(values.get("service_expense")),
+		})
 	doc.save()
 	return {"name": doc.name, "docstatus": doc.docstatus}
 

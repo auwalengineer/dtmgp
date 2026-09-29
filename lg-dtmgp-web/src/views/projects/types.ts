@@ -14,6 +14,7 @@ export interface Options {
   asset_categories: string[];
   items: { name: string; item_name: string }[];
   open_projects: { name: string; project_name: string }[];
+  vehicle_service_items: string[];
 }
 
 export interface Project {

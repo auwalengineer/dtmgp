@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { Camera, FolderKanban, HardHat, TriangleAlert } from "@lucide/vue";
-import { ref, watch } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { apiRequest, uploadFile } from "@/services/api";
+import { drainInspectionQueue, queueInspection, type QueuedInspection } from "@/services/offlineInspections";
 import { useSessionStore } from "@/stores/session";
 
 import AssetsSection from "./projects/AssetsSection.vue";
@@ -26,7 +27,7 @@ const session = useSessionStore();
 const route = useRoute();
 const activeTab = ref<Tab>(SECTION_TAB[String(route.params.section || "")] || TAB_LABELS[0]);
 const dashboard = ref<Dashboard | null>(null);
-const options = ref<Options>({ employees: [], locations: [], asset_categories: [], items: [], open_projects: [] });
+const options = ref<Options>({ employees: [], locations: [], asset_categories: [], items: [], open_projects: [], vehicle_service_items: [] });
 const projects = ref<Project[]>([]);
 const tasks = ref<Task[]>([]);
 const milestones = ref<Task[]>([]);
@@ -51,6 +52,19 @@ const saving = ref(false);
 
 function scopeQuery() { return `company=${encodeURIComponent(session.activeLga)}`; }
 function shortLga() { return session.activeLga.replace(" Local Government Area", " LGA"); }
+async function persistInspection(values: Record<string, string | number>, photo: File | null) {
+  const result = await apiRequest<{ name: string }>("/api/method/dtmgp.api.v1.projects.save_record", { method: "POST", body: JSON.stringify({ doctype: "DTMGP Project Inspection", values }) });
+  if (photo) await uploadFile(photo, { doctype: "DTMGP Project Inspection", docname: result.name, fieldname: "photo_evidence", isPrivate: true });
+}
+async function syncOfflineInspections() {
+  if (!navigator.onLine || !session.activeLga) return;
+  await drainInspectionQueue(async (entry: QueuedInspection) => {
+    const photo = entry.photo && entry.fileName ? new File([entry.photo], entry.fileName, { type: entry.photo.type }) : null;
+    await persistInspection(entry.values, photo);
+  });
+}
+onMounted(() => { window.addEventListener("online", syncOfflineInspections); syncOfflineInspections(); });
+onUnmounted(() => window.removeEventListener("online", syncOfflineInspections));
 async function listRecords<T>(doctype: string): Promise<T[]> {
   const result = await apiRequest<{ items: T[] }>(`/api/method/dtmgp.api.v1.projects.list_records?doctype=${encodeURIComponent(doctype)}&${scopeQuery()}&page_size=100`);
   return result.items;
@@ -119,9 +133,9 @@ async function saveForm() {
     if (formKind.value === "project") { await apiRequest("/api/method/dtmgp.api.v1.projects.save_project", { method: "POST", body: JSON.stringify({ values: { ...form.value, company: session.activeLga } }) }); await loadProjects(); }
     else if (formKind.value === "task") { await apiRequest("/api/method/dtmgp.api.v1.projects.save_task", { method: "POST", body: JSON.stringify({ values: form.value }) }); await Promise.all([loadTasks(), loadMilestones()]); }
     else if (formKind.value === "inspection") {
-      const result = await apiRequest<{ name: string }>("/api/method/dtmgp.api.v1.projects.save_record", { method: "POST", body: JSON.stringify({ doctype: "DTMGP Project Inspection", values: { ...form.value, company: session.activeLga } }) });
-      if (photoFile.value) await uploadFile(photoFile.value, { doctype: "DTMGP Project Inspection", docname: result.name, fieldname: "photo_evidence" });
-      await loadInspections();
+      const values = { ...form.value, company: session.activeLga };
+      if (!navigator.onLine) await queueInspection(values, photoFile.value);
+      else { await persistInspection(values, photoFile.value); await loadInspections(); }
     }
     else if (formKind.value === "asset") { await apiRequest("/api/method/dtmgp.api.v1.projects.save_record", { method: "POST", body: JSON.stringify({ doctype: "Asset", values: { ...form.value, company: session.activeLga } }) }); await loadAssets(); }
     else if (formKind.value === "asset-movement") {
@@ -165,7 +179,7 @@ async function submitAsset(name: string) { error.value = ""; try { await apiRequ
       <FieldMonitoringSection v-else-if="activeTab === 'Field Monitoring'" :inspections="inspections" :can-manage="dashboard.can_manage" @new-inspection="openForm('inspection', { project: '', scheduled_date: today(), status: 'Scheduled', latitude: '', longitude: '', findings: '', recommendation: '' })" @transition="transitionInspection" />
       <ProgressMonitoringSection v-else-if="activeTab === 'Progress Monitoring'" :projects="projects" :milestones="milestones" />
       <AssetsSection v-else-if="activeTab === 'Assets'" :assets="assets" :asset-movements="assetMovements" :asset-maintenance="assetMaintenance" :asset-verifications="assetVerifications" :options="options" :can-manage="dashboard.can_manage" @new-asset="openForm('asset', { asset_name: '', item_code: '', asset_category: '', location: '', purchase_date: today(), gross_purchase_amount: 0 })" @new-verification="openForm('asset-verification', { asset: '', verification_date: today(), condition: 'Good', remarks: '' })" @new-movement="(purpose) => openForm('asset-movement', { purpose, transaction_date: today(), asset: '', source_location: '', target_location: '', from_employee: '', to_employee: '' })" @submit-asset="submitAsset" />
-      <FleetManagementSection v-else-if="activeTab === 'Fleet Management'" :vehicles="vehicles" :vehicle-logs="vehicleLogs" :can-manage="dashboard.can_manage" @new-vehicle="openForm('vehicle', { license_plate: '', make: '', model: '', last_odometer: 0, fuel_type: 'Petrol', uom: 'Nos' })" @new-log="openForm('vehicle-log', { license_plate: '', date: today(), odometer: 0, fuel_qty: 0, price: 0 })" />
+      <FleetManagementSection v-else-if="activeTab === 'Fleet Management'" :vehicles="vehicles" :vehicle-logs="vehicleLogs" :can-manage="dashboard.can_manage" @new-vehicle="openForm('vehicle', { license_plate: '', make: '', model: '', last_odometer: 0, fuel_type: 'Petrol', uom: 'Nos' })" @new-log="openForm('vehicle-log', { license_plate: '', date: today(), odometer: 0, fuel_qty: 0, price: 0, service_item: '', service_type: 'Service', service_frequency: '', service_expense: 0 })" />
       <MapsSection v-else-if="activeTab === 'Maps'" :maps-data="mapsData" />
       <ProjectsReportsSection v-else-if="activeTab === 'Reports'" :reports="reportsData" />
     </section>
@@ -186,7 +200,7 @@ async function submitAsset(name: string) { error.value = ""; try { await apiRequ
 
     <template v-else-if="formKind === 'vehicle'"><h2>New vehicle</h2><div class="form-grid"><label>License plate<input v-model="form.license_plate" required /></label><label>Make<input v-model="form.make" required /></label><label>Model<input v-model="form.model" required /></label><label>Last odometer<input v-model.number="form.last_odometer" type="number" min="0" required /></label><label>Fuel type<select v-model="form.fuel_type"><option>Petrol</option><option>Diesel</option><option>Natural Gas</option><option>Electric</option></select></label><label>Fuel UOM<input v-model="form.uom" placeholder="Nos" required /></label><label>Insurance company<input v-model="form.insurance_company" /></label><label>Policy end date<input v-model="form.end_date" type="date" /></label></div></template>
 
-    <template v-else-if="formKind === 'vehicle-log'"><h2>New fuel / trip record</h2><div class="form-grid"><label class="full-field">Vehicle<select v-model="form.license_plate" required><option value="" disabled>Select vehicle</option><option v-for="v in vehicles" :key="v.name" :value="v.name">{{ v.name }} — {{ v.make }} {{ v.model }}</option></select></label><label>Date<input v-model="form.date" type="date" required /></label><label>Odometer<input v-model.number="form.odometer" type="number" min="0" required /></label><label>Fuel qty<input v-model.number="form.fuel_qty" type="number" min="0" step="0.01" /></label><label>Fuel price<input v-model.number="form.price" type="number" min="0" step="0.01" /></label></div></template>
+    <template v-else-if="formKind === 'vehicle-log'"><h2>New vehicle log</h2><div class="form-grid"><label class="full-field">Vehicle<select v-model="form.license_plate" required><option value="" disabled>Select vehicle</option><option v-for="v in vehicles" :key="v.name" :value="v.name">{{ v.name }} — {{ v.make }} {{ v.model }}</option></select></label><label>Date<input v-model="form.date" type="date" required /></label><label>Odometer<input v-model.number="form.odometer" type="number" min="0" required /></label><label>Fuel qty<input v-model.number="form.fuel_qty" type="number" min="0" step="0.01" /></label><label>Fuel price<input v-model.number="form.price" type="number" min="0" step="0.01" /></label><label>Service item<select v-model="form.service_item"><option value="">No maintenance</option><option v-for="item in options.vehicle_service_items" :key="item">{{ item }}</option></select></label><label>Service type<select v-model="form.service_type"><option>Inspection</option><option>Service</option><option>Change</option></select></label><label>Frequency<select v-model="form.service_frequency"><option value="">Not scheduled</option><option>Mileage</option><option>Monthly</option><option>Quarterly</option><option>Half Yearly</option><option>Yearly</option></select></label><label>Service expense<input v-model.number="form.service_expense" type="number" min="0" step="0.01" /></label></div></template>
 
     <p v-if="error" class="login-error" role="alert">{{ error }}</p><footer><button type="button" class="secondary-action" @click="showForm = false">Cancel</button><button class="primary-action" :disabled="saving">{{ saving ? "Saving..." : "Save record" }}</button></footer>
   </form></div>
