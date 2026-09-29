@@ -17,12 +17,14 @@ from dtmgp.api.v1.hr import (
 	list_employee_promotions,
 	list_employee_transfers,
 	list_lga_companies,
+	list_restricted_hr_records,
 	list_staffing_plans,
 	list_verification_records,
 	review_verification_record,
 	save_employee_promotion,
 	save_employee_separation,
 	save_employee_transfer,
+	save_restricted_hr_record,
 	save_staffing_plan,
 	save_verification_exercise,
 	save_verification_record,
@@ -53,6 +55,24 @@ class TestHRExtensions(FrappeTestCase):
 		super().tearDown()
 
 	# ---------------------------------------------------------------- Establishment (Staffing Plan)
+
+	def test_restricted_personnel_records_are_lga_scoped(self):
+		frappe.set_user(self.hr_officer.name)
+		created = save_restricted_hr_record("personnel_file", {
+			"company": self.makurdi, "employee": self.employee, "file_status": "Active",
+			"classification": "Restricted", "retention_category": "Personnel record",
+		})
+		self.assertEqual(list_restricted_hr_records("personnel_file", self.makurdi, self.employee)[0].name, created["name"])
+		with self.assertRaises(frappe.PermissionError):
+			list_restricted_hr_records("personnel_file", self.gboko)
+
+	def test_next_of_kin_employee_must_belong_to_selected_lga(self):
+		frappe.set_user("Administrator")
+		with self.assertRaises(frappe.ValidationError):
+			save_restricted_hr_record("next_of_kin", {
+				"company": self.gboko, "employee": self.employee, "full_name": "Test Contact",
+				"relationship": "Sibling", "phone": "08000000000",
+			})
 
 	def test_staffing_plan_reports_computed_headcount_and_vacancies(self):
 		# A dedicated, never-reused designation keeps this assertion exact regardless of

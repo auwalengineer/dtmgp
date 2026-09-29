@@ -21,6 +21,9 @@ def has_permission(doc, user=None, permission_type=None):
 
 def verification_exercise_query(user=None): return _conditions("DTMGP Staff Verification Exercise", user)
 def verification_record_query(user=None): return _conditions("DTMGP Staff Verification Record", user)
+def personnel_file_query(user=None): return _conditions("DTMGP Personnel File", user)
+def next_of_kin_query(user=None): return _conditions("DTMGP Next of Kin", user)
+def staff_document_query(user=None): return _conditions("DTMGP Staff Document", user)
 def project_query(user=None): return _conditions("Project", user)
 def shift_assignment_query(user=None): return _conditions("Shift Assignment", user)
 

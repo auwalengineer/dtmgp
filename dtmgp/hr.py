@@ -5,6 +5,45 @@ from frappe.utils import getdate, now_datetime
 from dtmgp.finance import require_roles, validate_lga
 from dtmgp.permissions.scope import HR_MANAGE_ROLES
 
+RESTRICTED_HR_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "HR Officer"}
+
+
+class RestrictedHRDocument(Document):
+	def validate(self):
+		validate_lga(self.company)
+		require_roles(RESTRICTED_HR_ROLES, "You are not permitted to manage restricted personnel records")
+		if frappe.db.get_value("Employee", self.employee, "company") != self.company:
+			frappe.throw("Employee must belong to the selected LGA")
+		self.validate_record()
+
+	def validate_record(self):
+		pass
+
+
+class DTMGPPersonnelFile(RestrictedHRDocument):
+	def validate_record(self):
+		if self.retention_review_date and getdate(self.retention_review_date) < getdate():
+			frappe.throw("Retention Review Date cannot be in the past")
+
+
+class DTMGPNextofKin(RestrictedHRDocument):
+	def validate_record(self):
+		if self.is_primary:
+			frappe.db.set_value("DTMGP Next of Kin", {"employee": self.employee, "is_primary": 1, "name": ["!=", self.name]}, "is_primary", 0)
+
+
+class DTMGPStaffDocument(RestrictedHRDocument):
+	def validate_record(self):
+		if self.expiry_date and self.document_date and getdate(self.expiry_date) < getdate(self.document_date):
+			frappe.throw("Expiry Date cannot be before Document Date")
+		if self.file:
+			file_doc = frappe.db.get_value("File", {"file_url": self.file}, ["name", "is_private"], as_dict=True)
+			if not file_doc or not file_doc.is_private:
+				frappe.throw("Staff documents must be uploaded as private files")
+		if self.has_value_changed("verification_status") and self.verification_status in {"Verified", "Rejected"}:
+			self.verified_by = frappe.session.user
+			self.verified_on = now_datetime()
+
 
 class ScopedHRDocument(Document):
 	"""Base for dtmgp-owned, LGA-scoped HR DocTypes. Concepts already covered by an

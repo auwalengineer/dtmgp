@@ -1,0 +1,20 @@
+{
+ "actions": [], "autoname": "format:NOK-{employee}-{#####}", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","employee","full_name","relationship","phone","alternate_phone","email","address","is_primary","verified_on"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"employee","fieldtype":"Link","in_list_view":1,"label":"Employee","options":"Employee","reqd":1},
+  {"fieldname":"full_name","fieldtype":"Data","in_list_view":1,"label":"Full Name","reqd":1},
+  {"fieldname":"relationship","fieldtype":"Data","label":"Relationship","reqd":1},
+  {"fieldname":"phone","fieldtype":"Data","label":"Phone","reqd":1},
+  {"fieldname":"alternate_phone","fieldtype":"Data","label":"Alternate Phone"},
+  {"fieldname":"email","fieldtype":"Data","label":"Email","options":"Email"},
+  {"fieldname":"address","fieldtype":"Small Text","label":"Address"},
+  {"default":"0","fieldname":"is_primary","fieldtype":"Check","label":"Primary Contact"},
+  {"fieldname":"verified_on","fieldtype":"Date","label":"Verified On"}
+ ],"index_web_pages_for_search":0,"module":"dtmgp","name":"DTMGP Next of Kin","naming_rule":"Expression","permissions":[
+  {"create":1,"delete":1,"read":1,"report":1,"role":"State Administrator","write":1},
+  {"create":1,"delete":1,"read":1,"report":1,"role":"HR Officer","write":1},
+  {"create":1,"read":1,"report":1,"role":"LGA Administrator","write":1}
+ ],"sort_field":"modified","sort_order":"DESC","track_changes":1
+}

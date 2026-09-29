@@ -1,0 +1,20 @@
+{
+ "actions": [], "autoname": "format:PF-{employee}", "doctype": "DocType", "engine": "InnoDB",
+ "field_order": ["company", "employee", "file_status", "classification", "retention_category", "retention_review_date", "physical_file_reference", "notes"],
+ "fields": [
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"employee","fieldtype":"Link","in_list_view":1,"label":"Employee","options":"Employee","reqd":1,"unique":1},
+  {"default":"Active","fieldname":"file_status","fieldtype":"Select","in_list_view":1,"label":"File Status","options":"Active\nClosed\nArchived\nLegal Hold","reqd":1},
+  {"default":"Restricted","fieldname":"classification","fieldtype":"Select","label":"Classification","options":"Restricted\nConfidential","reqd":1},
+  {"fieldname":"retention_category","fieldtype":"Data","label":"Retention Category","reqd":1},
+  {"fieldname":"retention_review_date","fieldtype":"Date","label":"Retention Review Date"},
+  {"fieldname":"physical_file_reference","fieldtype":"Data","label":"Physical File Reference"},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Notes"}
+ ],
+ "index_web_pages_for_search":0,"module":"dtmgp","name":"DTMGP Personnel File","naming_rule":"Expression","permissions":[
+  {"create":1,"delete":1,"email":1,"export":1,"print":1,"read":1,"report":1,"role":"State Administrator","share":1,"write":1},
+  {"create":1,"email":1,"print":1,"read":1,"report":1,"role":"HR Officer","write":1},
+  {"create":1,"email":1,"print":1,"read":1,"report":1,"role":"LGA Administrator","write":1},
+  {"read":1,"report":1,"role":"State Auditor"}, {"read":1,"report":1,"role":"Internal Auditor"}
+ ],"sort_field":"modified","sort_order":"DESC","track_changes":1
+}

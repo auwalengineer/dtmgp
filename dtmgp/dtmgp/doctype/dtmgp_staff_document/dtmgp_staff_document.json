@@ -1,0 +1,23 @@
+{
+ "actions": [], "autoname": "format:SDOC-{employee}-{#####}", "doctype":"DocType", "engine":"InnoDB",
+ "field_order":["company","employee","document_type","document_date","expiry_date","reference_number","file","classification","retention_category","retention_review_date","verification_status","verified_by","verified_on"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"employee","fieldtype":"Link","in_list_view":1,"label":"Employee","options":"Employee","reqd":1},
+  {"fieldname":"document_type","fieldtype":"Select","in_list_view":1,"label":"Document Type","options":"Appointment Letter\nPromotion Letter\nQualification\nIdentity Document\nMedical Record\nDisciplinary Record\nPension Record\nExit Document\nOther","reqd":1},
+  {"fieldname":"document_date","fieldtype":"Date","label":"Document Date"},
+  {"fieldname":"expiry_date","fieldtype":"Date","label":"Expiry Date"},
+  {"fieldname":"reference_number","fieldtype":"Data","label":"Reference Number"},
+  {"fieldname":"file","fieldtype":"Attach","label":"Private File","reqd":1},
+  {"default":"Restricted","fieldname":"classification","fieldtype":"Select","label":"Classification","options":"Restricted\nConfidential","reqd":1},
+  {"fieldname":"retention_category","fieldtype":"Data","label":"Retention Category","reqd":1},
+  {"fieldname":"retention_review_date","fieldtype":"Date","label":"Retention Review Date"},
+  {"default":"Pending","fieldname":"verification_status","fieldtype":"Select","in_list_view":1,"label":"Verification Status","options":"Pending\nVerified\nRejected","reqd":1},
+  {"fieldname":"verified_by","fieldtype":"Link","label":"Verified By","options":"User","read_only":1},
+  {"fieldname":"verified_on","fieldtype":"Datetime","label":"Verified On","read_only":1}
+ ],"index_web_pages_for_search":0,"module":"dtmgp","name":"DTMGP Staff Document","naming_rule":"Expression","permissions":[
+  {"create":1,"delete":1,"read":1,"report":1,"role":"State Administrator","write":1},
+  {"create":1,"delete":1,"read":1,"report":1,"role":"HR Officer","write":1},
+  {"create":1,"read":1,"report":1,"role":"LGA Administrator","write":1}
+ ],"sort_field":"modified","sort_order":"DESC","track_changes":1
+}

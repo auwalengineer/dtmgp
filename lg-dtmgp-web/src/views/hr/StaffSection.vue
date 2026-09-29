@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ChevronLeft, ChevronRight, Pencil, Search } from "@lucide/vue";
+import { ChevronLeft, ChevronRight, FilePlus2, Pencil, Plus, Search } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
-import { apiRequest } from "@/services/api";
+import { apiRequest, uploadFile } from "@/services/api";
 
 import ItemTabs from "../shared/ItemTabs.vue";
 import type { Employee } from "./types";
@@ -14,6 +14,9 @@ interface WorkHistoryRow { department: string | null; designation: string | null
 interface ExternalHistoryRow { company_name: string | null; designation: string | null; contact: string | null; total_experience: number | null }
 interface EmployeeProfile { name: string; employee_name: string; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
 interface DocumentRow { name: string; file_name: string; file_url: string; is_private: number; creation: string }
+interface PersonnelFile { name: string; file_status: string; classification: string; retention_category: string; retention_review_date?: string; physical_file_reference?: string }
+interface NextOfKin { name: string; full_name: string; relationship: string; phone: string; alternate_phone?: string; email?: string; address?: string; is_primary: number; verified_on?: string }
+interface StaffDocument { name: string; document_type: string; document_date?: string; expiry_date?: string; reference_number?: string; file: string; classification: string; retention_category: string; retention_review_date?: string; verification_status: string }
 
 const PROFILE_ITEMS = new Set(["staff-profiles", "digital-personnel-files", "employment-history", "next-of-kin", "staff-documents"]);
 
@@ -35,6 +38,15 @@ const profileError = ref("");
 const documents = ref<DocumentRow[]>([]);
 const documentsLoading = ref(false);
 const documentsFor = ref("");
+const personnelFiles = ref<PersonnelFile[]>([]);
+const nextOfKin = ref<NextOfKin[]>([]);
+const staffDocuments = ref<StaffDocument[]>([]);
+const recordLoading = ref(false);
+const recordError = ref("");
+const showRecordForm = ref(false);
+const recordKind = ref<"personnel_file" | "next_of_kin" | "staff_document">("personnel_file");
+const recordForm = ref<Record<string, string | number>>({});
+const pendingDocument = ref<File | null>(null);
 const DOCUMENT_ITEMS = new Set(["digital-personnel-files", "staff-documents"]);
 
 async function loadProfile(employee: string) {
@@ -51,7 +63,42 @@ async function ensureDocuments(employee: string) {
   try { documents.value = await apiRequest<DocumentRow[]>(`/api/method/dtmgp.api.v1.people.list_employee_documents?employee=${encodeURIComponent(employee)}`); documentsFor.value = employee; }
   finally { documentsLoading.value = false; }
 }
-watch(selectedEmployee, (employee) => { loadProfile(employee); if (employee && DOCUMENT_ITEMS.has(activeItem.value)) ensureDocuments(employee); });
+async function loadRestrictedRecords(employee: string) {
+  if (!employee) return;
+  recordLoading.value = true;
+  recordError.value = "";
+  try {
+    const endpoint = "/api/method/dtmgp.api.v1.hr.list_restricted_hr_records";
+    const query = (type: string) => `${endpoint}?record_type=${type}&employee=${encodeURIComponent(employee)}`;
+    [personnelFiles.value, nextOfKin.value, staffDocuments.value] = await Promise.all([
+      apiRequest<PersonnelFile[]>(query("personnel_file")), apiRequest<NextOfKin[]>(query("next_of_kin")), apiRequest<StaffDocument[]>(query("staff_document")),
+    ]);
+  } catch (reason) { recordError.value = reason instanceof Error ? reason.message : "Unable to load restricted personnel records"; }
+  finally { recordLoading.value = false; }
+}
+function openRecordForm(kind: typeof recordKind.value) {
+  recordKind.value = kind;
+  const common = { employee: selectedEmployee.value, company: profile.value?.company || "", classification: "Restricted", retention_category: "Personnel record" };
+  recordForm.value = kind === "personnel_file" ? { ...common, file_status: "Active", physical_file_reference: "" }
+    : kind === "next_of_kin" ? { ...common, full_name: "", relationship: "", phone: "", is_primary: 0 }
+    : { ...common, document_type: "Appointment Letter", verification_status: "Pending" };
+  pendingDocument.value = null;
+  showRecordForm.value = true;
+}
+async function saveRestrictedRecord() {
+  recordError.value = "";
+  try {
+    if (recordKind.value === "staff_document") {
+      if (!pendingDocument.value) throw new Error("Select a private document to upload");
+      const uploaded = await uploadFile(pendingDocument.value, { isPrivate: true });
+      recordForm.value.file = uploaded.file_url;
+    }
+    await apiRequest("/api/method/dtmgp.api.v1.hr.save_restricted_hr_record", { method: "POST", body: JSON.stringify({ record_type: recordKind.value, values: recordForm.value }) });
+    showRecordForm.value = false;
+    await loadRestrictedRecords(selectedEmployee.value);
+  } catch (reason) { recordError.value = reason instanceof Error ? reason.message : "Unable to save restricted personnel record"; }
+}
+watch(selectedEmployee, (employee) => { loadProfile(employee); loadRestrictedRecords(employee); if (employee && DOCUMENT_ITEMS.has(activeItem.value)) ensureDocuments(employee); });
 watch(activeItem, (item) => { if (selectedEmployee.value && DOCUMENT_ITEMS.has(item)) ensureDocuments(selectedEmployee.value); });
 
 const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
@@ -72,6 +119,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
     <p v-if="!selectedEmployee" class="users-empty">Select a staff member above to view their record.</p>
     <p v-else-if="profileLoading" class="users-empty">Loading record...</p>
     <p v-else-if="profileError" class="login-error" role="alert">{{ profileError }}</p>
+    <p v-if="recordError" class="login-error" role="alert">{{ recordError }}</p>
 
     <template v-else-if="profile && activeItem === 'staff-profiles'">
       <div class="staff-table-wrap"><table class="staff-table"><tbody>
@@ -90,14 +138,8 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
     </template>
 
     <template v-else-if="profile && activeItem === 'digital-personnel-files'">
-      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Record summary</h3></div>
-      <div class="staff-table-wrap"><table class="staff-table"><tbody>
-        <tr><td>Name</td><td>{{ profile.employee_name }}</td></tr>
-        <tr><td>Department / designation</td><td>{{ profile.department || '-' }} / {{ profile.designation || '-' }}</td></tr>
-        <tr><td>Grade level</td><td>{{ profile.grade_level || '-' }}</td></tr>
-      </tbody></table></div>
-      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Documents on file</h3></div>
-      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Document</th><th>Visibility</th><th>Uploaded</th></tr></thead><tbody><tr v-for="row in documents" :key="row.name"><td><a :href="row.file_url" target="_blank" rel="noopener">{{ row.file_name }}</a></td><td>{{ row.is_private ? "Private" : "Public" }}</td><td>{{ row.creation }}</td></tr></tbody></table><p v-if="documentsLoading" class="users-empty">Loading documents...</p><p v-else-if="!documents.length" class="users-empty">No documents on file for this staff member.</p></div>
+      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Personnel file</h3><button v-if="canManage && !personnelFiles.length" class="primary-action" @click="openRecordForm('personnel_file')"><Plus :size="15" /> Open file</button></div>
+      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Reference</th><th>Status</th><th>Classification</th><th>Retention</th><th>Review</th></tr></thead><tbody><tr v-for="row in personnelFiles" :key="row.name"><td>{{ row.physical_file_reference || row.name }}</td><td>{{ row.file_status }}</td><td>{{ row.classification }}</td><td>{{ row.retention_category }}</td><td>{{ row.retention_review_date || '-' }}</td></tr></tbody></table><p v-if="recordLoading" class="users-empty">Loading personnel file...</p><p v-else-if="!personnelFiles.length" class="users-empty">No digital personnel file has been opened.</p></div>
     </template>
 
     <template v-else-if="profile && activeItem === 'employment-history'">
@@ -108,16 +150,20 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
     </template>
 
     <template v-else-if="profile && activeItem === 'next-of-kin'">
-      <p class="users-empty" style="text-align:left;padding:12px 20px 0">Only a single emergency contact per staff member is currently recorded on the Employee record; a dedicated multi-entry next-of-kin list isn't modeled yet.</p>
-      <div class="staff-table-wrap"><table class="staff-table"><tbody>
-        <tr><td>Contact person</td><td>{{ profile.emergency_contact.person_to_be_contacted || '-' }}</td></tr>
-        <tr><td>Relationship</td><td>{{ profile.emergency_contact.relation || '-' }}</td></tr>
-        <tr><td>Phone</td><td>{{ profile.emergency_contact.emergency_phone_number || '-' }}</td></tr>
-      </tbody></table></div>
+      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Next of kin</h3><button v-if="canManage" class="primary-action" @click="openRecordForm('next_of_kin')"><Plus :size="15" /> Add contact</button></div>
+      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Name</th><th>Relationship</th><th>Phone</th><th>Email</th><th>Primary</th><th>Verified</th></tr></thead><tbody><tr v-for="row in nextOfKin" :key="row.name"><td>{{ row.full_name }}</td><td>{{ row.relationship }}</td><td>{{ row.phone }}</td><td>{{ row.email || '-' }}</td><td>{{ row.is_primary ? 'Yes' : 'No' }}</td><td>{{ row.verified_on || '-' }}</td></tr></tbody></table><p v-if="!nextOfKin.length" class="users-empty">No next-of-kin contacts recorded.</p></div>
     </template>
 
     <template v-else-if="activeItem === 'staff-documents'">
-      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Document</th><th>Visibility</th><th>Uploaded</th></tr></thead><tbody><tr v-for="row in documents" :key="row.name"><td><a :href="row.file_url" target="_blank" rel="noopener">{{ row.file_name }}</a></td><td>{{ row.is_private ? "Private" : "Public" }}</td><td>{{ row.creation }}</td></tr></tbody></table><p v-if="documentsLoading" class="users-empty">Loading documents...</p><p v-else-if="!documents.length" class="users-empty">No documents on file for this staff member.</p></div>
+      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Restricted documents</h3><button v-if="canManage" class="primary-action" @click="openRecordForm('staff_document')"><FilePlus2 :size="15" /> Add document</button></div>
+      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Type</th><th>Reference</th><th>Classification</th><th>Retention</th><th>Status</th><th>File</th></tr></thead><tbody><tr v-for="row in staffDocuments" :key="row.name"><td>{{ row.document_type }}</td><td>{{ row.reference_number || '-' }}</td><td>{{ row.classification }}</td><td>{{ row.retention_category }}</td><td>{{ row.verification_status }}</td><td><a :href="row.file" target="_blank" rel="noopener">Open private file</a></td></tr></tbody></table><p v-if="!staffDocuments.length" class="users-empty">No restricted staff documents recorded.</p></div>
     </template>
   </template>
+
+  <div v-if="showRecordForm" class="modal-backdrop" @click.self="showRecordForm = false"><form class="user-modal" @submit.prevent="saveRestrictedRecord"><h2>{{ recordKind === 'personnel_file' ? 'Open personnel file' : recordKind === 'next_of_kin' ? 'Add next of kin' : 'Add staff document' }}</h2>
+    <template v-if="recordKind === 'personnel_file'"><label>Physical file reference<input v-model="recordForm.physical_file_reference" /></label><label>Status<select v-model="recordForm.file_status"><option>Active</option><option>Closed</option><option>Archived</option><option>Legal Hold</option></select></label></template>
+    <template v-else-if="recordKind === 'next_of_kin'"><label>Full name<input v-model="recordForm.full_name" required /></label><label>Relationship<input v-model="recordForm.relationship" required /></label><label>Phone<input v-model="recordForm.phone" required /></label><label>Email<input v-model="recordForm.email" type="email" /></label><label><input v-model="recordForm.is_primary" type="checkbox" :true-value="1" :false-value="0" /> Primary contact</label></template>
+    <template v-else><label>Document type<select v-model="recordForm.document_type"><option>Appointment Letter</option><option>Promotion Letter</option><option>Qualification</option><option>Identity Document</option><option>Medical Record</option><option>Disciplinary Record</option><option>Pension Record</option><option>Exit Document</option><option>Other</option></select></label><label>Reference number<input v-model="recordForm.reference_number" /></label><label>Private file<input type="file" required @change="pendingDocument = ($event.target as HTMLInputElement).files?.[0] || null" /></label></template>
+    <label v-if="recordKind !== 'next_of_kin'">Classification<select v-model="recordForm.classification"><option>Restricted</option><option>Confidential</option></select></label><label v-if="recordKind !== 'next_of_kin'">Retention category<input v-model="recordForm.retention_category" required /></label><label v-if="recordKind !== 'next_of_kin'">Retention review date<input v-model="recordForm.retention_review_date" type="date" /></label>
+    <footer><button type="button" class="secondary-action" @click="showRecordForm = false">Cancel</button><button class="primary-action">Save</button></footer></form></div>
 </template>

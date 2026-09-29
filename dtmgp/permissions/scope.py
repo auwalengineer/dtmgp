@@ -14,6 +14,7 @@ HR_VIEW_ROLES = {
 	"LGA Administrator", "LGA Chairman", "LGA Secretary", "HR Officer", "Internal Auditor", "Read-only Officer",
 }
 HR_MANAGE_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "HR Officer"}
+RESTRICTED_HR_VIEW_ROLES = {"System Manager", "State Administrator", "State Auditor", "LGA Administrator", "HR Officer", "Internal Auditor"}
 STAFF_AUDIT_ROLES = {"System Manager", "State Administrator", "State Auditor", "Internal Auditor"}
 PAYROLL_ROLES = STATE_ROLES | {"Treasurer"}
 FINANCE_VIEW_ROLES = STATE_ROLES | {
@@ -81,6 +82,21 @@ def can_view_hr(user=None):
 def can_manage_hr(user=None):
 	user = user or frappe.session.user
 	return user == "Administrator" or bool(get_user_roles(user) & HR_MANAGE_ROLES)
+
+
+def can_view_restricted_hr(user=None):
+	user = user or frappe.session.user
+	return user == "Administrator" or bool(get_user_roles(user) & RESTRICTED_HR_VIEW_ROLES)
+
+
+def require_restricted_hr_access(write=False):
+	require_authenticated_user()
+	allowed = can_manage_hr() if write else can_view_restricted_hr()
+	if not allowed:
+		from dtmgp.audit import record_denial
+
+		record_denial("authorization_denied", "Restricted personnel record access denied")
+		frappe.throw("You are not permitted to access restricted personnel records", frappe.PermissionError)
 
 
 def can_view_finance(user=None):

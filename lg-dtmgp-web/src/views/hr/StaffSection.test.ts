@@ -9,9 +9,11 @@ const DOCUMENTS = [{ name: "FILE-1", file_name: "contract.pdf", file_url: "/file
 const apiRequest = vi.fn((path: string, _options?: RequestInit) => {
   if (path.includes("get_employee_profile")) return Promise.resolve(PROFILE);
   if (path.includes("list_employee_documents")) return Promise.resolve(DOCUMENTS);
+  if (path.includes("record_type=next_of_kin")) return Promise.resolve([{ name: "NOK-1", full_name: "Bala Bello", relationship: "Spouse", phone: "0801", is_primary: 1 }]);
+  if (path.includes("list_restricted_hr_records")) return Promise.resolve([]);
   return Promise.resolve({});
 });
-vi.mock("@/services/api", () => ({ apiRequest: (...args: [string, RequestInit?]) => apiRequest(...args) }));
+vi.mock("@/services/api", () => ({ apiRequest: (...args: [string, RequestInit?]) => apiRequest(...args), uploadFile: vi.fn() }));
 
 import StaffSection from "./StaffSection.vue";
 import type { Employee } from "./types";
@@ -45,13 +47,13 @@ describe("StaffSection", () => {
     expect(apiRequest).not.toHaveBeenCalled();
   });
 
-  it("fetches the real employee profile once a staff member is picked and shows the next-of-kin caveat", async () => {
+  it("fetches the employee profile and restricted next-of-kin records", async () => {
     const wrapper = mountSection("next-of-kin");
     await wrapper.find("select").setValue("HR-0001");
     await flushPromises();
 
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("get_employee_profile?employee=HR-0001"));
-    expect(wrapper.text()).toContain("Only a single emergency contact per staff member is currently recorded");
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("record_type=next_of_kin"));
     expect(wrapper.text()).toContain("Bala Bello");
   });
 
@@ -61,7 +63,7 @@ describe("StaffSection", () => {
     await flushPromises();
 
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("list_employee_documents?employee=HR-0001"));
-    expect(wrapper.text()).toContain("contract.pdf");
+    expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("record_type=staff_document"));
   });
 
   it("switches between already-wired items without ever calling the API", async () => {

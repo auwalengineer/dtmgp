@@ -7,13 +7,13 @@ export async function apiRequest<T>(path: string, options: RequestInit = {}): Pr
   if (!response.ok) throw new Error(payload.exception || payload.message || "Request failed");
   return (payload as FrappeResponse<T>).message;
 }
-export async function uploadFile(file: File, params: { doctype: string; docname: string; fieldname: string }): Promise<{ file_url: string }> {
+export async function uploadFile(file: File, params: { doctype?: string; docname?: string; fieldname?: string; isPrivate?: boolean }): Promise<{ file_url: string }> {
   const body = new FormData();
   body.append("file", file);
-  body.append("doctype", params.doctype);
-  body.append("docname", params.docname);
-  body.append("fieldname", params.fieldname);
-  body.append("is_private", "0");
+  if (params.doctype) body.append("doctype", params.doctype);
+  if (params.docname) body.append("docname", params.docname);
+  if (params.fieldname) body.append("fieldname", params.fieldname);
+  body.append("is_private", params.isPrivate ? "1" : "0");
   const response = await fetch("/api/method/upload_file", { method: "POST", credentials: "include", headers: csrfToken ? { "X-Frappe-CSRF-Token": csrfToken } : {}, body });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) throw new Error(payload.exception || payload.message || "Upload failed");

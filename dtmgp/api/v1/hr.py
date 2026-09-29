@@ -5,6 +5,7 @@ from dtmgp.permissions.scope import (
 	get_requested_companies,
 	require_hr_access,
 	require_payroll_access,
+	require_restricted_hr_access,
 	require_staff_audit_access,
 )
 from dtmgp.setup.organization import PARENT_COMPANY
@@ -37,6 +38,66 @@ def list_lga_companies():
 	unlike the records within them, which stay filtered by get_requested_companies."""
 	require_hr_access()
 	return frappe.get_all("Company", filters={"parent_company": PARENT_COMPANY, "is_group": 0}, pluck="name", order_by="company_name asc")
+
+
+# ------------------------------------------------------- Restricted personnel records
+
+RESTRICTED_DOCTYPES = {
+	"personnel_file": ("DTMGP Personnel File", ["name", "company", "employee", "file_status", "classification", "retention_category", "retention_review_date", "physical_file_reference"]),
+	"next_of_kin": ("DTMGP Next of Kin", ["name", "company", "employee", "full_name", "relationship", "phone", "alternate_phone", "email", "address", "is_primary", "verified_on"]),
+	"staff_document": ("DTMGP Staff Document", ["name", "company", "employee", "document_type", "document_date", "expiry_date", "reference_number", "file", "classification", "retention_category", "retention_review_date", "verification_status", "verified_by", "verified_on"]),
+}
+
+
+def _restricted_definition(record_type):
+	if record_type not in RESTRICTED_DOCTYPES:
+		frappe.throw("Unknown restricted HR record type")
+	return RESTRICTED_DOCTYPES[record_type]
+
+
+@frappe.whitelist()
+def list_restricted_hr_records(record_type, company=None, employee=None):
+	require_restricted_hr_access()
+	doctype, fields = _restricted_definition(record_type)
+	companies = get_requested_companies(company)
+	filters = {"company": ["in", companies]} if companies else {"name": ""}
+	if employee:
+		if frappe.db.get_value("Employee", employee, "company") not in companies:
+			frappe.throw("Employee is outside your permitted scope", frappe.PermissionError)
+		filters["employee"] = employee
+	return frappe.get_all(doctype, filters=filters, fields=fields, order_by="modified desc", limit_page_length=200)
+
+
+@frappe.whitelist(methods=["POST"])
+def save_restricted_hr_record(record_type, values, name=None):
+	require_restricted_hr_access(write=True)
+	values = frappe.parse_json(values) if isinstance(values, str) else values
+	doctype, fields = _restricted_definition(record_type)
+	doc = frappe.get_doc(doctype, name) if name else frappe.new_doc(doctype)
+	if name:
+		_scope_guard(doc)
+	allowed = {field for field in fields if field not in {"name", "verified_by", "verified_on"}}
+	for field in allowed:
+		if field in values:
+			doc.set(field, values[field])
+	doc.save()
+	return {"name": doc.name}
+
+
+@frappe.whitelist()
+def get_hr_migration_templates():
+	"""Machine-readable production import layouts. Restricted values are intentionally
+	not inferred; administrators must populate and validate them before import."""
+	require_restricted_hr_access(write=True)
+	return {
+		"version": "1.0",
+		"templates": {
+			"employees": ["employee_id", "first_name", "last_name", "company", "gender", "date_of_birth", "date_of_joining", "department", "designation", "grade_level", "status"],
+			"personnel_files": ["employee_id", "company", "file_status", "classification", "retention_category", "retention_review_date", "physical_file_reference"],
+			"next_of_kin": ["employee_id", "company", "full_name", "relationship", "phone", "alternate_phone", "email", "address", "is_primary", "verified_on"],
+			"staff_documents": ["employee_id", "company", "document_type", "document_date", "expiry_date", "reference_number", "private_file_url", "classification", "retention_category", "retention_review_date"],
+		},
+	}
 
 
 # ---------------------------------------------------------------- Establishment (Staffing Plan)
