@@ -1,6 +1,6 @@
 {
  "actions":[],"autoname":"format:RA-{YYYY}-{#####}","creation":"2026-09-16 00:00:00.000000","doctype":"DocType","engine":"InnoDB","is_submittable":1,
- "field_order":["company","revenue_head","taxpayer_name","taxpayer_id","contact","assessment_date","due_date","amount","amount_paid","status","notes"],
+ "field_order":["company","revenue_head","taxpayer_name","taxpayer_id","contact","assessment_date","due_date","amount","amount_paid","status","enforcement_stage","last_notice_date","next_action_date","enforcement_notes","notes"],
  "fields":[
   {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
   {"fieldname":"revenue_head","fieldtype":"Link","in_list_view":1,"label":"Revenue Head","options":"DTMGP Revenue Head","reqd":1},
@@ -10,6 +10,8 @@
   {"fieldname":"amount","fieldtype":"Currency","in_list_view":1,"label":"Amount","non_negative":1,"reqd":1},
   {"default":"0","fieldname":"amount_paid","fieldtype":"Currency","label":"Amount Paid","read_only":1},
   {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nUnpaid\nPart Paid\nPaid\nCancelled","read_only":1},
+  {"default":"None","fieldname":"enforcement_stage","fieldtype":"Select","label":"Enforcement Stage","options":"None\nReminder\nDemand Notice\nFinal Notice\nLegal Referral\nSuspended"},
+  {"fieldname":"last_notice_date","fieldtype":"Date","label":"Last Notice Date"},{"fieldname":"next_action_date","fieldtype":"Date","label":"Next Action Date"},{"fieldname":"enforcement_notes","fieldtype":"Small Text","label":"Enforcement Notes"},
   {"fieldname":"notes","fieldtype":"Small Text","label":"Notes"}
  ],"index_web_pages_for_search":0,"links":[],"modified":"2026-09-16 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Revenue Assessment","naming_rule":"Expression","owner":"Administrator",
  "permissions":[

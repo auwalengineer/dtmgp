@@ -1,0 +1,23 @@
+{
+ "actions":[],"autoname":"format:FCP-{company}-{policy_type}","doctype":"DocType","engine":"InnoDB",
+ "field_order":["company","policy_type","version","status","effective_from","legal_authority","chart_template","reconciliation_frequency","variance_tolerance","voucher_print_format","approved_by","approved_on","notes"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"policy_type","fieldtype":"Select","in_list_view":1,"label":"Policy Type","options":"Chart of Accounts\nBanking and Signatories\nBank Reconciliation\nVoucher and Printing\nReceivables and Payables\nRevenue Reconciliation","reqd":1},
+  {"default":"1.0","fieldname":"version","fieldtype":"Data","label":"Version","reqd":1},
+  {"default":"Draft","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Draft\nPending Approval\nApproved\nRetired","reqd":1},
+  {"fieldname":"effective_from","fieldtype":"Date","label":"Effective From"},
+  {"fieldname":"legal_authority","fieldtype":"Small Text","label":"Legal Authority","reqd":1},
+  {"fieldname":"chart_template","fieldtype":"Data","label":"Chart Template"},
+  {"fieldname":"reconciliation_frequency","fieldtype":"Select","label":"Reconciliation Frequency","options":"Daily\nWeekly\nMonthly"},
+  {"default":"0","fieldname":"variance_tolerance","fieldtype":"Currency","label":"Variance Tolerance","non_negative":1},
+  {"fieldname":"voucher_print_format","fieldtype":"Link","label":"Voucher Print Format","options":"Print Format"},
+  {"fieldname":"approved_by","fieldtype":"Link","label":"Approved By","options":"User","read_only":1},
+  {"fieldname":"approved_on","fieldtype":"Datetime","label":"Approved On","read_only":1},
+  {"fieldname":"notes","fieldtype":"Small Text","label":"Control Notes"}
+ ],"index_web_pages_for_search":0,"module":"dtmgp","name":"DTMGP Finance Control Policy","naming_rule":"Expression","permissions":[
+  {"create":1,"delete":1,"read":1,"report":1,"role":"State Administrator","write":1},
+  {"create":1,"read":1,"report":1,"role":"Treasurer","write":1},
+  {"read":1,"report":1,"role":"Internal Auditor"}
+ ],"sort_field":"modified","sort_order":"DESC","track_changes":1
+}

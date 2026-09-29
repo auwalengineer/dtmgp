@@ -1,6 +1,6 @@
 import frappe
 from frappe.model.document import Document
-from frappe.utils import flt, getdate
+from frappe.utils import flt, getdate, now_datetime
 
 from dtmgp.permissions.scope import get_allowed_companies
 from dtmgp.setup.organization import PARENT_COMPANY
@@ -52,6 +52,11 @@ class DTMGPRevenueHead(ScopedFinanceDocument):
 			frappe.throw("Revenue Code must be unique within the LGA")
 		if self.valid_from and self.valid_to and getdate(self.valid_to) < getdate(self.valid_from):
 			frappe.throw("Valid To cannot be before Valid From")
+		if self.approval_status == "Approved" and (not self.legal_authority or not self.valid_from):
+			frappe.throw("Legal Authority and Valid From are required before approving a revenue head")
+		if self.has_value_changed("approval_status") and self.approval_status == "Approved":
+			self.approved_by = frappe.session.user
+			self.approved_on = now_datetime()
 
 
 class DTMGPRevenueAssessment(ScopedFinanceDocument):
@@ -59,6 +64,8 @@ class DTMGPRevenueAssessment(ScopedFinanceDocument):
 
 	def validate_record(self):
 		_validate_company_link(self, "revenue_head", "DTMGP Revenue Head")
+		if frappe.db.get_value("DTMGP Revenue Head", self.revenue_head, "approval_status") != "Approved":
+			frappe.throw("Revenue Head must be approved before it can be assessed")
 		if flt(self.amount) <= 0:
 			frappe.throw("Assessment amount must be greater than zero")
 		if self.due_date and getdate(self.due_date) < getdate(self.assessment_date):
@@ -75,6 +82,10 @@ class DTMGPRevenueReceipt(ScopedFinanceDocument):
 		_validate_company_link(self, "assessment", "DTMGP Revenue Assessment")
 		if flt(self.amount) <= 0:
 			frappe.throw("Receipt amount must be greater than zero")
+		if self.payment_channel == "Online" and (not self.payment_gateway or not self.gateway_transaction_id):
+			frappe.throw("Online receipts require a payment gateway and transaction ID")
+		if self.reconciliation_status == "Matched" and not self.erpnext_payment_entry:
+			frappe.throw("A matched receipt requires an ERPNext Payment Entry")
 		assessment = frappe.get_doc("DTMGP Revenue Assessment", self.assessment)
 		if assessment.docstatus != 1:
 			frappe.throw("Revenue Assessment must be submitted before receipting")
@@ -119,6 +130,12 @@ class DTMGPProcurementCase(ScopedFinanceDocument):
 		_validate_company_link(self, "procurement_plan", "DTMGP Procurement Plan")
 		if flt(self.estimated_amount) <= 0:
 			frappe.throw("Estimated amount must be greater than zero")
+		if not self.applicable_threshold or not self.procurement_committee:
+			frappe.throw("BSPPC threshold and procurement committee references are required")
+		if self.status in {"Bid Opening", "Evaluation", "Evaluated", "Pending Approval", "Approved", "Awarded", "Completed"} and not self.bid_opening_minutes:
+			frappe.throw("Private bid opening minutes are required from Bid Opening onward")
+		if self.status in {"Evaluated", "Pending Approval", "Approved", "Awarded", "Completed"} and not self.evaluation_report:
+			frappe.throw("A private evaluation report is required after evaluation")
 		if self.status in {"Evaluated", "Approved", "Awarded", "Completed"} and not self.recommended_supplier:
 			frappe.throw("A recommended supplier is required after bid evaluation")
 		if self.status in {"Awarded", "Completed"} and not self.purchase_order:
@@ -172,6 +189,25 @@ class DTMGPContractVariation(ScopedFinanceDocument):
 
 	def validate_record(self):
 		_validate_company_link(self, "contract", "DTMGP Contract")
+
+
+class DTMGPFinanceControlPolicy(ScopedFinanceDocument):
+	def validate_record(self):
+		if self.status == "Approved":
+			if not self.effective_from:
+				frappe.throw("Effective From is required for an approved policy")
+			if not self.approved_by:
+				self.approved_by = frappe.session.user
+				self.approved_on = now_datetime()
+
+
+class DTMGPBankSignatory(ScopedFinanceDocument):
+	def validate_record(self):
+		bank_company = frappe.db.get_value("Bank Account", self.bank_account, "company")
+		if bank_company != self.company:
+			frappe.throw("Bank Account must belong to the selected LGA")
+		if self.valid_to and getdate(self.valid_to) < getdate(self.valid_from):
+			frappe.throw("Valid To cannot be before Valid From")
 
 
 def _validate_company_link(doc, fieldname, doctype):

@@ -5,11 +5,11 @@ from dtmgp.permissions.scope import can_manage_finance, get_requested_companies,
 
 
 RECORD_FIELDS = {
-	"DTMGP Revenue Head": ["company", "revenue_code", "revenue_name", "rate_type", "default_rate", "disabled"],
+	"DTMGP Revenue Head": ["company", "revenue_code", "revenue_name", "legal_authority", "rate_type", "default_rate", "approval_status", "disabled"],
 	"DTMGP Revenue Assessment": ["company", "revenue_head", "taxpayer_name", "assessment_date", "due_date", "amount", "amount_paid", "status"],
-	"DTMGP Revenue Receipt": ["company", "assessment", "posting_date", "amount", "payment_channel", "bank_reference", "docstatus"],
+	"DTMGP Revenue Receipt": ["company", "assessment", "posting_date", "amount", "payment_channel", "payment_gateway", "gateway_transaction_id", "gateway_status", "bank_reference", "reconciliation_status", "docstatus"],
 	"DTMGP Procurement Plan": ["company", "fiscal_year", "title", "procurement_category", "procurement_method", "estimated_amount", "status"],
-	"DTMGP Procurement Case": ["company", "title", "procurement_plan", "estimated_amount", "status", "recommended_supplier", "evaluated_amount", "purchase_order"],
+	"DTMGP Procurement Case": ["company", "title", "procurement_plan", "estimated_amount", "applicable_threshold", "procurement_committee", "status", "public_notice_url", "recommended_supplier", "evaluated_amount", "purchase_order"],
 	"DTMGP Payment Request": ["company", "request_date", "payee", "description", "amount", "status", "payment_entry"],
 	"DTMGP Audit Query": ["company", "query_date", "query_type", "severity", "subject", "assigned_to", "response_due_date", "status"],
 	"DTMGP Allocation": ["company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "status"],
@@ -18,19 +18,23 @@ RECORD_FIELDS = {
 	# Consumed by _validate_approval_limit below but had no CRUD surface anywhere --
 	# System Administration's Workflow Setup section is the entry point for it.
 	"DTMGP Approval Limit": ["company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"],
+	"DTMGP Finance Control Policy": ["company", "policy_type", "version", "status", "effective_from", "legal_authority", "reconciliation_frequency", "variance_tolerance", "voucher_print_format"],
+	"DTMGP Bank Signatory": ["company", "bank_account", "user", "signatory_role", "mandate_group", "valid_from", "valid_to", "status", "approval_reference"],
 }
 EDITABLE_FIELDS = {
-	"DTMGP Revenue Head": {"company", "revenue_code", "revenue_name", "legal_authority", "collection_frequency", "rate_type", "default_rate", "income_account", "valid_from", "valid_to", "disabled"},
-	"DTMGP Revenue Assessment": {"company", "revenue_head", "taxpayer_name", "taxpayer_id", "contact", "assessment_date", "due_date", "amount", "notes"},
-	"DTMGP Revenue Receipt": {"company", "assessment", "posting_date", "amount", "payment_channel", "bank_reference", "erpnext_payment_entry", "remarks"},
+	"DTMGP Revenue Head": {"company", "revenue_code", "revenue_name", "legal_authority", "collection_frequency", "rate_type", "default_rate", "income_account", "valid_from", "valid_to", "approval_status", "disabled"},
+	"DTMGP Revenue Assessment": {"company", "revenue_head", "taxpayer_name", "taxpayer_id", "contact", "assessment_date", "due_date", "amount", "enforcement_stage", "last_notice_date", "next_action_date", "enforcement_notes", "notes"},
+	"DTMGP Revenue Receipt": {"company", "assessment", "posting_date", "amount", "payment_channel", "payment_gateway", "gateway_transaction_id", "gateway_status", "bank_reference", "erpnext_payment_entry", "reconciliation_status", "remarks"},
 	"DTMGP Procurement Plan": {"company", "fiscal_year", "title", "requesting_department", "procurement_category", "procurement_method", "estimated_amount", "budget_account", "planned_start_date", "planned_end_date", "description"},
-	"DTMGP Procurement Case": {"company", "title", "procurement_plan", "material_request", "request_for_quotation", "estimated_amount", "bid_opening_date", "recommended_supplier", "evaluated_amount", "approval_reference", "purchase_order", "contract_end_date", "description"},
+	"DTMGP Procurement Case": {"company", "title", "procurement_plan", "material_request", "request_for_quotation", "estimated_amount", "applicable_threshold", "procurement_committee", "public_notice_url", "notice_publication_date", "bid_opening_date", "bid_opening_minutes", "bid_evidence", "evaluation_report", "recommended_supplier", "evaluated_amount", "approval_reference", "purchase_order", "contract_end_date", "description"},
 	"DTMGP Payment Request": {"company", "request_date", "requesting_department", "payee_type", "payee", "description", "amount", "expense_account", "cost_center", "procurement_case", "purchase_invoice", "approval_reference", "payment_entry", "justification"},
 	"DTMGP Audit Query": {"company", "query_date", "query_type", "severity", "reference_doctype", "reference_name", "subject", "finding", "recommendation", "assigned_to", "response_due_date", "management_response", "resolution"},
 	"DTMGP Allocation": {"company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "bank_reference", "distributions", "remarks"},
 	"DTMGP Contract": {"company", "title", "procurement_case", "contractor", "contract_value", "start_date", "end_date", "completion_certificate_reference", "milestones", "description"},
 	"DTMGP Contract Variation": {"company", "contract", "variation_type", "requested_date", "amount_change", "days_change", "description", "approval_reference"},
 	"DTMGP Approval Limit": {"company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"},
+	"DTMGP Finance Control Policy": {"company", "policy_type", "version", "status", "effective_from", "legal_authority", "chart_template", "reconciliation_frequency", "variance_tolerance", "voucher_print_format", "notes"},
+	"DTMGP Bank Signatory": {"company", "bank_account", "user", "signatory_role", "mandate_group", "valid_from", "valid_to", "status", "approval_reference"},
 }
 
 TRANSITIONS = {
@@ -380,6 +384,36 @@ def get_trial_balance(company=None, fiscal_year=None):
 		values, as_dict=True,
 	)
 	return {"rows": rows, "total_debit": sum(flt(row.debit) for row in rows), "total_credit": sum(flt(row.credit) for row in rows)}
+
+
+@frappe.whitelist()
+def get_receivables_payables(company=None):
+	"""Operational subledgers for DTMGP's non-invoice model. Receivables are lawful
+	revenue assessments; payables are approved/unpaid expenditure requests."""
+	require_finance_access()
+	companies = get_requested_companies(company)
+	receivables = frappe.get_all(
+		"DTMGP Revenue Assessment", filters={"company": ["in", companies], "docstatus": 1, "status": ["in", ["Unpaid", "Part Paid"]]},
+		fields=["name", "company", "taxpayer_name as party", "due_date", "amount", "amount_paid", "status"], order_by="due_date asc", limit_page_length=500,
+	)
+	for row in receivables:
+		row.outstanding = flt(row.amount) - flt(row.amount_paid)
+	payables = frappe.get_all(
+		"DTMGP Payment Request", filters={"company": ["in", companies], "status": ["in", ["Pending Approval", "Approved"]]},
+		fields=["name", "company", "payee as party", "request_date as due_date", "amount", "status", "payment_entry"], order_by="request_date asc", limit_page_length=500,
+	)
+	return {"receivables": receivables, "payables": payables}
+
+
+@frappe.whitelist()
+def get_banking_setup(company=None):
+	require_finance_access()
+	companies = get_requested_companies(company)
+	accounts = frappe.get_all("Bank Account", filters={"company": ["in", companies]}, fields=["name", "account_name", "bank", "company", "is_default", "is_company_account", "disabled"], order_by="account_name")
+	transactions = frappe.get_all("Bank Transaction", filters={"company": ["in", companies], "docstatus": 1}, fields=["name", "bank_account", "date", "deposit", "withdrawal", "status", "unallocated_amount"], order_by="date desc", limit_page_length=200)
+	signatories = frappe.get_all("DTMGP Bank Signatory", filters={"company": ["in", companies]}, fields=RECORD_FIELDS["DTMGP Bank Signatory"], order_by="modified desc")
+	formats = frappe.get_all("Print Format", filters={"doc_type": ["in", ["Journal Entry", "Payment Entry", "DTMGP Payment Request"]], "disabled": 0}, fields=["name", "doc_type", "standard"], order_by="doc_type, name")
+	return {"accounts": accounts, "transactions": transactions, "signatories": signatories, "voucher_print_formats": formats}
 
 
 @frappe.whitelist()

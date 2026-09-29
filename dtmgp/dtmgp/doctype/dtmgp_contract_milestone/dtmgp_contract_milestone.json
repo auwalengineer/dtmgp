@@ -1,13 +1,14 @@
 {
  "actions":[],"creation":"2026-09-21 00:00:00.000000","doctype":"DocType","editable_grid":1,"engine":"InnoDB",
- "field_order":["title","due_date","amount","status","certified_date","payment_request"],
+ "field_order":["title","due_date","amount","completion_percentage","status","certified_date","certified_by","certificate","payment_request","payment_entry"],
  "fields":[
   {"fieldname":"title","fieldtype":"Data","in_list_view":1,"label":"Milestone","reqd":1},
   {"fieldname":"due_date","fieldtype":"Date","in_list_view":1,"label":"Due Date"},
   {"fieldname":"amount","fieldtype":"Currency","in_list_view":1,"label":"Amount","non_negative":1,"reqd":1},
+  {"default":"0","fieldname":"completion_percentage","fieldtype":"Percent","label":"Completion %"},
   {"default":"Pending","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Pending\nCertified\nPaid","reqd":1},
-  {"fieldname":"certified_date","fieldtype":"Date","label":"Certified Date"},
-  {"fieldname":"payment_request","fieldtype":"Link","label":"Payment Request","options":"DTMGP Payment Request"}
+  {"fieldname":"certified_date","fieldtype":"Date","label":"Certified Date"},{"fieldname":"certified_by","fieldtype":"Link","label":"Certified By","options":"User"},{"fieldname":"certificate","fieldtype":"Attach","label":"Private Milestone Certificate"},
+  {"fieldname":"payment_request","fieldtype":"Link","label":"Payment Request","options":"DTMGP Payment Request"},{"fieldname":"payment_entry","fieldtype":"Link","label":"Payment Entry","options":"Payment Entry"}
  ],"index_web_pages_for_search":0,"istable":1,"links":[],"modified":"2026-09-21 00:00:00.000000","modified_by":"Administrator",
  "module":"dtmgp","name":"DTMGP Contract Milestone","owner":"Administrator","permissions":[],"sort_field":"modified","sort_order":"DESC","states":[]
 }

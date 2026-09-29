@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Landmark, Scale, Wallet, WalletCards } from "@lucide/vue";
 import { ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -7,7 +6,6 @@ import { apiRequest } from "@/services/api";
 import { useSessionStore } from "@/stores/session";
 
 import ItemTabs from "../shared/ItemTabs.vue";
-import PreviewCard from "../shared/PreviewCard.vue";
 import { money } from "./types";
 import type { AccountRow, GLEntryRow, JournalEntryRow, TrialBalanceRow } from "./types";
 
@@ -26,6 +24,8 @@ const accounts = ref<AccountRow[]>([]);
 const journalEntries = ref<JournalEntryRow[]>([]);
 const glEntries = ref<GLEntryRow[]>([]);
 const trialBalance = ref<{ rows: TrialBalanceRow[]; total_debit: number; total_credit: number } | null>(null);
+const ledgers = ref<{ receivables: Array<Record<string, string | number>>; payables: Array<Record<string, string | number>> }>({ receivables: [], payables: [] });
+const banking = ref<{ accounts: Array<Record<string, string | number>>; transactions: Array<Record<string, string | number>>; signatories: Array<Record<string, string | number>>; voucher_print_formats: Array<Record<string, string | number>> }>({ accounts: [], transactions: [], signatories: [], voucher_print_formats: [] });
 const trialBalanceFiscalYear = ref(props.fiscalYears[0] || "");
 const loaded = new Set<string>();
 
@@ -39,6 +39,8 @@ async function loadTab(item: string) {
     if (item === "chart-of-accounts") accounts.value = (await apiRequest<{ items: AccountRow[] }>(`/api/method/dtmgp.api.v1.finance.get_accounts_tree?${scopeQuery()}`)).items;
     else if (item === "journal-entries") journalEntries.value = (await apiRequest<{ items: JournalEntryRow[] }>(`/api/method/dtmgp.api.v1.finance.list_journal_entries?${scopeQuery()}`)).items;
     else if (item === "general-ledger") glEntries.value = (await apiRequest<{ items: GLEntryRow[] }>(`/api/method/dtmgp.api.v1.finance.list_gl_entries?${scopeQuery()}`)).items;
+    else if (["accounts-receivable", "accounts-payable"].includes(item)) ledgers.value = await apiRequest(`/api/method/dtmgp.api.v1.finance.get_receivables_payables?${scopeQuery()}`);
+    else if (item === "bank-reconciliation") banking.value = await apiRequest(`/api/method/dtmgp.api.v1.finance.get_banking_setup?${scopeQuery()}`);
     else if (item === "trial-balance") trialBalance.value = await apiRequest(`/api/method/dtmgp.api.v1.finance.get_trial_balance?${scopeQuery()}${trialBalanceFiscalYear.value ? `&fiscal_year=${encodeURIComponent(trialBalanceFiscalYear.value)}` : ""}`);
     loaded.add(item);
   } catch (reason) { error.value = reason instanceof Error ? reason.message : "Unable to load accounting records"; }
@@ -68,15 +70,16 @@ watch(trialBalanceFiscalYear, () => { loaded.delete("trial-balance"); loadTab("t
     </template>
 
     <template v-else-if="activeItem === 'accounts-receivable'">
-      <PreviewCard :icon="Wallet" title="Accounts receivable" body="A dedicated accounts-receivable ledger isn't available yet -- outstanding revenue assessments are visible under Revenue Performance in the meantime." />
+      <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Assessment</th><th>Ratepayer</th><th>Due</th><th>Assessed</th><th>Outstanding</th><th>Status</th></tr></thead><tbody><tr v-for="row in ledgers.receivables" :key="String(row.name)"><td>{{ row.name }}</td><td>{{ row.party }}</td><td>{{ row.due_date }}</td><td>{{ money(Number(row.amount)) }}</td><td>{{ money(Number(row.outstanding)) }}</td><td>{{ row.status }}</td></tr></tbody></table><p v-if="!ledgers.receivables.length" class="users-empty">No outstanding revenue assessments.</p></div>
     </template>
 
     <template v-else-if="activeItem === 'accounts-payable'">
-      <PreviewCard :icon="WalletCards" title="Accounts payable" body="A dedicated accounts-payable ledger isn't available yet -- pending payment requests are visible under Expenditure in the meantime." />
+      <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Request</th><th>Payee</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead><tbody><tr v-for="row in ledgers.payables" :key="String(row.name)"><td>{{ row.name }}</td><td>{{ row.party }}</td><td>{{ row.due_date }}</td><td>{{ money(Number(row.amount)) }}</td><td>{{ row.status }}</td></tr></tbody></table><p v-if="!ledgers.payables.length" class="users-empty">No approved or pending payment requests.</p></div>
     </template>
 
     <template v-else-if="activeItem === 'bank-reconciliation'">
-      <PreviewCard :icon="Landmark" title="Bank reconciliation" body="Bank reconciliation isn't available yet -- it depends on approved bank signatories and Bank Account setup (see docs/implementation-status.md's external production conditions)." />
+      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Bank accounts and mandates</h3></div><div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Account</th><th>Bank</th><th>Default</th><th>Status</th></tr></thead><tbody><tr v-for="row in banking.accounts" :key="String(row.name)"><td>{{ row.account_name }}</td><td>{{ row.bank }}</td><td>{{ row.is_default ? 'Yes' : 'No' }}</td><td>{{ row.disabled ? 'Disabled' : 'Active' }}</td></tr></tbody></table><p v-if="!banking.accounts.length" class="users-empty">No ERPNext bank accounts configured for this LGA.</p></div>
+      <div class="directory-toolbar"><h3 style="margin:0;flex:1">Reconciliation queue</h3></div><div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Date</th><th>Bank account</th><th>Deposit</th><th>Withdrawal</th><th>Unallocated</th><th>Status</th></tr></thead><tbody><tr v-for="row in banking.transactions" :key="String(row.name)"><td>{{ row.date }}</td><td>{{ row.bank_account }}</td><td>{{ money(Number(row.deposit)) }}</td><td>{{ money(Number(row.withdrawal)) }}</td><td>{{ money(Number(row.unallocated_amount)) }}</td><td>{{ row.status }}</td></tr></tbody></table><p v-if="!banking.transactions.length" class="users-empty">No submitted bank transactions awaiting reconciliation.</p></div>
     </template>
 
     <template v-else-if="activeItem === 'trial-balance'">

@@ -1,6 +1,6 @@
 {
  "actions": [], "autoname": "format:RVH-{revenue_code}-{#####}", "creation": "2026-09-16 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
- "field_order":["company","revenue_code","revenue_name","legal_authority","collection_frequency","rate_type","default_rate","income_account","valid_from","valid_to","disabled"],
+ "field_order":["company","revenue_code","revenue_name","legal_authority","collection_frequency","rate_type","default_rate","income_account","valid_from","valid_to","approval_status","approved_by","approved_on","disabled"],
  "fields":[
   {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
   {"fieldname":"revenue_code","fieldtype":"Data","in_list_view":1,"label":"Revenue Code","reqd":1},
@@ -11,6 +11,7 @@
   {"fieldname":"default_rate","fieldtype":"Currency","label":"Default Rate","non_negative":1},
   {"fieldname":"income_account","fieldtype":"Link","label":"ERPNext Income Account","options":"Account"},
   {"fieldname":"valid_from","fieldtype":"Date","label":"Valid From"},{"fieldname":"valid_to","fieldtype":"Date","label":"Valid To"},
+  {"default":"Draft","fieldname":"approval_status","fieldtype":"Select","in_list_view":1,"label":"Approval Status","options":"Draft\nPending Approval\nApproved\nRetired","reqd":1},{"fieldname":"approved_by","fieldtype":"Link","label":"Approved By","options":"User","read_only":1},{"fieldname":"approved_on","fieldtype":"Datetime","label":"Approved On","read_only":1},
   {"default":"0","fieldname":"disabled","fieldtype":"Check","label":"Disabled"}
  ],
  "index_web_pages_for_search":0,"links":[],"modified":"2026-09-16 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Revenue Head","naming_rule":"Expression","owner":"Administrator",

@@ -1,15 +1,17 @@
 {
  "actions":[],"autoname":"format:RR-{YYYY}-{#####}","creation":"2026-09-16 00:00:00.000000","doctype":"DocType","engine":"InnoDB","is_submittable":1,
- "field_order":["company","assessment","posting_date","amount","payment_channel","bank_reference","collected_by","erpnext_payment_entry","remarks"],
+ "field_order":["company","assessment","posting_date","amount","payment_channel","payment_gateway","gateway_transaction_id","gateway_status","bank_reference","collected_by","erpnext_payment_entry","reconciliation_status","reconciled_on","remarks"],
  "fields":[
   {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
   {"fieldname":"assessment","fieldtype":"Link","in_list_view":1,"label":"Revenue Assessment","options":"DTMGP Revenue Assessment","reqd":1},
   {"default":"Today","fieldname":"posting_date","fieldtype":"Date","in_list_view":1,"label":"Posting Date","reqd":1},
   {"fieldname":"amount","fieldtype":"Currency","in_list_view":1,"label":"Amount","non_negative":1,"reqd":1},
   {"fieldname":"payment_channel","fieldtype":"Select","label":"Payment Channel","options":"Bank Transfer\nPOS\nOnline\nBank Deposit\nCash","reqd":1},
+  {"fieldname":"payment_gateway","fieldtype":"Data","label":"Payment Gateway"},{"fieldname":"gateway_transaction_id","fieldtype":"Data","label":"Gateway Transaction ID"},{"default":"Not Applicable","fieldname":"gateway_status","fieldtype":"Select","label":"Gateway Status","options":"Not Applicable\nPending\nVerified\nFailed"},
   {"fieldname":"bank_reference","fieldtype":"Data","label":"Bank / Payment Reference","reqd":1},
   {"fieldname":"collected_by","fieldtype":"Link","label":"Recorded By","options":"User","read_only":1,"default":"__user"},
   {"fieldname":"erpnext_payment_entry","fieldtype":"Link","label":"ERPNext Payment Entry","options":"Payment Entry"},
+  {"default":"Unreconciled","fieldname":"reconciliation_status","fieldtype":"Select","in_list_view":1,"label":"Reconciliation Status","options":"Unreconciled\nMatched\nException","reqd":1},{"fieldname":"reconciled_on","fieldtype":"Datetime","label":"Reconciled On","read_only":1},
   {"fieldname":"remarks","fieldtype":"Small Text","label":"Remarks"}
  ],"index_web_pages_for_search":0,"links":[],"modified":"2026-09-16 00:00:00.000000","modified_by":"Administrator","module":"dtmgp","name":"DTMGP Revenue Receipt","naming_rule":"Expression","owner":"Administrator",
  "permissions":[

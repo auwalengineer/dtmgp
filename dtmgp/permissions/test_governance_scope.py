@@ -25,6 +25,8 @@ class TestGovernanceScope(FrappeTestCase):
 		frappe.set_user("Administrator")
 		seed_security_setup()
 		seed_governance_catalogue()
+		for doctype in ("DTMGP Statutory Return Type", "DTMGP Compliance Requirement"):
+			frappe.db.set_value(doctype, {}, {"approval_status": "Approved", "legal_authority": "Test authority", "effective_from": "2026-01-01"})
 		self.makurdi = next(lga.company_name for lga in BENUE_LGAS if lga.name == "Makurdi")
 		self.gboko = next(lga.company_name for lga in BENUE_LGAS if lga.name == "Gboko")
 		self.secretary = self._make_user("LGA Secretary", self.makurdi)

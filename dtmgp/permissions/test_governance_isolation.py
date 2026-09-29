@@ -143,18 +143,18 @@ class TestGovernanceCrossLGAIsolation(FrappeTestCase):
 		}).insert(ignore_permissions=True)
 
 	def _make_statutory_return(self, company):
-		return_type = frappe.db.exists("DTMGP Statutory Return Type", {"disabled": 0})
+		return_type = frappe.db.exists("DTMGP Statutory Return Type", {"disabled": 0, "approval_status": "Approved"})
 		if not return_type:
-			return_type = frappe.get_doc({"doctype": "DTMGP Statutory Return Type", "return_name": f"Isolation Test Return {uuid4().hex[:6]}", "frequency": "Annually"}).insert(ignore_permissions=True).name
+			return_type = frappe.get_doc({"doctype": "DTMGP Statutory Return Type", "return_name": f"Isolation Test Return {uuid4().hex[:6]}", "frequency": "Annually", "approval_status": "Approved", "legal_authority": "Test authority", "effective_from": "2026-01-01"}).insert(ignore_permissions=True).name
 		return frappe.get_doc({
 			"doctype": "DTMGP Statutory Return", "company": company, "return_type": return_type,
 			"period": "2026-Q3", "due_date": "2026-09-30",
 		}).insert(ignore_permissions=True)
 
 	def _make_compliance_submission(self, company):
-		requirement = frappe.db.exists("DTMGP Compliance Requirement", {"disabled": 0})
+		requirement = frappe.db.exists("DTMGP Compliance Requirement", {"disabled": 0, "approval_status": "Approved"})
 		if not requirement:
-			requirement = frappe.get_doc({"doctype": "DTMGP Compliance Requirement", "requirement_name": f"Isolation Test Requirement {uuid4().hex[:6]}", "frequency": "Annually"}).insert(ignore_permissions=True).name
+			requirement = frappe.get_doc({"doctype": "DTMGP Compliance Requirement", "requirement_name": f"Isolation Test Requirement {uuid4().hex[:6]}", "frequency": "Annually", "approval_status": "Approved", "legal_authority": "Test authority", "effective_from": "2026-01-01"}).insert(ignore_permissions=True).name
 		return frappe.get_doc({
 			"doctype": "DTMGP Compliance Submission", "company": company, "requirement": requirement,
 			"period": "2026-Q3", "due_date": "2026-09-30",

@@ -41,6 +41,7 @@ class TestFinanceScope(FrappeTestCase):
 			"company": self.makurdi, "revenue_code": f"MKT-{uuid4().hex[:6]}",
 			"revenue_name": "Market Stall Fee", "legal_authority": "Approved council rate",
 			"collection_frequency": "Annually", "rate_type": "Fixed", "default_rate": 5000,
+			"valid_from": "2026-01-01", "approval_status": "Approved",
 		})
 		assessment = save_record("DTMGP Revenue Assessment", {
 			"company": self.makurdi, "revenue_head": head["name"], "taxpayer_name": "Test Payer",
@@ -163,7 +164,8 @@ class TestFinanceScope(FrappeTestCase):
 		})
 		case = save_record("DTMGP Procurement Case", {
 			"company": self.makurdi, "title": f"Case {uuid4().hex[:6]}", "procurement_plan": plan["name"],
-			"estimated_amount": 500000, "description": "Test",
+			"estimated_amount": 500000, "applicable_threshold": "Test threshold",
+			"procurement_committee": "Test committee minute", "description": "Test",
 		})
 
 		contract = save_record("DTMGP Contract", {

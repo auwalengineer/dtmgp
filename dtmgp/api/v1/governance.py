@@ -187,8 +187,8 @@ def get_form_options(company=None):
 		"users": frappe.get_all("User", filters={"enabled": 1, "user_type": "System User"}, fields=["name", "full_name"], order_by="full_name"),
 		"meetings": frappe.get_all("DTMGP Meeting", filters={"company": selected}, fields=["name", "title", "meeting_date"], order_by="meeting_date desc", page_length=50),
 		"resolutions": frappe.get_all("DTMGP Resolution", filters={"company": selected, "status": ["in", ["Proposed", "Adopted"]]}, fields=["name", "title"], order_by="modified desc", page_length=50),
-		"return_types": frappe.get_all("DTMGP Statutory Return Type", filters={"disabled": 0}, fields=["name", "return_name", "frequency"], order_by="return_name"),
-		"compliance_requirements": frappe.get_all("DTMGP Compliance Requirement", filters={"disabled": 0}, fields=["name", "requirement_name", "frequency"], order_by="requirement_name"),
+		"return_types": frappe.get_all("DTMGP Statutory Return Type", filters={"disabled": 0, "approval_status": "Approved"}, fields=["name", "return_name", "frequency", "catalogue_version", "legal_authority"], order_by="return_name"),
+		"compliance_requirements": frappe.get_all("DTMGP Compliance Requirement", filters={"disabled": 0, "approval_status": "Approved"}, fields=["name", "requirement_name", "frequency", "catalogue_version", "legal_authority"], order_by="requirement_name"),
 		"roles": frappe.get_all("Role", filters={"name": ["in", list(PLATFORM_ROLES)]}, pluck="name", order_by="name"),
 	}
 

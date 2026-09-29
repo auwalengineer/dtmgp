@@ -1,10 +1,11 @@
 {
  "actions": [], "autoname": "field:return_name", "creation": "2026-09-21 00:00:00.000000", "doctype":"DocType", "engine":"InnoDB",
- "field_order":["return_name","statutory_body","frequency","description","disabled"],
+ "field_order":["return_name","statutory_body","frequency","legal_authority","catalogue_version","approval_status","effective_from","approved_by","approved_on","description","disabled"],
  "fields":[
   {"fieldname":"return_name","fieldtype":"Data","in_list_view":1,"label":"Return Name","reqd":1,"unique":1},
   {"fieldname":"statutory_body","fieldtype":"Data","in_list_view":1,"label":"Statutory Body"},
   {"default":"Annually","fieldname":"frequency","fieldtype":"Select","in_list_view":1,"label":"Frequency","options":"Monthly\nQuarterly\nAnnually","reqd":1},
+  {"fieldname":"legal_authority","fieldtype":"Small Text","label":"Legal Authority"},{"default":"Draft","fieldname":"catalogue_version","fieldtype":"Data","label":"Catalogue Version"},{"default":"Draft","fieldname":"approval_status","fieldtype":"Select","in_list_view":1,"label":"Approval Status","options":"Draft\nPending Approval\nApproved\nRetired","reqd":1},{"fieldname":"effective_from","fieldtype":"Date","label":"Effective From"},{"fieldname":"approved_by","fieldtype":"Link","label":"Approved By","options":"User","read_only":1},{"fieldname":"approved_on","fieldtype":"Datetime","label":"Approved On","read_only":1},
   {"fieldname":"description","fieldtype":"Small Text","label":"Description"},
   {"default":"0","fieldname":"disabled","fieldtype":"Check","label":"Disabled"}
  ],

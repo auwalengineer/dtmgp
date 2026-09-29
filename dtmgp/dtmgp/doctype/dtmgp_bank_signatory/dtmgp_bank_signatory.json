@@ -1,0 +1,19 @@
+{
+ "actions":[],"autoname":"format:SIG-{bank_account}-{user}","doctype":"DocType","engine":"InnoDB",
+ "field_order":["company","bank_account","user","signatory_role","mandate_group","valid_from","valid_to","status","approval_reference"],
+ "fields":[
+  {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
+  {"fieldname":"bank_account","fieldtype":"Link","in_list_view":1,"label":"Bank Account","options":"Bank Account","reqd":1},
+  {"fieldname":"user","fieldtype":"Link","in_list_view":1,"label":"Signatory","options":"User","reqd":1},
+  {"fieldname":"signatory_role","fieldtype":"Select","label":"Role","options":"Primary\nJoint\nAuthorizer\nReviewer","reqd":1},
+  {"fieldname":"mandate_group","fieldtype":"Data","label":"Mandate Group","reqd":1},
+  {"fieldname":"valid_from","fieldtype":"Date","label":"Valid From","reqd":1},
+  {"fieldname":"valid_to","fieldtype":"Date","label":"Valid To"},
+  {"default":"Pending Approval","fieldname":"status","fieldtype":"Select","in_list_view":1,"label":"Status","options":"Pending Approval\nActive\nSuspended\nExpired","reqd":1},
+  {"fieldname":"approval_reference","fieldtype":"Data","label":"Approval Reference"}
+ ],"index_web_pages_for_search":0,"module":"dtmgp","name":"DTMGP Bank Signatory","naming_rule":"Expression","permissions":[
+  {"create":1,"delete":1,"read":1,"report":1,"role":"State Administrator","write":1},
+  {"create":1,"read":1,"report":1,"role":"Treasurer","write":1},
+  {"read":1,"report":1,"role":"Internal Auditor"}
+ ],"sort_field":"modified","sort_order":"DESC","track_changes":1
+}

@@ -100,7 +100,14 @@ class DTMGPStatutoryReturnType(Document):
 	dtmgp.setup.governance.seed_governance_catalogue; the authoritative catalogue is
 	an external production condition, same as Finance's revenue-head catalogue."""
 
-	pass
+	def validate(self):
+		require_roles({"System Manager", "State Administrator"}, "Only state administration may manage the statutory catalogue")
+		if self.approval_status == "Approved":
+			if not self.legal_authority or not self.effective_from:
+				frappe.throw("Legal Authority and Effective From are required before approval")
+			if not self.approved_by:
+				self.approved_by = frappe.session.user
+				self.approved_on = frappe.utils.now_datetime()
 
 
 class DTMGPStatutoryReturn(ScopedGovernanceDocument):
@@ -108,8 +115,10 @@ class DTMGPStatutoryReturn(ScopedGovernanceDocument):
 		lga_dated_autoname(self, "RET", "due_date")
 
 	def validate_record(self):
-		if self.return_type and frappe.db.get_value("DTMGP Statutory Return Type", self.return_type, "disabled"):
-			frappe.throw("Return Type is disabled")
+		if self.return_type:
+			status = frappe.db.get_value("DTMGP Statutory Return Type", self.return_type, ["disabled", "approval_status"], as_dict=True)
+			if status.disabled or status.approval_status != "Approved":
+				frappe.throw("Return Type must be approved and active")
 		if self.status == "Submitted" and not self.submitted_date:
 			self.submitted_date = frappe.utils.nowdate()
 
@@ -117,7 +126,14 @@ class DTMGPStatutoryReturn(ScopedGovernanceDocument):
 class DTMGPComplianceRequirement(Document):
 	"""State-managed reference catalogue, not LGA-scoped — see DTMGPStatutoryReturnType."""
 
-	pass
+	def validate(self):
+		require_roles({"System Manager", "State Administrator"}, "Only state administration may manage the compliance catalogue")
+		if self.approval_status == "Approved":
+			if not self.legal_authority or not self.effective_from:
+				frappe.throw("Legal Authority and Effective From are required before approval")
+			if not self.approved_by:
+				self.approved_by = frappe.session.user
+				self.approved_on = frappe.utils.now_datetime()
 
 
 class DTMGPComplianceSubmission(ScopedGovernanceDocument):
@@ -125,8 +141,10 @@ class DTMGPComplianceSubmission(ScopedGovernanceDocument):
 		lga_dated_autoname(self, "CMP", "due_date")
 
 	def validate_record(self):
-		if self.requirement and frappe.db.get_value("DTMGP Compliance Requirement", self.requirement, "disabled"):
-			frappe.throw("Compliance Requirement is disabled")
+		if self.requirement:
+			status = frappe.db.get_value("DTMGP Compliance Requirement", self.requirement, ["disabled", "approval_status"], as_dict=True)
+			if status.disabled or status.approval_status != "Approved":
+				frappe.throw("Compliance Requirement must be approved and active")
 		if self.status == "Submitted" and not self.submitted_date:
 			self.submitted_date = frappe.utils.nowdate()
 
