@@ -71,6 +71,20 @@ FIELD_ALLOWLISTS = {
 }
 
 
+def _frontend_label(field):
+	if field.fieldname == "company":
+		return "LGA"
+	if field.fieldname == "new_company":
+		return "New LGA"
+	if field.fieldname == "company_email":
+		return "Work Email"
+	return field.label
+
+
+def _section_label(label):
+	return "LGA Details" if label == "Company Details" else label
+
+
 def _require_domain_access(doctype):
 	if doctype not in ALLOWED_DOCTYPES:
 		frappe.throw("This record type is not available in the frontend", frappe.PermissionError)
@@ -103,9 +117,13 @@ def _serialize_fields(doc, meta):
 	sections.append(section)
 	for field in meta.fields:
 		if field.fieldtype in {"Section Break", "Tab Break"}:
-			if field.label and section["fields"]:
-				section = {"label": field.label, "fields": []}
-				sections.append(section)
+			if field.label:
+				label = _section_label(field.label)
+				if section["fields"]:
+					section = {"label": label, "fields": []}
+					sections.append(section)
+				else:
+					section["label"] = label
 			continue
 		if field.fieldtype in SKIPPED_FIELDTYPES or field.hidden or cint(field.permlevel) > 0:
 			continue
@@ -122,15 +140,15 @@ def _serialize_fields(doc, meta):
 						continue
 					child_value = _format_value(child_field, child.get(child_field.fieldname))
 					if child_value is not None:
-						row.append({"label": child_field.label, "value": child_value, "type": child_field.fieldtype})
+						row.append({"label": _frontend_label(child_field), "value": child_value, "type": child_field.fieldtype})
 				if row:
 					rows.append(row)
 			if rows:
-				section["fields"].append({"label": field.label, "value": rows, "type": "Table"})
+				section["fields"].append({"label": _frontend_label(field), "value": rows, "type": "Table"})
 			continue
 		formatted = _format_value(field, value)
 		if formatted is not None:
-			section["fields"].append({"label": field.label, "value": formatted, "type": field.fieldtype})
+			section["fields"].append({"label": _frontend_label(field), "value": formatted, "type": field.fieldtype})
 	return [item for item in sections if item["fields"]]
 
 

@@ -30,6 +30,9 @@ class TestRecordDetails(FrappeTestCase):
 			for field in section["fields"]
 		}
 		self.assertIn("Full Name", fieldnames)
+		self.assertIn("LGA", fieldnames)
+		self.assertNotIn("Company", fieldnames)
 		self.assertNotIn("Date of Birth", fieldnames)
 		self.assertNotIn("Bank Account No", fieldnames)
 		self.assertNotIn("Personal Email", fieldnames)
+		self.assertTrue(any(section["label"] == "LGA Details" for section in _serialize_fields(doc, frappe.get_meta("Employee"))))

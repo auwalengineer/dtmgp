@@ -81,7 +81,7 @@ watch(() => session.activeLga, loadOverview, { immediate: true });
 
     <div class="overview-grid">
       <section class="panel access-summary">
-        <header class="panel-header"><div><h2>Your access boundary</h2><p>Calculated by the server from your roles and Company permissions</p></div></header>
+        <header class="panel-header"><div><h2>Your access boundary</h2><p>Calculated by the server from your roles and LGA permissions</p></div></header>
         <div class="access-summary-body">
           <ShieldCheck :size="30" />
           <div><strong>{{ overview.scope }}</strong><p>{{ overview.is_statewide ? "State role recognized. Metrics remain filtered by the active LGA selection." : "Your account is locked to its assigned Local Government Area." }}</p></div>

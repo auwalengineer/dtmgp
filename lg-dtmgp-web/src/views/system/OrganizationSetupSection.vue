@@ -87,7 +87,7 @@ async function saveForm() {
   <template v-else>
     <template v-if="activeItem === 'lgas'">
       <div class="directory-toolbar"><h3 style="margin:0;flex:1">Local Government Areas</h3></div>
-      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>LGA</th><th>Code</th><th>Company</th><th>Status</th><th v-if="session.canManageSystemConfig"></th></tr></thead><tbody><tr v-for="lga in lgas" :key="lga.name"><td><strong>{{ lga.lga_name }}</strong></td><td>{{ lga.lga_code }}</td><td>{{ lga.company }}</td><td><span class="table-status" :class="lga.enabled ? 'success' : 'neutral'">{{ lga.enabled ? "Enabled" : "Disabled" }}</span></td><td v-if="session.canManageSystemConfig"><button class="secondary-action compact-action" @click="toggleLga(lga)">{{ lga.enabled ? "Disable" : "Enable" }}</button></td></tr></tbody></table></div>
+      <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>LGA</th><th>Code</th><th>LGA record</th><th>Status</th><th v-if="session.canManageSystemConfig"></th></tr></thead><tbody><tr v-for="lga in lgas" :key="lga.name"><td><strong>{{ lga.lga_name }}</strong></td><td>{{ lga.lga_code }}</td><td>{{ lga.company }}</td><td><span class="table-status" :class="lga.enabled ? 'success' : 'neutral'">{{ lga.enabled ? "Enabled" : "Disabled" }}</span></td><td v-if="session.canManageSystemConfig"><button class="secondary-action compact-action" @click="toggleLga(lga)">{{ lga.enabled ? "Disable" : "Enable" }}</button></td></tr></tbody></table></div>
     </template>
 
     <template v-else-if="activeItem === 'departments-units'">
