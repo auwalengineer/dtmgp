@@ -10,6 +10,7 @@ from dtmgp.api.v1.hr import (
 	get_attendance_summary,
 	get_employee_separation,
 	get_establishment_report,
+	get_staffing_plan,
 	get_hr_reports,
 	get_payroll_overview,
 	get_retirement_forecast,
@@ -95,6 +96,13 @@ class TestHRExtensions(FrappeTestCase):
 		self.assertEqual(position["current_count"], 1)
 		self.assertEqual(position["number_of_positions"], 3)
 		self.assertEqual(position["position_status"], "Partially Filled")
+
+		detail = get_staffing_plan(created["name"])
+		self.assertEqual(detail["company"], self.makurdi)
+		self.assertNotIn("owner", detail)  # a curated field set, not doc.as_dict()
+		plan_position = next(p for p in detail["positions"] if p["designation"] == designation)
+		self.assertEqual(plan_position["number_of_positions"], 3)
+		self.assertEqual(plan_position["current_count"], 1)
 
 	def test_staffing_plan_is_denied_across_lga(self):
 		frappe.set_user(self.hr_officer.name)

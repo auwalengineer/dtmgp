@@ -123,7 +123,26 @@ def get_staffing_plan(name):
 	require_hr_access()
 	doc = frappe.get_doc("Staffing Plan", name)
 	_scope_guard(doc)
-	return doc.as_dict()
+	return {
+		"name": doc.name,
+		"company": doc.company,
+		"department": doc.department,
+		"from_date": doc.from_date,
+		"to_date": doc.to_date,
+		"docstatus": doc.docstatus,
+		"total_estimated_budget": doc.total_estimated_budget,
+		"positions": [
+			{
+				"designation": row.designation,
+				"number_of_positions": row.number_of_positions,
+				"current_count": row.current_count,
+				"vacancies": row.vacancies,
+				"estimated_cost_per_position": row.estimated_cost_per_position,
+				"total_estimated_cost": row.total_estimated_cost,
+			}
+			for row in doc.staffing_details
+		],
+	}
 
 
 @frappe.whitelist(methods=["POST"])
