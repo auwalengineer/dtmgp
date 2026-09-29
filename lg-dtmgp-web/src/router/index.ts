@@ -14,6 +14,11 @@ import GovernanceView from "@/views/GovernanceView.vue";
 import ProjectsView from "@/views/ProjectsView.vue";
 import TraditionalAffairsView from "@/views/TraditionalAffairsView.vue";
 import AnalyticsView from "@/views/AnalyticsView.vue";
+import MyProfileView from "@/views/global/MyProfileView.vue";
+import MyTasksView from "@/views/global/MyTasksView.vue";
+import MyApprovalsView from "@/views/global/MyApprovalsView.vue";
+import RecentlyViewedView from "@/views/global/RecentlyViewedView.vue";
+import HelpSupportView from "@/views/global/HelpSupportView.vue";
 
 export const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -35,6 +40,11 @@ export const router = createRouter({
     { path: "/workspace/finance/:section/:item?", name: "finance-workspace", component: FinanceWorkspaceView, meta: { title: "Finance, Revenue & Procurement", requiresFinanceAccess: true } },
     { path: "/workspace/projects/:section/:item?", name: "projects-workspace", component: ProjectsView, meta: { title: "Projects, Assets & Field Monitoring", requiresProjectsAccess: true } },
     { path: "/workspace/analytics/:section/:item?", name: "analytics-workspace", component: AnalyticsView, meta: { title: "Executive Dashboard & Analytics", requiresAnalyticsAccess: true } },
+    { path: "/workspace/global/my-tasks", name: "my-tasks", component: MyTasksView, meta: { title: "My Tasks" } },
+    { path: "/workspace/global/my-approvals", name: "my-approvals", component: MyApprovalsView, meta: { title: "My Approvals" } },
+    { path: "/workspace/global/recently-viewed", name: "recently-viewed", component: RecentlyViewedView, meta: { title: "Recently Viewed" } },
+    { path: "/workspace/global/help-support", name: "help-support", component: HelpSupportView, meta: { title: "Help & Support" } },
+    { path: "/workspace/global/my-profile", name: "my-profile", component: MyProfileView, meta: { title: "My Profile" } },
     { path: "/workspace/:domain/:section?/:item?", name: "workspace", component: WorkspaceView },
     {
       path: "/:module(people)",

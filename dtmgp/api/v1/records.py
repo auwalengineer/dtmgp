@@ -152,15 +152,19 @@ def _serialize_fields(doc, meta):
 	return [item for item in sections if item["fields"]]
 
 
-@frappe.whitelist(methods=["GET"])
-def get_record(doctype, name):
+def _require_record_access(doctype, name):
 	_require_domain_access(doctype)
 	doc = frappe.get_doc(doctype, name)
 	if not frappe.has_permission(doctype, "read", doc=doc):
 		frappe.throw("You are not permitted to view this record", frappe.PermissionError)
 	if doc.meta.has_field("company") and doc.get("company") and doc.get("company") not in get_allowed_companies():
 		frappe.throw("Record is outside your permitted scope", frappe.PermissionError)
+	return doc
 
+
+@frappe.whitelist(methods=["GET"])
+def get_record(doctype, name):
+	doc = _require_record_access(doctype, name)
 	title_field = doc.meta.title_field
 	title = doc.get(title_field) if title_field else None
 	return {
@@ -172,3 +176,25 @@ def get_record(doctype, name):
 		"modified": format_datetime(doc.modified),
 		"sections": _serialize_fields(doc, doc.meta),
 	}
+
+
+@frappe.whitelist(methods=["GET"])
+def get_record_timeline(doctype, name):
+	"""A record's own DTMGP Audit Event history, for the RecordDetailDrawer's Timeline
+	section. Read permission on DTMGP Audit Event itself is restricted to a handful of
+	audit roles (State Administrator/Auditor, Internal Auditor) -- far narrower than
+	who can legitimately view a record's own detail. _require_record_access above
+	already proves the caller can read *this specific record* (domain gate +
+	has_permission + company scope, identical to get_record); ignore_permissions=True
+	is deliberate here, scoped tightly to that one already-authorized record's own
+	events (reference_doctype/reference_name), not an open query over the doctype."""
+	_require_record_access(doctype, name)
+	events = frappe.get_all(
+		"DTMGP Audit Event",
+		filters={"reference_doctype": doctype, "reference_name": name},
+		fields=["name", "occurred_at", "event_type", "outcome", "actor", "summary"],
+		order_by="occurred_at desc",
+		limit_page_length=100,
+		ignore_permissions=True,
+	)
+	return {"items": events}

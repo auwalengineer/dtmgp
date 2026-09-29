@@ -4,6 +4,8 @@ import { computed, nextTick, ref, watch } from "vue";
 
 import { closeRecordDetails, recordDetailState, type DetailField } from "@/services/recordDetails";
 
+import RecordTimeline from "./workflow/RecordTimeline.vue";
+
 const closeButton = ref<HTMLButtonElement>();
 const titleId = "record-detail-title";
 const fields = computed(() => recordDetailState.record?.sections.reduce((total, section) => total + section.fields.length, 0) || 0);
@@ -58,6 +60,10 @@ function displayValue(field: DetailField) {
                 </dl>
               </section>
               <p v-if="!fields" class="record-detail-state">No displayable details are available for this record.</p>
+              <section class="record-detail-section">
+                <h3>History</h3>
+                <RecordTimeline :doctype="recordDetailState.record.doctype" :name="recordDetailState.record.name" />
+              </section>
             </template>
           </div>
         </aside>

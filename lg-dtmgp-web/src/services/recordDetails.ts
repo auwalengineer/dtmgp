@@ -1,6 +1,7 @@
 import { reactive } from "vue";
 
 import { apiRequest } from "./api";
+import { recordRecentlyViewed } from "./recentlyViewed";
 
 export interface RecordReference { doctype: string; name: string; }
 export interface DetailField { label: string; type: string; value: string | number | boolean | DetailField[][]; }
@@ -25,7 +26,10 @@ export async function openRecordDetails(reference: RecordReference) {
   try {
     const query = new URLSearchParams({ doctype: reference.doctype, name: reference.name });
     const record = await apiRequest<RecordDetails>(`/api/method/dtmgp.api.v1.records.get_record?${query}`);
-    if (currentRequest === requestNumber) recordDetailState.record = record;
+    if (currentRequest === requestNumber) {
+      recordDetailState.record = record;
+      recordRecentlyViewed({ doctype: record.doctype, name: record.name, title: record.title });
+    }
   } catch (error) {
     if (currentRequest === requestNumber) recordDetailState.error = error instanceof Error ? error.message : "Unable to load this record";
   } finally {
