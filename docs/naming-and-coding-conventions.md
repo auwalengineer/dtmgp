@@ -94,14 +94,16 @@ User-facing identifiers follow `{TYPE}-{LGA_CODE}-{YEAR}-{SEQUENCE}`.
 
 ## API conventions
 
-- Public application endpoints begin with `/api/v1/lg-dtmgp/`.
-- Resource paths use plural kebab-case nouns: `/council-resolutions`.
-- Commands use explicit action subpaths when they are not CRUD: `/council-resolutions/{id}/approve`.
-- JSON fields use snake case to match Frappe fields.
-- Dates use `YYYY-MM-DD`; datetimes use ISO 8601 with timezone; money uses decimal strings plus currency.
-- Lists use `page`, `page_size`, allowlisted `sort`, and allowlisted filters. Maximum page size is enforced server-side.
-- Errors use stable machine codes and safe user messages; validation errors identify fields without leaking restricted values.
-- Breaking contracts require a new API version. Additive fields remain backward compatible.
+**This section describes the convention actually implemented, reconciled 2026-09-29.** The original Stage 0 design below called for a REST-resource namespace (`/api/v1/lg-dtmgp/council-resolutions`); that was never built. Every shipped endpoint instead uses Frappe's native RPC-style whitelist mechanism, and the convention below documents that reality rather than the unbuilt original.
+
+- Endpoints are Python functions decorated `@frappe.whitelist()` (`methods=["POST"]` for writes) in `dtmgp/api/v1/<module>.py`, called from the frontend as `/api/method/dtmgp.api.v1.<module>.<function_name>` (e.g. `/api/method/dtmgp.api.v1.finance.list_records`). There is no separate REST resource path or action-subpath convention — the function name itself is the verb (`list_x`, `save_x`, `transition_x`, `get_x_report`).
+- Every request carries the same-origin Frappe session cookie; POST bodies are JSON, sent as `application/json` with the CSRF token in an `X-Frappe-CSRF-Token` header (`lg-dtmgp-web/src/services/api.ts`'s `apiRequest`).
+- JSON fields use snake_case to match the underlying Frappe fields.
+- **List endpoints**: the standard envelope is `{"items": [...], "total": N, "page": N, "page_size": N}`, e.g. `dtmgp.api.v1.finance.list_records`, `dtmgp.api.v1.projects.list_projects`. Endpoints over genuinely small, bounded reference/lookup sets (role lists, LGA pickers, designation lists) intentionally return a bare list instead — pagination would be pure overhead for a result set that's always under a few hundred rows and never grows per-record. A handful of list endpoints (mostly in `finance.py`, e.g. `list_allocations`, `get_contract_milestones`) still return `{"items": [...]}` without `total`/`page`/`page_size` for historical reasons rather than a small-bounded-set decision — this is tracked as known debt, not the intended convention; see `docs/implementation-status.md`'s FND-005/API-contract rows.
+- **Save/write endpoints**: return at minimum `{"name": ..., "status": ...}` (workflow-state doctypes) or `{"name": ..., "docstatus": ...}` (submittable doctypes) reflecting the row as saved; a handful of transition-only endpoints return additional domain-specific fields (e.g. `set_contractor_hold` also returns `on_hold`). Single-record "get" endpoints return a hand-curated field subset, never a raw `doc.as_dict()` — that would leak internal Frappe metadata (owner, idx, child-row parent/parenttype/parentfield) the frontend has no use for.
+- Dates use `YYYY-MM-DD`; datetimes use Frappe's native `YYYY-MM-DD HH:MM:SS` (system timezone, no explicit offset — same as every other Frappe/ERPNext datetime in this stack); money is a plain number in the LGA's base currency, no decimal-string/currency-pair encoding.
+- **Errors**: every scope/role/LGA-boundary violation raises `frappe.throw(message, frappe.PermissionError)` — this is 100% consistent across the app (206 `frappe.throw()` call sites audited; every explicit-class throw outside two call sites is `PermissionError`). Business-rule violations use a bare `frappe.throw(message)`, which defaults to `ValidationError`. There is no machine-readable error-code field (`error_code` or similar) today — the frontend's uniform `catch (reason) { error.value = reason instanceof Error ? reason.message : "..." }` pattern (90/90 call sites) displays the raw message string and does not branch on HTTP status or exception class. Adding one is a deliberate future feature (e.g. to show a distinct "access denied" panel vs. a form-validation toast), not a bug fix — do not invent error codes ad hoc.
+- Breaking a function's parameters or return shape requires a coordinated change across the calling frontend in the same commit — there is no API versioning scheme beyond the `v1` module path, since this is a same-origin app talking to its own dedicated backend, not a published third-party API.
 
 ## Git, commits, and releases
 

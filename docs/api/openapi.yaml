@@ -1,0 +1,4397 @@
+openapi: 3.0.3
+info:
+  title: LG-DTMGP API
+  version: v1
+  description: Auto-generated from dtmgp/api/v1/*.py's @frappe.whitelist() functions
+    by dtmgp/setup/generate_api_docs.py -- do not hand-edit this file, regenerate
+    it instead. Every request is same-origin, cookie-authenticated (Frappe session
+    cookie) with an X-Frappe-CSRF-Token header on writes; there is no separate API-key
+    auth scheme for this application. See docs/naming-and-coding-conventions.md's
+    "API conventions" section for the response-envelope, pagination and error conventions
+    this reflects.
+servers:
+- url: /
+  description: Same-origin -- the Vue app and this API are served from the same Frappe
+    site.
+paths:
+  /api/method/dtmgp.api.v1.administration.get_dashboard:
+    get:
+      tags:
+      - administration
+      summary: get_dashboard (administration)
+      operationId: administration.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': &id001
+          description: AuthenticationError -- no session (Guest) or the session's
+            user has been disabled (frappe.ValidationError, HTTP 417, is thrown instead
+            for an already-established session's user being disabled mid-session --
+            see docs/implementation-status.md's FND-008 row).
+        '403': &id002
+          description: PermissionError -- authenticated, but the caller's role or
+            LGA scope does not permit this request. Every scope/role/company-boundary
+            violation in dtmgp uses this class; see docs/naming-and-coding-conventions.md's
+            API conventions section.
+        '417': &id003
+          description: ValidationError (Frappe's default for a bare frappe.throw(message))
+            -- a business-rule violation, e.g. an invalid status transition or a required
+            cross-referenced field.
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.administration.get_document_numbering_reference:
+    get:
+      tags:
+      - administration
+      summary: get_document_numbering_reference (administration)
+      operationId: administration.get_document_numbering_reference
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.administration.get_system_health:
+    get:
+      tags:
+      - administration
+      summary: get_system_health (administration)
+      operationId: administration.get_system_health
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.administration.list_audit_events:
+    get:
+      tags:
+      - administration
+      summary: event_type accepts a comma-separated list (e.g. Security & Audit's
+        Permission
+      operationId: administration.list_audit_events
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: event_type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: outcome
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.administration.list_lga_access:
+    get:
+      tags:
+      - administration
+      summary: Access register grouping Company User Permission grants by LGA -- a
+        review
+      operationId: administration.list_lga_access
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.administration.list_lga_profiles:
+    get:
+      tags:
+      - administration
+      summary: Statewide LGA directory. LGA Profile already grants LGA Administrator
+      operationId: administration.list_lga_profiles
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.administration.list_login_history:
+    get:
+      tags:
+      - administration
+      summary: Activity Log has no company field of its own; company=None (the default
+        for a
+      operationId: administration.list_login_history
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.administration.list_platform_roles:
+    get:
+      tags:
+      - administration
+      summary: Read-only register of platform roles with how many in-scope users hold
+        each.
+      operationId: administration.list_platform_roles
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.administration.list_reference_records:
+    get:
+      tags:
+      - administration
+      summary: list_reference_records (administration)
+      operationId: administration.list_reference_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: doctype
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.administration.list_role_profiles:
+    get:
+      tags:
+      - administration
+      summary: Read-only register of Role Profiles, seeded 1:1 with PLATFORM_ROLES
+        by
+      operationId: administration.list_role_profiles
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.administration.list_user_sessions:
+    get:
+      tags:
+      - administration
+      summary: Active session register read from Frappe's raw `tabSessions` table
+        -- there is
+      operationId: administration.list_user_sessions
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.administration.save_reference_record:
+    post:
+      tags:
+      - administration
+      summary: save_reference_record (administration)
+      operationId: administration.save_reference_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - values
+  /api/method/dtmgp.api.v1.administration.set_lga_profile_enabled:
+    post:
+      tags:
+      - administration
+      summary: set_lga_profile_enabled (administration)
+      operationId: administration.set_lga_profile_enabled
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                lga_code:
+                  type: string
+                enabled:
+                  type: string
+              required:
+              - lga_code
+              - enabled
+  /api/method/dtmgp.api.v1.analytics.export_executive_summary:
+    post:
+      tags:
+      - analytics
+      summary: export_executive_summary (analytics)
+      operationId: analytics.export_executive_summary
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                purpose:
+                  type: string
+                company:
+                  type: string
+                from_date:
+                  type: string
+                to_date:
+                  type: string
+              required:
+              - purpose
+  /api/method/dtmgp.api.v1.analytics.get_alerts:
+    get:
+      tags:
+      - analytics
+      summary: get_alerts (analytics)
+      operationId: analytics.get_alerts
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.analytics.get_analytics_controls:
+    get:
+      tags:
+      - analytics
+      summary: get_analytics_controls (analytics)
+      operationId: analytics.get_analytics_controls
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.analytics.get_dashboard:
+    get:
+      tags:
+      - analytics
+      summary: get_dashboard (analytics)
+      operationId: analytics.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.analytics.get_maps:
+    get:
+      tags:
+      - analytics
+      summary: get_maps (analytics)
+      operationId: analytics.get_maps
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.analytics.get_scorecards:
+    get:
+      tags:
+      - analytics
+      summary: get_scorecards (analytics)
+      operationId: analytics.get_scorecards
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.analytics.get_trends:
+    get:
+      tags:
+      - analytics
+      summary: get_trends (analytics)
+      operationId: analytics.get_trends
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: months
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 6
+  /api/method/dtmgp.api.v1.context.get_current_user_context:
+    get:
+      tags:
+      - context
+      summary: get_current_user_context (context)
+      operationId: context.get_current_user_context
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.finance.amend_budget:
+    post:
+      tags:
+      - finance
+      summary: amend_budget (finance)
+      operationId: finance.amend_budget
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.finance.cancel_budget:
+    post:
+      tags:
+      - finance
+      summary: cancel_budget (finance)
+      operationId: finance.cancel_budget
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.finance.get_accounts_tree:
+    get:
+      tags:
+      - finance
+      summary: get_accounts_tree (finance)
+      operationId: finance.get_accounts_tree
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_allocation_distributions:
+    get:
+      tags:
+      - finance
+      summary: get_allocation_distributions (finance)
+      operationId: finance.get_allocation_distributions
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_banking_setup:
+    get:
+      tags:
+      - finance
+      summary: get_banking_setup (finance)
+      operationId: finance.get_banking_setup
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_budget_performance:
+    get:
+      tags:
+      - finance
+      summary: get_budget_performance (finance)
+      operationId: finance.get_budget_performance
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_cash_flow:
+    get:
+      tags:
+      - finance
+      summary: get_cash_flow (finance)
+      operationId: finance.get_cash_flow
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_contract_milestones:
+    get:
+      tags:
+      - finance
+      summary: get_contract_milestones (finance)
+      operationId: finance.get_contract_milestones
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_dashboard:
+    get:
+      tags:
+      - finance
+      summary: get_dashboard (finance)
+      operationId: finance.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_form_options:
+    get:
+      tags:
+      - finance
+      summary: get_form_options (finance)
+      operationId: finance.get_form_options
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_receivables_payables:
+    get:
+      tags:
+      - finance
+      summary: Operational subledgers for DTMGP's non-invoice model. Receivables are
+        lawful
+      operationId: finance.get_receivables_payables
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.get_trial_balance:
+    get:
+      tags:
+      - finance
+      summary: get_trial_balance (finance)
+      operationId: finance.get_trial_balance
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.list_allocations:
+    get:
+      tags:
+      - finance
+      summary: list_allocations (finance)
+      operationId: finance.list_allocations
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.list_budgets:
+    get:
+      tags:
+      - finance
+      summary: list_budgets (finance)
+      operationId: finance.list_budgets
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: fiscal_year
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.list_gl_entries:
+    get:
+      tags:
+      - finance
+      summary: list_gl_entries (finance)
+      operationId: finance.list_gl_entries
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: account
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: from_date
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: to_date
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 50
+  /api/method/dtmgp.api.v1.finance.list_journal_entries:
+    get:
+      tags:
+      - finance
+      summary: list_journal_entries (finance)
+      operationId: finance.list_journal_entries
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.finance.list_purchase_receipts:
+    get:
+      tags:
+      - finance
+      summary: list_purchase_receipts (finance)
+      operationId: finance.list_purchase_receipts
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.finance.list_records:
+    get:
+      tags:
+      - finance
+      summary: list_records (finance)
+      operationId: finance.list_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: doctype
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.finance.save_budget:
+    post:
+      tags:
+      - finance
+      summary: save_budget (finance)
+      operationId: finance.save_budget
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                company:
+                  type: string
+                fiscal_year:
+                  type: string
+                budget_against:
+                  type: string
+                cost_center:
+                  type: string
+                project:
+                  type: string
+                accounts:
+                  type: string
+                name:
+                  type: string
+              required:
+              - company
+              - fiscal_year
+              - budget_against
+  /api/method/dtmgp.api.v1.finance.save_record:
+    post:
+      tags:
+      - finance
+      summary: save_record (finance)
+      operationId: finance.save_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - values
+  /api/method/dtmgp.api.v1.finance.submit_budget:
+    post:
+      tags:
+      - finance
+      summary: submit_budget (finance)
+      operationId: finance.submit_budget
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.finance.submit_record:
+    post:
+      tags:
+      - finance
+      summary: submit_record (finance)
+      operationId: finance.submit_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - name
+  /api/method/dtmgp.api.v1.finance.transition_record:
+    post:
+      tags:
+      - finance
+      summary: transition_record (finance)
+      operationId: finance.transition_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                name:
+                  type: string
+                target_status:
+                  type: string
+              required:
+              - doctype
+              - name
+              - target_status
+  /api/method/dtmgp.api.v1.governance.get_approvals_inbox:
+    get:
+      tags:
+      - governance
+      summary: get_approvals_inbox (governance)
+      operationId: governance.get_approvals_inbox
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.governance.get_dashboard:
+    get:
+      tags:
+      - governance
+      summary: get_dashboard (governance)
+      operationId: governance.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.governance.get_form_options:
+    get:
+      tags:
+      - governance
+      summary: get_form_options (governance)
+      operationId: governance.get_form_options
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.governance.get_reports:
+    get:
+      tags:
+      - governance
+      summary: get_reports (governance)
+      operationId: governance.get_reports
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.governance.list_departments:
+    get:
+      tags:
+      - governance
+      summary: list_departments (governance)
+      operationId: governance.list_departments
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.governance.list_records:
+    get:
+      tags:
+      - governance
+      summary: list_records (governance)
+      operationId: governance.list_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: doctype
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+      - name: correspondence_type
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: assigned_to
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.governance.save_department:
+    post:
+      tags:
+      - governance
+      summary: save_department (governance)
+      operationId: governance.save_department
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.governance.save_record:
+    post:
+      tags:
+      - governance
+      summary: save_record (governance)
+      operationId: governance.save_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - values
+  /api/method/dtmgp.api.v1.governance.transition_record:
+    post:
+      tags:
+      - governance
+      summary: transition_record (governance)
+      operationId: governance.transition_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                name:
+                  type: string
+                target_status:
+                  type: string
+              required:
+              - doctype
+              - name
+              - target_status
+  /api/method/dtmgp.api.v1.hr.cancel_employee_transfer:
+    post:
+      tags:
+      - hr
+      summary: cancel_employee_transfer (hr)
+      operationId: hr.cancel_employee_transfer
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.hr.complete_separation_activity:
+    post:
+      tags:
+      - hr
+      summary: complete_separation_activity (hr)
+      operationId: hr.complete_separation_activity
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                activity_name:
+                  type: string
+              required:
+              - name
+              - activity_name
+  /api/method/dtmgp.api.v1.hr.decide_leave_application:
+    post:
+      tags:
+      - hr
+      summary: decide_leave_application (hr)
+      operationId: hr.decide_leave_application
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                decision:
+                  type: string
+              required:
+              - name
+              - decision
+  /api/method/dtmgp.api.v1.hr.get_attendance_summary:
+    get:
+      tags:
+      - hr
+      summary: get_attendance_summary (hr)
+      operationId: hr.get_attendance_summary
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: attendance_date
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_employee_separation:
+    get:
+      tags:
+      - hr
+      summary: get_employee_separation (hr)
+      operationId: hr.get_employee_separation
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: name
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_establishment_report:
+    get:
+      tags:
+      - hr
+      summary: get_establishment_report (hr)
+      operationId: hr.get_establishment_report
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_hr_migration_templates:
+    get:
+      tags:
+      - hr
+      summary: Machine-readable production import layouts. Restricted values are intentionally
+      operationId: hr.get_hr_migration_templates
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.hr.get_hr_reports:
+    get:
+      tags:
+      - hr
+      summary: get_hr_reports (hr)
+      operationId: hr.get_hr_reports
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_leave_balances:
+    get:
+      tags:
+      - hr
+      summary: get_leave_balances (hr)
+      operationId: hr.get_leave_balances
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: employee
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_payroll_overview:
+    get:
+      tags:
+      - hr
+      summary: get_payroll_overview (hr)
+      operationId: hr.get_payroll_overview
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_retirement_forecast:
+    get:
+      tags:
+      - hr
+      summary: get_retirement_forecast (hr)
+      operationId: hr.get_retirement_forecast
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: months
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 12
+  /api/method/dtmgp.api.v1.hr.get_staff_audit_exceptions:
+    get:
+      tags:
+      - hr
+      summary: get_staff_audit_exceptions (hr)
+      operationId: hr.get_staff_audit_exceptions
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.get_staffing_plan:
+    get:
+      tags:
+      - hr
+      summary: get_staffing_plan (hr)
+      operationId: hr.get_staffing_plan
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: name
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.list_attendance:
+    get:
+      tags:
+      - hr
+      summary: list_attendance (hr)
+      operationId: hr.list_attendance
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: attendance_date
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.list_employee_promotions:
+    get:
+      tags:
+      - hr
+      summary: list_employee_promotions (hr)
+      operationId: hr.list_employee_promotions
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.list_employee_separations:
+    get:
+      tags:
+      - hr
+      summary: list_employee_separations (hr)
+      operationId: hr.list_employee_separations
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.list_employee_transfers:
+    get:
+      tags:
+      - hr
+      summary: list_employee_transfers (hr)
+      operationId: hr.list_employee_transfers
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.list_leave_calendar:
+    get:
+      tags:
+      - hr
+      summary: list_leave_calendar (hr)
+      operationId: hr.list_leave_calendar
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: month
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.list_lga_companies:
+    get:
+      tags:
+      - hr
+      summary: All 23 LGA names, for pickers such as a transfer's destination LGA.
+        LGA names
+      operationId: hr.list_lga_companies
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.hr.list_restricted_hr_records:
+    get:
+      tags:
+      - hr
+      summary: list_restricted_hr_records (hr)
+      operationId: hr.list_restricted_hr_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: record_type
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: employee
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.hr.list_staffing_plans:
+    get:
+      tags:
+      - hr
+      summary: list_staffing_plans (hr)
+      operationId: hr.list_staffing_plans
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.list_verification_exercises:
+    get:
+      tags:
+      - hr
+      summary: list_verification_exercises (hr)
+      operationId: hr.list_verification_exercises
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.list_verification_records:
+    get:
+      tags:
+      - hr
+      summary: list_verification_records (hr)
+      operationId: hr.list_verification_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: exercise
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: review_status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.hr.review_verification_record:
+    post:
+      tags:
+      - hr
+      summary: review_verification_record (hr)
+      operationId: hr.review_verification_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                review_status:
+                  type: string
+                exception_reason:
+                  type: string
+              required:
+              - name
+              - review_status
+  /api/method/dtmgp.api.v1.hr.save_employee_promotion:
+    post:
+      tags:
+      - hr
+      summary: save_employee_promotion (hr)
+      operationId: hr.save_employee_promotion
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.hr.save_employee_separation:
+    post:
+      tags:
+      - hr
+      summary: save_employee_separation (hr)
+      operationId: hr.save_employee_separation
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.hr.save_employee_transfer:
+    post:
+      tags:
+      - hr
+      summary: save_employee_transfer (hr)
+      operationId: hr.save_employee_transfer
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.hr.save_restricted_hr_record:
+    post:
+      tags:
+      - hr
+      summary: save_restricted_hr_record (hr)
+      operationId: hr.save_restricted_hr_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                record_type:
+                  type: string
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - record_type
+              - values
+  /api/method/dtmgp.api.v1.hr.save_staffing_plan:
+    post:
+      tags:
+      - hr
+      summary: save_staffing_plan (hr)
+      operationId: hr.save_staffing_plan
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.hr.save_verification_exercise:
+    post:
+      tags:
+      - hr
+      summary: save_verification_exercise (hr)
+      operationId: hr.save_verification_exercise
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.hr.save_verification_record:
+    post:
+      tags:
+      - hr
+      summary: save_verification_record (hr)
+      operationId: hr.save_verification_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.hr.submit_employee_promotion:
+    post:
+      tags:
+      - hr
+      summary: submit_employee_promotion (hr)
+      operationId: hr.submit_employee_promotion
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.hr.submit_employee_separation:
+    post:
+      tags:
+      - hr
+      summary: submit_employee_separation (hr)
+      operationId: hr.submit_employee_separation
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.hr.submit_employee_transfer:
+    post:
+      tags:
+      - hr
+      summary: submit_employee_transfer (hr)
+      operationId: hr.submit_employee_transfer
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.hr.submit_staffing_plan:
+    post:
+      tags:
+      - hr
+      summary: submit_staffing_plan (hr)
+      operationId: hr.submit_staffing_plan
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+              required:
+              - name
+  /api/method/dtmgp.api.v1.hr.transition_verification_exercise:
+    post:
+      tags:
+      - hr
+      summary: transition_verification_exercise (hr)
+      operationId: hr.transition_verification_exercise
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                target_status:
+                  type: string
+              required:
+              - name
+              - target_status
+  /api/method/dtmgp.api.v1.navigation.get_navigation:
+    get:
+      tags:
+      - navigation
+      summary: get_navigation (navigation)
+      operationId: navigation.get_navigation
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters: []
+  /api/method/dtmgp.api.v1.overview.get_overview:
+    get:
+      tags:
+      - overview
+      summary: get_overview (overview)
+      operationId: overview.get_overview
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.people.get_dashboard:
+    get:
+      tags:
+      - people
+      summary: get_dashboard (people)
+      operationId: people.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.people.get_employee_profile:
+    get:
+      tags:
+      - people
+      summary: Consolidated read view backing the Staff Profiles / Digital Personnel
+        File /
+      operationId: people.get_employee_profile
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: employee
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.people.get_establishment:
+    get:
+      tags:
+      - people
+      summary: get_establishment (people)
+      operationId: people.get_establishment
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.people.get_form_options:
+    get:
+      tags:
+      - people
+      summary: get_form_options (people)
+      operationId: people.get_form_options
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.people.list_employee_documents:
+    get:
+      tags:
+      - people
+      summary: 'Staff Documents: exposes the generic, already-scoped Frappe file-attachment'
+      operationId: people.list_employee_documents
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: employee
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.people.list_employees:
+    get:
+      tags:
+      - people
+      summary: list_employees (people)
+      operationId: people.list_employees
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: department
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.people.list_former_staff:
+    get:
+      tags:
+      - people
+      summary: list_former_staff (people)
+      operationId: people.list_former_staff
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.people.list_leave:
+    get:
+      tags:
+      - people
+      summary: list_leave (people)
+      operationId: people.list_leave
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.people.save_employee:
+    post:
+      tags:
+      - people
+      summary: save_employee (people)
+      operationId: people.save_employee
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                first_name:
+                  type: string
+                company:
+                  type: string
+                gender:
+                  type: string
+                date_of_birth:
+                  type: string
+                date_of_joining:
+                  type: string
+                employee:
+                  type: string
+                last_name:
+                  type: string
+                department:
+                  type: string
+                designation:
+                  type: string
+                grade_level:
+                  type: string
+                status:
+                  type: string
+                  default: Active
+                verification_status:
+                  type: string
+                  default: Pending
+              required:
+              - first_name
+              - company
+              - gender
+              - date_of_birth
+              - date_of_joining
+  /api/method/dtmgp.api.v1.projects.get_contractor_performance:
+    get:
+      tags:
+      - projects
+      summary: Derived read-only view over DTMGP Procurement Case -- no new schema.
+        Cross-domain
+      operationId: projects.get_contractor_performance
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.get_dashboard:
+    get:
+      tags:
+      - projects
+      summary: get_dashboard (projects)
+      operationId: projects.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.get_form_options:
+    get:
+      tags:
+      - projects
+      summary: get_form_options (projects)
+      operationId: projects.get_form_options
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.get_maps_data:
+    get:
+      tags:
+      - projects
+      summary: get_maps_data (projects)
+      operationId: projects.get_maps_data
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.get_project_financials:
+    get:
+      tags:
+      - projects
+      summary: get_project_financials (projects)
+      operationId: projects.get_project_financials
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.get_reports:
+    get:
+      tags:
+      - projects
+      summary: get_reports (projects)
+      operationId: projects.get_reports
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.list_contractors:
+    get:
+      tags:
+      - projects
+      summary: Suppliers are shared statewide (no `company` field), same as they're
+        already
+      operationId: projects.list_contractors
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.projects.list_projects:
+    get:
+      tags:
+      - projects
+      summary: list_projects (projects)
+      operationId: projects.list_projects
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: view
+        in: query
+        required: false
+        schema:
+          type: string
+          default: register
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.projects.list_records:
+    get:
+      tags:
+      - projects
+      summary: list_records (projects)
+      operationId: projects.list_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: doctype
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.projects.list_tasks:
+    get:
+      tags:
+      - projects
+      summary: list_tasks (projects)
+      operationId: projects.list_tasks
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: project
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: is_milestone
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.projects.list_vehicle_logs:
+    get:
+      tags:
+      - projects
+      summary: list_vehicle_logs (projects)
+      operationId: projects.list_vehicle_logs
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: license_plate
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.projects.list_vehicle_services:
+    get:
+      tags:
+      - projects
+      summary: Reads back the `service_detail` (Vehicle Service) child rows save_vehicle_log
+      operationId: projects.list_vehicle_services
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: license_plate
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.projects.save_project:
+    post:
+      tags:
+      - projects
+      summary: save_project (projects)
+      operationId: projects.save_project
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.projects.save_record:
+    post:
+      tags:
+      - projects
+      summary: save_record (projects)
+      operationId: projects.save_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - values
+  /api/method/dtmgp.api.v1.projects.save_task:
+    post:
+      tags:
+      - projects
+      summary: save_task (projects)
+      operationId: projects.save_task
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.projects.save_vehicle_log:
+    post:
+      tags:
+      - projects
+      summary: save_vehicle_log (projects)
+      operationId: projects.save_vehicle_log
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - values
+  /api/method/dtmgp.api.v1.projects.set_contractor_hold:
+    post:
+      tags:
+      - projects
+      summary: set_contractor_hold (projects)
+      operationId: projects.set_contractor_hold
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                supplier:
+                  type: string
+                on_hold:
+                  type: string
+                hold_type:
+                  type: string
+              required:
+              - supplier
+              - on_hold
+  /api/method/dtmgp.api.v1.projects.submit_record:
+    post:
+      tags:
+      - projects
+      summary: submit_record (projects)
+      operationId: projects.submit_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - name
+  /api/method/dtmgp.api.v1.projects.transition_record:
+    post:
+      tags:
+      - projects
+      summary: transition_record (projects)
+      operationId: projects.transition_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                name:
+                  type: string
+                target_status:
+                  type: string
+              required:
+              - doctype
+              - name
+              - target_status
+  /api/method/dtmgp.api.v1.records.get_record:
+    get:
+      tags:
+      - records
+      summary: get_record (records)
+      operationId: records.get_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: doctype
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: name
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.report_exports.export_report:
+    post:
+      tags:
+      - report_exports
+      summary: export_report (report_exports)
+      operationId: report_exports.export_report
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                report_id:
+                  type: string
+                title:
+                  type: string
+                purpose:
+                  type: string
+                columns:
+                  type: string
+                rows:
+                  type: string
+                company:
+                  type: string
+              required:
+              - report_id
+              - title
+              - purpose
+              - columns
+              - rows
+  /api/method/dtmgp.api.v1.traditional.get_dashboard:
+    get:
+      tags:
+      - traditional
+      summary: get_dashboard (traditional)
+      operationId: traditional.get_dashboard
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.traditional.get_form_options:
+    get:
+      tags:
+      - traditional
+      summary: get_form_options (traditional)
+      operationId: traditional.get_form_options
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.traditional.get_traditional_reports:
+    get:
+      tags:
+      - traditional
+      summary: get_traditional_reports (traditional)
+      operationId: traditional.get_traditional_reports
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.traditional.list_petition_documents:
+    get:
+      tags:
+      - traditional
+      summary: list_petition_documents (traditional)
+      operationId: traditional.list_petition_documents
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: petition
+        in: query
+        required: true
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.traditional.list_records:
+    get:
+      tags:
+      - traditional
+      summary: list_records (traditional)
+      operationId: traditional.list_records
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: doctype
+        in: query
+        required: true
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: status
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 25
+  /api/method/dtmgp.api.v1.traditional.save_record:
+    post:
+      tags:
+      - traditional
+      summary: save_record (traditional)
+      operationId: traditional.save_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                values:
+                  type: string
+                name:
+                  type: string
+              required:
+              - doctype
+              - values
+  /api/method/dtmgp.api.v1.traditional.transition_record:
+    post:
+      tags:
+      - traditional
+      summary: transition_record (traditional)
+      operationId: traditional.transition_record
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                doctype:
+                  type: string
+                name:
+                  type: string
+                target_status:
+                  type: string
+              required:
+              - doctype
+              - name
+              - target_status
+  /api/method/dtmgp.api.v1.traditional.update_recognition:
+    post:
+      tags:
+      - traditional
+      summary: update_recognition (traditional)
+      operationId: traditional.update_recognition
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                recognition_status:
+                  type: string
+                reason:
+                  type: string
+              required:
+              - name
+              - recognition_status
+  /api/method/dtmgp.api.v1.users.create_user:
+    post:
+      tags:
+      - users
+      summary: create_user (users)
+      operationId: users.create_user
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                first_name:
+                  type: string
+                role:
+                  type: string
+                company:
+                  type: string
+                last_name:
+                  type: string
+                temporary_password:
+                  type: string
+              required:
+              - email
+              - first_name
+              - role
+              - company
+  /api/method/dtmgp.api.v1.users.list_users:
+    get:
+      tags:
+      - users
+      summary: list_users (users)
+      operationId: users.list_users
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 1
+      - name: page_size
+        in: query
+        required: false
+        schema:
+          type: number
+          default: 20
+      - name: search
+        in: query
+        required: false
+        schema:
+          type: string
+      - name: company
+        in: query
+        required: false
+        schema:
+          type: string
+  /api/method/dtmgp.api.v1.users.set_user_enabled:
+    post:
+      tags:
+      - users
+      summary: set_user_enabled (users)
+      operationId: users.set_user_enabled
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                enabled:
+                  type: string
+              required:
+              - user
+              - enabled
+  /api/method/dtmgp.api.v1.users.update_user:
+    post:
+      tags:
+      - users
+      summary: update_user (users)
+      operationId: users.update_user
+      responses:
+        '200':
+          description: 'Success. Response body is Frappe''s standard {"message": <result>}
+            envelope; see docs/naming-and-coding-conventions.md''s API conventions
+            section for the shape of <result>.'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: {}
+        '401': *id001
+        '403': *id002
+        '417': *id003
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                first_name:
+                  type: string
+                role:
+                  type: string
+                company:
+                  type: string
+                last_name:
+                  type: string
+              required:
+              - user
+              - first_name
+              - role
+              - company

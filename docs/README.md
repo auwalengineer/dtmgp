@@ -11,5 +11,6 @@
 - [Initial backlog and acceptance criteria](initial-backlog-and-acceptance-criteria.md)
 - [Implementation status and pending work](implementation-status.md)
 - [Architecture decision records](architecture/README.md)
+- [API reference (OpenAPI + Postman/Bruno collection)](api/README.md)
 
 These documents define the initial platform operating model. Named government bodies are functional ownership groups for authorization design; statutory titles and reporting lines must be validated by the project owner before production rollout.
