@@ -35,7 +35,7 @@ const reconciliation = computed(() => props.revenueHeads.map((head) => {
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
 
   <template v-if="activeItem === 'revenue-sources'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Revenue head</th><th>Code</th><th>Rate type</th><th>Default rate</th><th>Status</th></tr></thead><tbody><tr v-for="head in revenueHeads" :key="head.name"><td>{{ head.revenue_name }}</td><td>{{ head.revenue_code }}</td><td>{{ head.rate_type }}</td><td>{{ head.default_rate }}</td><td><span class="table-status" :class="head.disabled ? 'neutral' : 'success'">{{ head.disabled ? 'Disabled' : 'Active' }}</span></td></tr></tbody></table><p v-if="!revenueHeads.length" class="users-empty">No revenue heads configured for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Revenue head</th><th>Code</th><th>Rate type</th><th>Default rate</th><th>Status</th></tr></thead><tbody><tr v-for="head in revenueHeads" :key="head.name" v-record="{ doctype: 'DTMGP Revenue Head', name: head.name }"><td>{{ head.revenue_name }}</td><td>{{ head.revenue_code }}</td><td>{{ head.rate_type }}</td><td>{{ head.default_rate }}</td><td><span class="table-status" :class="head.disabled ? 'neutral' : 'success'">{{ head.disabled ? 'Disabled' : 'Active' }}</span></td></tr></tbody></table><p v-if="!revenueHeads.length" class="users-empty">No revenue heads configured for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'revenue-targets'">
@@ -44,7 +44,7 @@ const reconciliation = computed(() => props.revenueHeads.map((head) => {
 
   <template v-else-if="activeItem === 'revenue-collections'">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Revenue collections</h3><button v-if="canManage" class="secondary-action" @click="$emit('new-receipt')"><Receipt :size="15" /> New receipt</button></div>
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Reference</th><th>Assessment</th><th>Date</th><th>Amount</th><th>Channel</th><th>Status</th><th></th></tr></thead><tbody><tr v-for="receipt in revenueReceipts" :key="receipt.name"><td><strong>{{ receipt.name }}</strong></td><td>{{ receipt.assessment }}</td><td>{{ receipt.posting_date }}</td><td>{{ money(receipt.amount) }}</td><td>{{ receipt.payment_channel || '-' }}</td><td><span class="table-status" :class="receipt.docstatus === 1 ? 'success' : 'neutral'">{{ receipt.docstatus === 1 ? 'Submitted' : 'Draft' }}</span></td><td><button v-if="canManage && receipt.docstatus === 0" class="secondary-action compact-action" @click="$emit('submit-receipt', receipt.name)">Submit</button></td></tr></tbody></table><p v-if="!revenueReceipts.length" class="users-empty">No revenue collections recorded for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Reference</th><th>Assessment</th><th>Date</th><th>Amount</th><th>Channel</th><th>Status</th><th></th></tr></thead><tbody><tr v-for="receipt in revenueReceipts" :key="receipt.name" v-record="{ doctype: 'DTMGP Revenue Receipt', name: receipt.name }"><td><strong>{{ receipt.name }}</strong></td><td>{{ receipt.assessment }}</td><td>{{ receipt.posting_date }}</td><td>{{ money(receipt.amount) }}</td><td>{{ receipt.payment_channel || '-' }}</td><td><span class="table-status" :class="receipt.docstatus === 1 ? 'success' : 'neutral'">{{ receipt.docstatus === 1 ? 'Submitted' : 'Draft' }}</span></td><td><button v-if="canManage && receipt.docstatus === 0" class="secondary-action compact-action" @click="$emit('submit-receipt', receipt.name)">Submit</button></td></tr></tbody></table><p v-if="!revenueReceipts.length" class="users-empty">No revenue collections recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'collection-channels'">
@@ -56,7 +56,7 @@ const reconciliation = computed(() => props.revenueHeads.map((head) => {
   </template>
 
   <template v-else-if="activeItem === 'daily-collections'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Reference</th><th>Assessment</th><th>Amount</th><th>Channel</th></tr></thead><tbody><tr v-for="receipt in dailyReceipts" :key="receipt.name"><td><strong>{{ receipt.name }}</strong></td><td>{{ receipt.assessment }}</td><td>{{ money(receipt.amount) }}</td><td>{{ receipt.payment_channel || '-' }}</td></tr></tbody></table><p v-if="!dailyReceipts.length" class="users-empty">No collections recorded today.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Reference</th><th>Assessment</th><th>Amount</th><th>Channel</th></tr></thead><tbody><tr v-for="receipt in dailyReceipts" :key="receipt.name" v-record="{ doctype: 'DTMGP Revenue Receipt', name: receipt.name }"><td><strong>{{ receipt.name }}</strong></td><td>{{ receipt.assessment }}</td><td>{{ money(receipt.amount) }}</td><td>{{ receipt.payment_channel || '-' }}</td></tr></tbody></table><p v-if="!dailyReceipts.length" class="users-empty">No collections recorded today.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'revenue-performance' && dashboard">

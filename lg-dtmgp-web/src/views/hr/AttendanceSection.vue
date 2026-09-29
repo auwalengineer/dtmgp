@@ -34,15 +34,15 @@ const reportTo = ref("");
       <article><span class="hr-metric-icon red"><CircleAlert :size="19" /></span><div><small>Absent</small><strong>{{ attendanceSummary.absent }}</strong><p>{{ attendanceSummary.late_entries }} late entries</p></div></article>
       <article><span class="hr-metric-icon gold"><CalendarDays :size="19" /></span><div><small>On leave</small><strong>{{ attendanceSummary.on_leave }}</strong><p>Half day: {{ attendanceSummary.half_day }}</p></div></article>
     </section>
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Date</th><th>Status</th><th>Late</th></tr></thead><tbody><tr v-for="item in attendanceItems" :key="item.name"><td>{{ item.employee_name }}</td><td>{{ item.attendance_date }}</td><td><span class="table-status" :class="item.status === 'Present' ? 'success' : 'neutral'">{{ item.status }}</span></td><td>{{ item.late_entry ? 'Yes' : 'No' }}</td></tr></tbody></table><p v-if="!attendanceItems.length" class="users-empty">No attendance recorded for today.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Date</th><th>Status</th><th>Late</th></tr></thead><tbody><tr v-for="item in attendanceItems" :key="item.name" v-record="{ doctype: 'Attendance', name: item.name }"><td>{{ item.employee_name }}</td><td>{{ item.attendance_date }}</td><td><span class="table-status" :class="item.status === 'Present' ? 'success' : 'neutral'">{{ item.status }}</span></td><td>{{ item.late_entry ? 'Yes' : 'No' }}</td></tr></tbody></table><p v-if="!attendanceItems.length" class="users-empty">No attendance recorded for today.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'late-arrivals'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Date</th><th>Status</th></tr></thead><tbody><tr v-for="item in lateArrivals" :key="item.name"><td>{{ item.employee_name }}</td><td>{{ item.attendance_date }}</td><td><span class="table-status neutral">{{ item.status }}</span></td></tr></tbody></table><p v-if="!lateArrivals.length" class="users-empty">No late arrivals recorded for today.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Date</th><th>Status</th></tr></thead><tbody><tr v-for="item in lateArrivals" :key="item.name" v-record="{ doctype: 'Attendance', name: item.name }"><td>{{ item.employee_name }}</td><td>{{ item.attendance_date }}</td><td><span class="table-status neutral">{{ item.status }}</span></td></tr></tbody></table><p v-if="!lateArrivals.length" class="users-empty">No late arrivals recorded for today.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'absent-staff'">
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Date</th></tr></thead><tbody><tr v-for="item in absentStaff" :key="item.name"><td>{{ item.employee_name }}</td><td>{{ item.attendance_date }}</td></tr></tbody></table><p v-if="!absentStaff.length" class="users-empty">No absences recorded for today.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Date</th></tr></thead><tbody><tr v-for="item in absentStaff" :key="item.name" v-record="{ doctype: 'Attendance', name: item.name }"><td>{{ item.employee_name }}</td><td>{{ item.attendance_date }}</td></tr></tbody></table><p v-if="!absentStaff.length" class="users-empty">No absences recorded for today.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'shift-assignments'">

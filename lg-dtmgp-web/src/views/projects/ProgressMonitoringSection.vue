@@ -22,7 +22,7 @@ const delayedMilestones = computed(() => props.milestones.filter((m) => m.status
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
 
   <template v-if="activeItem === 'physical-progress'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Project</th><th>Status</th><th>Physical progress</th></tr></thead><tbody><tr v-for="item in projects" :key="item.name"><td><strong>{{ item.project_name }}</strong></td><td><span class="table-status neutral">{{ item.status }}</span></td><td>{{ item.percent_complete }}%</td></tr></tbody></table><p v-if="!projects.length" class="users-empty">No projects recorded for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Project</th><th>Status</th><th>Physical progress</th></tr></thead><tbody><tr v-for="item in projects" :key="item.name" v-record="{ doctype: 'Project', name: item.name }"><td><strong>{{ item.project_name }}</strong></td><td><span class="table-status neutral">{{ item.status }}</span></td><td>{{ item.percent_complete }}%</td></tr></tbody></table><p v-if="!projects.length" class="users-empty">No projects recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'financial-progress'">
@@ -30,11 +30,11 @@ const delayedMilestones = computed(() => props.milestones.filter((m) => m.status
   </template>
 
   <template v-else-if="activeItem === 'milestone-status'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Milestone</th><th>Project</th><th>Status</th><th>Target date</th></tr></thead><tbody><tr v-for="item in milestones" :key="item.name"><td><strong>{{ item.subject }}</strong></td><td>{{ item.project }}</td><td><span class="table-status" :class="item.status === 'Completed' ? 'success' : 'neutral'">{{ item.status }}</span></td><td>{{ item.exp_end_date || '-' }}</td></tr></tbody></table><p v-if="!milestones.length" class="users-empty">No milestones recorded for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Milestone</th><th>Project</th><th>Status</th><th>Target date</th></tr></thead><tbody><tr v-for="item in milestones" :key="item.name" v-record="{ doctype: 'Task', name: item.name }"><td><strong>{{ item.subject }}</strong></td><td>{{ item.project }}</td><td><span class="table-status" :class="item.status === 'Completed' ? 'success' : 'neutral'">{{ item.status }}</span></td><td>{{ item.exp_end_date || '-' }}</td></tr></tbody></table><p v-if="!milestones.length" class="users-empty">No milestones recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'delayed-milestones'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Milestone</th><th>Project</th><th>Target date</th></tr></thead><tbody><tr v-for="item in delayedMilestones" :key="item.name"><td><strong>{{ item.subject }}</strong></td><td>{{ item.project }}</td><td>{{ item.exp_end_date || '-' }}</td></tr></tbody></table><p v-if="!delayedMilestones.length" class="users-empty">No overdue milestones for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Milestone</th><th>Project</th><th>Target date</th></tr></thead><tbody><tr v-for="item in delayedMilestones" :key="item.name" v-record="{ doctype: 'Task', name: item.name }"><td><strong>{{ item.subject }}</strong></td><td>{{ item.project }}</td><td>{{ item.exp_end_date || '-' }}</td></tr></tbody></table><p v-if="!delayedMilestones.length" class="users-empty">No overdue milestones for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'variation-requests'">

@@ -5,6 +5,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import { loadEnvironment } from "./config/environment";
 import { router } from "./router";
+import { recordDirective } from "./directives/record";
 import { useSessionStore } from "./stores/session";
 import "./styles/main.css";
 
@@ -16,6 +17,7 @@ async function bootstrap() {
   app.provide("environment", environment);
   app.use(pinia);
   app.use(VueQueryPlugin);
+  app.directive("record", recordDirective);
   const session = useSessionStore(pinia);
   await session.restore();
   router.beforeEach((to) => {

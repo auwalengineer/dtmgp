@@ -286,7 +286,7 @@ watch(itemId, async () => { if (session.activeLga) await loadRecords(); });
         <table class="staff-table finance-table">
           <thead><tr><th>Reference</th><th v-for="column in tableMeta!.columns" :key="column[0]">{{ column[1] }}</th><th>Action</th></tr></thead>
           <tbody>
-            <tr v-for="item in records" :key="item.name">
+            <tr v-for="item in records" :key="item.name" v-record="{ doctype: tableMeta!.doctype, name: item.name }">
               <td><strong>{{ item.name }}</strong></td>
               <td v-for="column in tableMeta!.columns" :key="column[0]"><span v-if="column[0] === 'status'" class="table-status" :class="['Closed', 'Held', 'Adopted', 'Completed', 'Submitted', 'State Reviewed', 'Verified'].includes(String(item[column[0]])) ? 'success' : 'neutral'">{{ item[column[0]] }}</span><template v-else>{{ item[column[0]] === 1 ? 'Yes' : item[column[0]] === 0 ? 'No' : (item[column[0]] || '-') }}</template></td>
               <td><button v-for="next in (tableMeta!.next[String(item.status)] || [])" :key="next" class="secondary-action" type="button" @click="transition(item, next)">{{ next }}</button></td>
@@ -301,7 +301,7 @@ watch(itemId, async () => { if (session.activeLga) await loadRecords(); });
         <table class="staff-table finance-table">
           <thead><tr><th>Department</th><th>Parent</th><th>Status</th></tr></thead>
           <tbody>
-            <tr v-for="item in departments" :key="item.name">
+            <tr v-for="item in departments" :key="item.name" v-record="{ doctype: 'Department', name: item.name }">
               <td><strong>{{ item.department_name }}</strong></td>
               <td>{{ item.parent_department || '-' }}</td>
               <td><span class="table-status" :class="item.disabled ? 'neutral' : 'success'">{{ item.disabled ? 'Disabled' : 'Active' }}</span></td>
@@ -316,7 +316,7 @@ watch(itemId, async () => { if (session.activeLga) await loadRecords(); });
         <table class="staff-table finance-table">
           <thead><tr><th>Reference</th><th>Type</th><th>Title / Period</th><th>Status</th><th>Action</th></tr></thead>
           <tbody>
-            <tr v-for="item in approvalsInbox" :key="item.doctype + item.name">
+            <tr v-for="item in approvalsInbox" :key="item.doctype + item.name" v-record="{ doctype: item.doctype, name: item.name }">
               <td><strong>{{ item.name }}</strong></td>
               <td>{{ item.doctype.replace('DTMGP ', '') }}</td>
               <td>{{ item.title }}</td>
@@ -340,7 +340,7 @@ watch(itemId, async () => { if (session.activeLga) await loadRecords(); });
         <table class="staff-table finance-table">
           <thead><tr><th>Name</th><th>Frequency</th></tr></thead>
           <tbody>
-            <tr v-for="item in (mode === 'return-types' ? options.return_types : options.compliance_requirements)" :key="item.name">
+            <tr v-for="item in (mode === 'return-types' ? options.return_types : options.compliance_requirements)" :key="item.name" v-record="{ doctype: mode === 'return-types' ? 'DTMGP Statutory Return Type' : 'DTMGP Compliance Requirement', name: item.name }">
               <td><strong>{{ item.return_name || item.requirement_name }}</strong></td>
               <td>{{ item.frequency }}</td>
             </tr>

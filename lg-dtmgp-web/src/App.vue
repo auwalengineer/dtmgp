@@ -4,6 +4,7 @@ import { useRoute } from "vue-router";
 
 import AppSidebar from "@/components/AppSidebar.vue";
 import AppTopbar from "@/components/AppTopbar.vue";
+import RecordDetailDrawer from "@/components/RecordDetailDrawer.vue";
 
 const navigationOpen = ref(false);
 const route = useRoute();
@@ -35,4 +36,5 @@ onUnmounted(() => window.clearInterval(updateTimer));
       </main>
     </div>
   </div>
+  <RecordDetailDrawer />
 </template>

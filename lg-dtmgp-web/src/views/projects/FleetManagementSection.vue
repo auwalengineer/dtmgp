@@ -26,20 +26,20 @@ const insuranceDueSoon = (endDate: string | null) => !!endDate && endDate <= new
 
   <template v-if="activeItem === 'vehicle-register'">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Vehicle register</h3><button v-if="canManage" class="secondary-action" @click="emit('new-vehicle')"><FilePlus2 :size="15" /> New vehicle</button></div>
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>License plate</th><th>Make / Model</th><th>Odometer</th><th>Driver</th></tr></thead><tbody><tr v-for="item in vehicles" :key="item.name"><td><strong>{{ item.name }}</strong></td><td>{{ item.make }} {{ item.model }}</td><td>{{ item.last_odometer.toLocaleString() }}</td><td>{{ item.employee || 'Unassigned' }}</td></tr></tbody></table><p v-if="!vehicles.length" class="users-empty">No vehicles registered for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>License plate</th><th>Make / Model</th><th>Odometer</th><th>Driver</th></tr></thead><tbody><tr v-for="item in vehicles" :key="item.name" v-record="{ doctype: 'Vehicle', name: item.name }"><td><strong>{{ item.name }}</strong></td><td>{{ item.make }} {{ item.model }}</td><td>{{ item.last_odometer.toLocaleString() }}</td><td>{{ item.employee || 'Unassigned' }}</td></tr></tbody></table><p v-if="!vehicles.length" class="users-empty">No vehicles registered for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'vehicle-assignments'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>License plate</th><th>Driver</th><th>Location</th></tr></thead><tbody><tr v-for="item in assigned" :key="item.name"><td><strong>{{ item.name }}</strong></td><td>{{ item.employee }}</td><td>{{ item.location || '-' }}</td></tr></tbody></table><p v-if="!assigned.length" class="users-empty">No vehicles currently assigned to a driver.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>License plate</th><th>Driver</th><th>Location</th></tr></thead><tbody><tr v-for="item in assigned" :key="item.name" v-record="{ doctype: 'Vehicle', name: item.name }"><td><strong>{{ item.name }}</strong></td><td>{{ item.employee }}</td><td>{{ item.location || '-' }}</td></tr></tbody></table><p v-if="!assigned.length" class="users-empty">No vehicles currently assigned to a driver.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'trip-records'">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Trip records</h3><button v-if="canManage" class="secondary-action" @click="emit('new-log')"><FilePlus2 :size="15" /> New log entry</button></div>
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Vehicle</th><th>Date</th><th>Odometer</th><th>Driver</th></tr></thead><tbody><tr v-for="item in vehicleLogs" :key="item.name"><td><strong>{{ item.license_plate }}</strong></td><td>{{ item.date }}</td><td>{{ item.odometer.toLocaleString() }}</td><td>{{ item.employee || '-' }}</td></tr></tbody></table><p v-if="!vehicleLogs.length" class="users-empty">No vehicle log entries recorded for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Vehicle</th><th>Date</th><th>Odometer</th><th>Driver</th></tr></thead><tbody><tr v-for="item in vehicleLogs" :key="item.name" v-record="{ doctype: 'Vehicle Log', name: item.name }"><td><strong>{{ item.license_plate }}</strong></td><td>{{ item.date }}</td><td>{{ item.odometer.toLocaleString() }}</td><td>{{ item.employee || '-' }}</td></tr></tbody></table><p v-if="!vehicleLogs.length" class="users-empty">No vehicle log entries recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'fuel-records'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Vehicle</th><th>Date</th><th>Fuel qty</th><th>Price</th><th>Supplier</th></tr></thead><tbody><tr v-for="item in fuelRecords" :key="item.name"><td><strong>{{ item.license_plate }}</strong></td><td>{{ item.date }}</td><td>{{ item.fuel_qty }}</td><td>{{ item.price.toLocaleString() }}</td><td>{{ item.supplier || '-' }}</td></tr></tbody></table><p v-if="!fuelRecords.length" class="users-empty">No fuel records recorded for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Vehicle</th><th>Date</th><th>Fuel qty</th><th>Price</th><th>Supplier</th></tr></thead><tbody><tr v-for="item in fuelRecords" :key="item.name" v-record="{ doctype: 'Vehicle Log', name: item.name }"><td><strong>{{ item.license_plate }}</strong></td><td>{{ item.date }}</td><td>{{ item.fuel_qty }}</td><td>{{ item.price.toLocaleString() }}</td><td>{{ item.supplier || '-' }}</td></tr></tbody></table><p v-if="!fuelRecords.length" class="users-empty">No fuel records recorded for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'vehicle-maintenance'">
@@ -47,10 +47,10 @@ const insuranceDueSoon = (endDate: string | null) => !!endDate && endDate <= new
   </template>
 
   <template v-else-if="activeItem === 'insurance-licensing'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>License plate</th><th>Insurer</th><th>Policy no.</th><th>Expiry</th></tr></thead><tbody><tr v-for="item in vehicles" :key="item.name"><td><strong>{{ item.name }}</strong></td><td>{{ item.insurance_company || '-' }}</td><td>{{ item.policy_no || '-' }}</td><td><span class="table-status" :class="insuranceDueSoon(item.end_date) ? 'neutral' : 'success'">{{ item.end_date || 'Not recorded' }}</span></td></tr></tbody></table><p v-if="!vehicles.length" class="users-empty">No vehicles registered for this LGA.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>License plate</th><th>Insurer</th><th>Policy no.</th><th>Expiry</th></tr></thead><tbody><tr v-for="item in vehicles" :key="item.name" v-record="{ doctype: 'Vehicle', name: item.name }"><td><strong>{{ item.name }}</strong></td><td>{{ item.insurance_company || '-' }}</td><td>{{ item.policy_no || '-' }}</td><td><span class="table-status" :class="insuranceDueSoon(item.end_date) ? 'neutral' : 'success'">{{ item.end_date || 'Not recorded' }}</span></td></tr></tbody></table><p v-if="!vehicles.length" class="users-empty">No vehicles registered for this LGA.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'driver-records'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Driver</th><th>Vehicle</th></tr></thead><tbody><tr v-for="item in assigned" :key="item.name"><td><strong>{{ item.employee }}</strong></td><td>{{ item.name }} — {{ item.make }} {{ item.model }}</td></tr></tbody></table><p v-if="!assigned.length" class="users-empty">No drivers currently assigned to a vehicle.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Driver</th><th>Vehicle</th></tr></thead><tbody><tr v-for="item in assigned" :key="item.name" v-record="{ doctype: 'Vehicle', name: item.name }"><td><strong>{{ item.employee }}</strong></td><td>{{ item.name }} — {{ item.make }} {{ item.model }}</td></tr></tbody></table><p v-if="!assigned.length" class="users-empty">No drivers currently assigned to a vehicle.</p></div>
   </template>
 </template>

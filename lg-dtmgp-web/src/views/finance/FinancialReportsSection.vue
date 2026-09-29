@@ -78,6 +78,6 @@ watch(fiscalYear, () => { loaded.delete("trial-balance"); loadTab(activeItem.val
   </template>
 
   <template v-else-if="activeItem === 'general-ledger-report'">
-    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Date</th><th>Account</th><th>Debit</th><th>Credit</th><th>Voucher</th></tr></thead><tbody><tr v-for="row in glEntries" :key="row.name"><td>{{ row.posting_date }}</td><td>{{ row.account }}</td><td>{{ money(row.debit) }}</td><td>{{ money(row.credit) }}</td><td>{{ row.voucher_type }} {{ row.voucher_no }}</td></tr></tbody></table><p v-if="!glEntries.length" class="users-empty">No general ledger postings for this LGA yet.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Date</th><th>Account</th><th>Debit</th><th>Credit</th><th>Voucher</th></tr></thead><tbody><tr v-for="row in glEntries" :key="row.name" v-record="{ doctype: 'GL Entry', name: row.name }"><td>{{ row.posting_date }}</td><td>{{ row.account }}</td><td>{{ money(row.debit) }}</td><td>{{ money(row.credit) }}</td><td>{{ row.voucher_type }} {{ row.voucher_no }}</td></tr></tbody></table><p v-if="!glEntries.length" class="users-empty">No general ledger postings for this LGA yet.</p></div>
   </template>
 </template>

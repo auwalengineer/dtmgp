@@ -25,7 +25,7 @@ watch(() => route.params.item, (item) => { activeItem.value = item && String(ite
 
   <template v-else-if="activeItem === 'audit-exceptions' && auditExceptions">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Unverified staff</h3></div>
-    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Verification status</th></tr></thead><tbody><tr v-for="item in auditExceptions.unverified" :key="item.name"><td>{{ item.employee_name }}</td><td>{{ item.dtmgp_verification_status || 'Pending' }}</td></tr></tbody></table><p v-if="!auditExceptions.unverified.length" class="users-empty">No unverified staff.</p></div>
+    <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Employee</th><th>Verification status</th></tr></thead><tbody><tr v-for="item in auditExceptions.unverified" :key="item.name" v-record="{ doctype: 'Employee', name: item.name }"><td>{{ item.employee_name }}</td><td>{{ item.dtmgp_verification_status || 'Pending' }}</td></tr></tbody></table><p v-if="!auditExceptions.unverified.length" class="users-empty">No unverified staff.</p></div>
   </template>
 
   <template v-else-if="activeItem === 'duplicate-records' && auditExceptions">
