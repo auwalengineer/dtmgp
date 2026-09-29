@@ -61,6 +61,12 @@ REPORT_COLUMNS = {
 REPORT_GATES = {"hr.payroll": require_payroll_access, "hr.staff-audit": require_staff_audit_access}
 
 
+def _safe_csv_cell(value):
+	if isinstance(value, str) and value.startswith(("=", "+", "-", "@")):
+		return f"'{value}"
+	return value
+
+
 @frappe.whitelist(methods=["POST"])
 def export_report(report_id, title, purpose, columns, rows, company=None):
 	domain = (report_id or "").split(".", 1)[0]
@@ -87,7 +93,7 @@ def export_report(report_id, title, purpose, columns, rows, company=None):
 	output = io.StringIO()
 	writer = csv.writer(output)
 	writer.writerow(columns)
-	writer.writerows(rows)
+	writer.writerows([[_safe_csv_cell(value) for value in row] for row in rows])
 	record_event(
 		"data_export", f"{title} exported", company=selected_company,
 		metadata={"purpose": purpose, "report_id": report_id, "row_count": len(rows), "classification": "Internal"},

@@ -20,10 +20,11 @@ class TestReportExports(FrappeTestCase):
 	def test_export_has_approved_layout_and_audit_event(self, _access, _companies, audit):
 		result = export_report(
 			"hr.staff-strength", "Staff Strength Report", "Monthly management review",
-			["Department", "Staff"], [["Finance", 12]], "Test LGA",
+			["Department", "Staff"], [["Finance", 12], ["=DANGEROUS()", 1]], "Test LGA",
 		)
 		self.assertIn("Department,Staff", result["content"])
-		self.assertEqual(result["row_count"], 1)
+		self.assertIn("'=DANGEROUS()", result["content"])
+		self.assertEqual(result["row_count"], 2)
 		audit.assert_called_once()
 
 	@patch("dtmgp.api.v1.report_exports.get_requested_companies", return_value=["Test LGA"])
