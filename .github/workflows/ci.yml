@@ -161,3 +161,17 @@ jobs:
 
       - name: Audit production dependencies
         run: npm audit --omit=dev
+
+      # ADR-004: the frontend is an immutable, content-hashed artifact promoted across
+      # dev/staging/prod without rebuilding -- publish the exact bytes this workflow
+      # verified (typecheck, unit tests, Playwright, asset integrity, dependency audit
+      # all passed against this build) so a release can deploy this artifact verbatim
+      # instead of rebuilding from source at deploy time. Named by commit SHA so the
+      # same commit never silently produces two different published artifacts.
+      - name: Publish build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist-${{ github.sha }}
+          path: lg-dtmgp-web/dist
+          if-no-files-found: error
+          retention-days: 90

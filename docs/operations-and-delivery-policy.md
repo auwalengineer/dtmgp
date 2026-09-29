@@ -180,7 +180,21 @@ Every pull request must eventually enforce:
 - A build-integrity check proving every asset referenced by `index.html` exists.
 - Review of migrations, fixtures, permission changes, retention changes, and new external data flows.
 
-Current gap: CI covers backend installation/tests, Python lint/security checks, Vue type-check/tests/build, explicit 23-LGA seed assertions, and frontend asset integrity. Browser tests will be added when critical integrated journeys are available.
+Current gap: CI covers backend installation/tests, Python lint/security checks, Vue type-check/tests/build, explicit 23-LGA seed assertions, frontend asset integrity, and Playwright browser/accessibility journeys (`.github/workflows/ci.yml`'s frontend job runs `test:e2e`, currently `tests/e2e/authorization.spec.ts`'s authorization-denial and critical-impact axe checks). Frontend builds are now published as an immutable, commit-addressed CI artifact (`frontend-dist-<sha>`) rather than built and discarded. Remaining: expand Playwright coverage beyond authorization denial (see `docs/implementation-status.md`'s P1 item 4), and apply the branch-protection configuration below to `main`/`develop` — the required-status-check names now exist in CI, but the repository setting itself is a GitHub administrative action outside source control, not something this repo's files alone can enforce.
+
+### Required branch protection (apply in GitHub; not enforceable from source control)
+
+The following is the concrete configuration to apply to `main` and `develop` under Settings → Branches → Branch protection rules — this is the "evidence" a release/security reviewer checks for, since no file in this repository can force GitHub to apply it:
+
+- Require a pull request before merging, with at least one approving review, and dismiss stale approvals when new commits are pushed.
+- Require status checks to pass before merging, specifically the three jobs `.github/workflows/ci.yml` and `.github/workflows/linter.yml` produce: **Secret scan**, **Server**, **Vue**, and the linter workflow's pre-commit/Semgrep/pip-audit job.
+- Require branches to be up to date with the base branch before merging.
+- Do not allow force pushes or branch deletion.
+- Require conversation resolution before merging.
+- Restrict who can push directly to `main`/`develop` (merges only, via approved pull request).
+- Include administrators in these restrictions (no bypass for repo admins), unless an explicitly documented emergency-change procedure requires a temporary exception.
+
+A repository admin can apply this via `gh api repos/<owner>/<repo>/branches/main/protection -X PUT --input -` with a JSON payload matching the checklist above (`required_status_checks`, `required_pull_request_reviews`, `enforce_admins`, `restrictions`, `allow_force_pushes: false`, `allow_deletions: false`); this is intentionally not scripted into this repository, since applying it requires the admin's own authenticated `gh`/GitHub App credentials and is a one-time-per-branch administrative action, not a build step.
 
 ## Release policy
 
