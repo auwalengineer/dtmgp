@@ -44,7 +44,7 @@ export function printReportDocument(report: PrintableReport) {
     footer { position: fixed; right: 0; bottom: -10mm; left: 0; display: flex; justify-content: space-between; border-top: 1px solid #aebdb5; padding-top: 4px; color: #66736c; font-size: 7.5pt; }
     footer .page::after { content: "Page " counter(page) " of " counter(pages); }
   </style></head><body>
-    <header><img src="${escapeHtml(window.location.origin)}/benue-govt-logo.jpeg" alt="Benue State Government emblem"><div><h1>Benue State Local Government Administration</h1><h2>${escapeHtml(report.title)}</h2><p>${escapeHtml(report.lga || "Statewide")} &bull; ${orientation === "landscape" ? "Landscape" : "Portrait"}</p></div><div></div></header>
+    <header><img src="${escapeHtml(window.location.origin)}/benue-govt-logo.jpeg" alt="Benue State Government emblem"><div><h1>Benue State Local Government Administration</h1><h2>${escapeHtml(report.title)}</h2><p>${escapeHtml(report.lga || "Statewide")}</p></div><div></div></header>
     <section class="meta"><span><strong>Generated:</strong> ${escapeHtml(generated)} (WAT)</span><span><strong>Records:</strong> ${report.rows.length}</span></section>
     ${filterMarkup}<table><thead><tr>${report.columns.map(column => `<th>${escapeHtml(column)}</th>`).join("")}</tr></thead><tbody>${bodyRows}</tbody></table>
     <footer><span>LG-DTMGP &bull; Internal</span><span class="page"></span></footer>
