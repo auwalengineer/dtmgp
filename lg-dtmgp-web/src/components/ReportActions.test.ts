@@ -9,10 +9,14 @@ describe("ReportActions", () => {
     expect(wrapper.get("button[disabled]").text()).toContain("Export CSV");
   });
 
-  it("opens print from the report toolbar", async () => {
-    const print = vi.spyOn(window, "print").mockImplementation(() => undefined);
+  it("opens a dedicated print document from the report toolbar", async () => {
+    const write = vi.fn();
+    const close = vi.fn();
+    const open = vi.spyOn(window, "open").mockReturnValue({ document: { write, close } } as unknown as Window);
     const wrapper = mount(ReportActions, { props: { reportId: "hr.staff-strength", title: "Staff Strength", columns: ["Department", "Staff"], rows: [["Finance", 2]] } });
     await wrapper.get("button").trigger("click");
-    expect(print).toHaveBeenCalledOnce();
+    expect(open).toHaveBeenCalledOnce();
+    expect(write.mock.calls[0][0]).toContain("Benue State Local Government Administration");
+    expect(write.mock.calls[0][0]).toContain("Staff Strength");
   });
 });

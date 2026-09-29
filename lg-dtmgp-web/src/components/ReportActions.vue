@@ -3,17 +3,18 @@ import { Download, Printer } from "@lucide/vue";
 import { ref } from "vue";
 
 import { apiRequest } from "@/services/api";
+import { printReportDocument } from "@/services/reportPrint";
 
-const props = defineProps<{ reportId: string; title: string; columns: string[]; rows: unknown[][]; company?: string }>();
+const props = defineProps<{ reportId: string; title: string; columns: string[]; rows: unknown[][]; company?: string; filters?: Record<string, string | number | null | undefined> }>();
 const exportOpen = ref(false);
 const purpose = ref("");
 const exporting = ref(false);
 const error = ref("");
 
 function printReport() {
-  document.body.classList.add("printing-report");
-  window.print();
-  window.setTimeout(() => document.body.classList.remove("printing-report"), 250);
+  error.value = "";
+  try { printReportDocument({ title: props.title, columns: props.columns, rows: props.rows, lga: props.company, filters: props.filters }); }
+  catch (reason) { error.value = reason instanceof Error ? reason.message : "Unable to prepare report for printing"; }
 }
 
 async function exportReport() {
@@ -42,6 +43,7 @@ async function exportReport() {
     <button class="secondary-action" type="button" @click="printReport"><Printer :size="16" /> Print</button>
     <button class="secondary-action" type="button" :disabled="!rows.length" @click="exportOpen = true"><Download :size="16" /> Export CSV</button>
   </div>
+  <p v-if="error && !exportOpen" class="login-error" role="alert">{{ error }}</p>
   <div v-if="exportOpen" class="modal-backdrop" @click.self="exportOpen = false">
     <form class="user-modal" @submit.prevent="exportReport">
       <h2>Export {{ title }}</h2>

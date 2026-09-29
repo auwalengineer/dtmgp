@@ -4,6 +4,7 @@ import { computed, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 
 import { apiRequest } from "@/services/api";
+import { printReportDocument } from "@/services/reportPrint";
 import { useSessionStore } from "@/stores/session";
 import { formatMetric, scoreLabel, type AlertItem, type Dashboard, type MapPoint, type Metric, type Scorecard, type TrendMonth } from "./analytics/types";
 
@@ -13,7 +14,16 @@ const dashboard = ref<Dashboard | null>(null);
 const scorecards = ref<Scorecard[]>([]);
 const trends = ref<TrendMonth[]>([]);
 const alerts = ref<AlertItem[]>([]);
-function printReport() { window.print(); }
+function printReport() {
+  if (!dashboard.value) return;
+  printReportDocument({
+    title: title.value || "Executive Report",
+    lga: dashboard.value.scope || session.activeLga,
+    filters: { From: fromDate.value, To: toDate.value },
+    columns: ["Metric", "Domain", "Value", "Format", "Source", "Freshness"],
+    rows: dashboard.value.metrics.map(metric => [metric.label, metric.domain, metric.value, metric.format, metric.source, metric.freshness.status]),
+  });
+}
 const points = ref<MapPoint[]>([]);
 const loading = ref(true);
 const error = ref("");

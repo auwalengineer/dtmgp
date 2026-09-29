@@ -49,7 +49,7 @@ const exportData = computed(() => {
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
-  <ReportActions :report-id="exportData.id" :title="ITEM_LABELS[activeItem]" :columns="exportData.columns" :rows="exportData.rows" :company="session.activeLga" />
+  <ReportActions :report-id="exportData.id" :title="ITEM_LABELS[activeItem]" :columns="exportData.columns" :rows="exportData.rows" :company="session.activeLga" :filters="fiscalYear ? { 'Fiscal year': fiscalYear } : { Period: 'All time' }" />
 
   <template v-if="activeItem === 'budget-performance-report'">
     <div class="directory-toolbar"><h3 style="margin:0;flex:1">Budget performance report</h3><label>Fiscal year<select v-model="fiscalYear"><option value="" disabled>Select year</option><option v-for="year in fiscalYears" :key="year">{{ year }}</option></select></label></div>
