@@ -46,3 +46,29 @@ class DTMGPAssetVerification(ScopedProjectsDocument):
 
 	def validate_record(self):
 		_validate_company_link(self, "asset", "Asset")
+
+
+class DTMGPProjectProposal(ScopedProjectsDocument):
+	def validate_record(self):
+		if self.department and frappe.db.get_value("Department", self.department, "company") != self.company:
+			frappe.throw("Department must belong to the selected LGA")
+		if self.expected_end_date and self.expected_start_date and frappe.utils.getdate(self.expected_end_date) < frappe.utils.getdate(self.expected_start_date):
+			frappe.throw("Expected End cannot be before Expected Start")
+		if self.status in {"Approved", "Converted"} and not self.approval_reference:
+			frappe.throw("Approval Reference is required for an approved proposal")
+
+
+class DTMGPAssetDisposal(ScopedProjectsDocument):
+	def validate_record(self):
+		_validate_company_link(self, "asset", "Asset")
+		if self.status == "Disposed" and (not self.approval_reference or not self.journal_entry or not self.disposal_date):
+			frappe.throw("Approval Reference, Journal Entry and Disposal Date are required before disposal")
+
+
+class DTMGPContractorDocument(ScopedProjectsDocument):
+	def validate_record(self):
+		if self.expiry_date and self.issue_date and frappe.utils.getdate(self.expiry_date) < frappe.utils.getdate(self.issue_date):
+			frappe.throw("Expiry Date cannot be before Issue Date")
+		file_doc = frappe.db.get_value("File", {"file_url": self.file}, "is_private") if self.file else None
+		if not file_doc:
+			frappe.throw("Contractor documents must be uploaded as private files")

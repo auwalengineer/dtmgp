@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import ItemTabs from "../shared/ItemTabs.vue";
@@ -13,11 +13,18 @@ const DEFAULT_ITEM = "project-map";
 const route = useRoute();
 const activeItem = ref(String(route.params.item || "") in ITEM_LABELS ? String(route.params.item) : DEFAULT_ITEM);
 watch(() => route.params.item, (item) => { activeItem.value = item && String(item) in ITEM_LABELS ? String(item) : DEFAULT_ITEM; });
+const activePoints = computed(() => activeItem.value === "asset-map" ? props.mapsData.assets : activeItem.value === "inspection-map" ? props.mapsData.inspections : props.mapsData.projects);
+const mapUrl = computed(() => {
+  const point = activePoints.value.find((item) => item.latitude && item.longitude);
+  if (!point) return "";
+  const lat = Number(point.latitude); const lon = Number(point.longitude); const pad = 0.03;
+  return `https://www.openstreetmap.org/export/embed.html?bbox=${lon-pad}%2C${lat-pad}%2C${lon+pad}%2C${lat+pad}&layer=mapnik&marker=${lat}%2C${lon}`;
+});
 </script>
 
 <template>
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
-  <p class="users-empty" style="background:#fff;border:1px solid var(--line);margin-bottom:16px;text-align:left;padding:12px 16px">These are the geo-tagged records in scope, each linking out to an external map -- an embedded map view isn't built into the workspace yet.</p>
+  <iframe v-if="mapUrl" :src="mapUrl" title="Scoped project and asset map" loading="lazy" style="border:1px solid var(--line);height:360px;margin-bottom:16px;width:100%"></iframe>
 
   <template v-if="activeItem === 'project-map'">
     <div class="staff-table-wrap"><table class="staff-table finance-table"><thead><tr><th>Project</th><th>Coordinates</th></tr></thead><tbody><tr v-for="item in mapsData.projects" :key="item.name"><td><strong>{{ item.project_name }}</strong></td><td><a :href="mapLink(item.latitude, item.longitude)" target="_blank" rel="noopener">{{ item.latitude }}, {{ item.longitude }}</a></td></tr></tbody></table><p v-if="!mapsData.projects.length" class="users-empty">No projects with a geo-tagged location yet.</p></div>

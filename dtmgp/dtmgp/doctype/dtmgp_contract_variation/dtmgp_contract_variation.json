@@ -1,9 +1,10 @@
 {
  "actions":[],"autoname":"format:CV-{YYYY}-{#####}","creation":"2026-09-21 00:00:00.000000","doctype":"DocType","engine":"InnoDB",
- "field_order":["company","contract","variation_type","requested_date","amount_change","days_change","status","description","approval_reference"],
+ "field_order":["company","contract","project","variation_type","requested_date","amount_change","days_change","status","description","approval_reference"],
  "fields":[
   {"fieldname":"company","fieldtype":"Link","in_list_view":1,"label":"LGA","options":"Company","reqd":1},
   {"fieldname":"contract","fieldtype":"Link","in_list_view":1,"label":"Contract","options":"DTMGP Contract","reqd":1},
+  {"fieldname":"project","fieldtype":"Link","in_list_view":1,"label":"Project","options":"Project"},
   {"fieldname":"variation_type","fieldtype":"Select","in_list_view":1,"label":"Variation Type","options":"Time Extension\nCost Variation\nScope Change","reqd":1},
   {"default":"Today","fieldname":"requested_date","fieldtype":"Date","label":"Requested Date","reqd":1},
   {"fieldname":"amount_change","fieldtype":"Currency","in_list_view":1,"label":"Amount Change"},

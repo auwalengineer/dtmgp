@@ -189,6 +189,7 @@ class DTMGPContractVariation(ScopedFinanceDocument):
 
 	def validate_record(self):
 		_validate_company_link(self, "contract", "DTMGP Contract")
+		_validate_company_link(self, "project", "Project")
 
 
 class DTMGPFinanceControlPolicy(ScopedFinanceDocument):

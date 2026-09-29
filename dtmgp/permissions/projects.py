@@ -25,6 +25,9 @@ def asset_maintenance_query(user=None): return _conditions("Asset Maintenance", 
 def vehicle_query(user=None): return _conditions("Vehicle", user)
 def project_inspection_query(user=None): return _conditions("DTMGP Project Inspection", user)
 def asset_verification_query(user=None): return _conditions("DTMGP Asset Verification", user)
+def project_proposal_query(user=None): return _conditions("DTMGP Project Proposal", user)
+def asset_disposal_query(user=None): return _conditions("DTMGP Asset Disposal", user)
+def contractor_document_query(user=None): return _conditions("DTMGP Contractor Document", user)
 
 
 def asset_maintenance_log_query(user=None):

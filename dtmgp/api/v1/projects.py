@@ -11,6 +11,9 @@ RECORD_FIELDS = {
 	"Vehicle": ["company", "make", "model", "last_odometer", "location", "employee", "insurance_company", "policy_no", "end_date"],
 	"DTMGP Project Inspection": ["company", "project", "scheduled_date", "inspector", "status", "latitude", "longitude", "findings"],
 	"DTMGP Asset Verification": ["company", "asset", "verification_date", "verified_by", "condition"],
+	"DTMGP Project Proposal": ["company", "title", "department", "location", "funding_source", "estimated_cost", "expected_start_date", "expected_end_date", "status", "approved_project", "approval_reference"],
+	"DTMGP Asset Disposal": ["company", "asset", "request_date", "disposal_method", "valuation_amount", "status", "approval_reference", "journal_entry", "disposal_date", "proceeds"],
+	"DTMGP Contractor Document": ["company", "supplier", "document_type", "reference_number", "issue_date", "expiry_date", "file", "classification", "retention_category", "verification_status"],
 }
 EDITABLE_FIELDS = {
 	"Asset": {"company", "asset_name", "item_code", "asset_category", "location", "custodian", "department", "purchase_date", "gross_purchase_amount", "available_for_use_date", "asset_owner"},
@@ -19,6 +22,9 @@ EDITABLE_FIELDS = {
 	"Vehicle": {"company", "license_plate", "make", "model", "last_odometer", "acquisition_date", "location", "employee", "chassis_no", "vehicle_value", "insurance_company", "policy_no", "start_date", "end_date", "fuel_type", "uom", "color", "wheels", "doors"},
 	"DTMGP Project Inspection": {"company", "project", "scheduled_date", "inspector", "status", "latitude", "longitude", "photo_evidence", "findings", "recommendation", "exception_reason"},
 	"DTMGP Asset Verification": {"company", "asset", "verification_date", "verified_by", "condition", "remarks"},
+	"DTMGP Project Proposal": {"company", "title", "department", "location", "funding_source", "estimated_cost", "expected_start_date", "expected_end_date", "status", "business_case", "approval_reference"},
+	"DTMGP Asset Disposal": {"company", "asset", "request_date", "disposal_method", "reason", "valuation_amount", "status", "approval_reference", "journal_entry", "disposal_date", "proceeds"},
+	"DTMGP Contractor Document": {"company", "supplier", "document_type", "reference_number", "issue_date", "expiry_date", "file", "classification", "retention_category", "verification_status"},
 }
 
 # Status filters the frontend is allowed to request per doctype (an allowlist, not a
@@ -429,3 +435,18 @@ def get_reports(company=None):
 		"assets": asset_counts,
 		"fleet": {"vehicle_count": frappe.db.count("Vehicle", filters=fleet_filters), "total_fuel_cost": flt(fuel_cost)},
 	}
+
+
+@frappe.whitelist()
+def get_project_financials(company=None):
+	require_projects_access()
+	companies = get_requested_companies(company)
+	projects = frappe.get_all("Project", filters={"company": ["in", companies]}, fields=["name", "project_name", "company"], order_by="project_name")
+	rows = []
+	for project in projects:
+		budget = frappe.db.sql("""select coalesce(sum(ba.budget_amount), 0) from `tabBudget Account` ba
+			inner join `tabBudget` b on b.name=ba.parent where b.docstatus=1 and b.project=%s""", project.name)[0][0]
+		actual = frappe.db.sql("select coalesce(sum(debit-credit), 0) from `tabGL Entry` where is_cancelled=0 and project=%s and company=%s", (project.name, project.company))[0][0]
+		rows.append({**project, "budget": flt(budget), "actual": flt(actual), "drawdown": flt(actual / budget * 100) if budget else 0})
+	variations = frappe.get_all("DTMGP Contract Variation", filters={"company": ["in", companies], "project": ["is", "set"]}, fields=["name", "project", "contract", "variation_type", "amount_change", "days_change", "status", "approval_reference"], order_by="modified desc")
+	return {"projects": rows, "variations": variations}

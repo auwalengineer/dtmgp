@@ -14,7 +14,7 @@ RECORD_FIELDS = {
 	"DTMGP Audit Query": ["company", "query_date", "query_type", "severity", "subject", "assigned_to", "response_due_date", "status"],
 	"DTMGP Allocation": ["company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "status"],
 	"DTMGP Contract": ["company", "title", "procurement_case", "contractor", "contract_value", "start_date", "end_date", "status", "completion_certificate_reference"],
-	"DTMGP Contract Variation": ["company", "contract", "variation_type", "requested_date", "amount_change", "days_change", "status"],
+	"DTMGP Contract Variation": ["company", "contract", "project", "variation_type", "requested_date", "amount_change", "days_change", "status"],
 	# Consumed by _validate_approval_limit below but had no CRUD surface anywhere --
 	# System Administration's Workflow Setup section is the entry point for it.
 	"DTMGP Approval Limit": ["company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"],
@@ -31,7 +31,7 @@ EDITABLE_FIELDS = {
 	"DTMGP Audit Query": {"company", "query_date", "query_type", "severity", "reference_doctype", "reference_name", "subject", "finding", "recommendation", "assigned_to", "response_due_date", "management_response", "resolution"},
 	"DTMGP Allocation": {"company", "fiscal_year", "tier", "source", "tranche_period", "amount", "expected_date", "received_date", "bank_reference", "distributions", "remarks"},
 	"DTMGP Contract": {"company", "title", "procurement_case", "contractor", "contract_value", "start_date", "end_date", "completion_certificate_reference", "milestones", "description"},
-	"DTMGP Contract Variation": {"company", "contract", "variation_type", "requested_date", "amount_change", "days_change", "description", "approval_reference"},
+	"DTMGP Contract Variation": {"company", "contract", "project", "variation_type", "requested_date", "amount_change", "days_change", "description", "approval_reference"},
 	"DTMGP Approval Limit": {"company", "transaction_type", "approving_role", "minimum_amount", "maximum_amount", "active"},
 	"DTMGP Finance Control Policy": {"company", "policy_type", "version", "status", "effective_from", "legal_authority", "chart_template", "reconciliation_frequency", "variance_tolerance", "voucher_print_format", "notes"},
 	"DTMGP Bank Signatory": {"company", "bank_account", "user", "signatory_role", "mandate_group", "valid_from", "valid_to", "status", "approval_reference"},

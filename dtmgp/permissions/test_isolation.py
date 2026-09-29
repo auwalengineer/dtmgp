@@ -119,6 +119,8 @@ class TestCrossLGAIsolation(FrappeTestCase):
 				"legal_authority": "Test",
 				"rate_type": "Fixed",
 				"default_rate": 100,
+				"valid_from": "2026-01-01",
+				"approval_status": "Approved",
 			}
 		).insert(ignore_permissions=True)
 

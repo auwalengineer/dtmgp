@@ -187,6 +187,9 @@ permission_query_conditions = {
 	"Vehicle Log": "dtmgp.permissions.projects.vehicle_log_query",
 	"DTMGP Project Inspection": "dtmgp.permissions.projects.project_inspection_query",
 	"DTMGP Asset Verification": "dtmgp.permissions.projects.asset_verification_query",
+	"DTMGP Project Proposal": "dtmgp.permissions.projects.project_proposal_query",
+	"DTMGP Asset Disposal": "dtmgp.permissions.projects.asset_disposal_query",
+	"DTMGP Contractor Document": "dtmgp.permissions.projects.contractor_document_query",
 }
 #
 has_permission = {
@@ -236,6 +239,9 @@ has_permission = {
 	"Vehicle Log": "dtmgp.permissions.projects.vehicle_log_has_permission",
 	"DTMGP Project Inspection": "dtmgp.permissions.projects.has_permission",
 	"DTMGP Asset Verification": "dtmgp.permissions.projects.has_permission",
+	"DTMGP Project Proposal": "dtmgp.permissions.projects.has_permission",
+	"DTMGP Asset Disposal": "dtmgp.permissions.projects.has_permission",
+	"DTMGP Contractor Document": "dtmgp.permissions.projects.has_permission",
 }
 
 doc_events = {

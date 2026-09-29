@@ -63,6 +63,13 @@ def get_scorecards(from_date=None, to_date=None):
 
 
 @frappe.whitelist()
+def get_analytics_controls():
+	require_analytics_access(statewide=True)
+	items = frappe.get_all("DTMGP Analytics Control", fields=["name", "control_type", "company", "title", "status", "kpi_key", "weight", "warning_threshold", "critical_threshold", "endpoint_url", "auth_type", "data_sharing_agreement", "accepted_role", "accepted_by", "accepted_on", "evidence", "notes"], order_by="control_type, modified desc")
+	return {"items": items, "active_integrations": sum(1 for item in items if item.control_type == "External Integration" and item.status == "Active"), "approved_acceptances": sum(1 for item in items if item.control_type == "Staging Acceptance" and item.status == "Approved")}
+
+
+@frappe.whitelist()
 def get_trends(company=None, months=6):
 	require_analytics_access()
 	companies = get_requested_companies(company)
@@ -218,7 +225,13 @@ def _scorecard(company, period):
 	missing = [label for label, value in zip(["statutory returns", "resolution actions", "projects", "staff verification", "revenue assessments"], values) if value is None]
 	stale = [source for source in ("DTMGP Statutory Return", "DTMGP Resolution Action", "Project", "Employee", "DTMGP Revenue Assessment") if _freshness(source, [company])["status"] == "stale"]
 	complete = not missing and not stale
-	return {"company": company, "score": round(sum(values) / len(values), 1) if complete else None, "rank": None, "completeness": round((len(values) - len(missing)) / len(values) * 100), "missing": missing, "stale": stale, "metrics": {"returns": values[0], "actions": values[1], "projects": values[2], "workforce": values[3], "revenue": values[4]}}
+	metric_names = ["returns", "actions", "projects", "workforce", "revenue"]
+	configured = frappe.get_all("DTMGP Analytics Control", filters={"control_type": "KPI Configuration", "status": ["in", ["Approved", "Active"]]}, fields=["kpi_key", "weight"])
+	weights = {row.kpi_key: flt(row.weight) for row in configured}
+	if set(weights) != set(metric_names) or not sum(weights.values()):
+		weights = {key: 20 for key in metric_names}
+	score = sum(value * weights[key] for key, value in zip(metric_names, values)) / sum(weights.values()) if complete else None
+	return {"company": company, "score": round(score, 1) if score is not None else None, "rank": None, "completeness": round((len(values) - len(missing)) / len(values) * 100), "missing": missing, "stale": stale, "metrics": dict(zip(metric_names, values)), "weights": weights}
 
 
 def _count(doctype, companies, filters=None):
