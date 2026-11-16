@@ -1,11 +1,45 @@
 import frappe
 from frappe.model.document import Document
-from frappe.utils import getdate, now_datetime
+from frappe.utils import add_years, getdate, now_datetime
 
 from dtmgp.finance import require_roles, validate_lga
 from dtmgp.permissions.scope import HR_MANAGE_ROLES
+from dtmgp.setup.security import (
+	EMPLOYEE_BVN_FIELD,
+	EMPLOYEE_FIRST_APPOINTMENT_FIELD,
+	EMPLOYEE_NIN_FIELD,
+	EMPLOYEE_RETIRE_BY_AGE_FIELD,
+	EMPLOYEE_RETIRE_BY_SERVICE_FIELD,
+	RETIREMENT_AGE_YEARS,
+	RETIREMENT_SERVICE_YEARS,
+)
 
 RESTRICTED_HR_ROLES = {"System Manager", "State Administrator", "LGA Administrator", "HR Officer"}
+
+
+def validate_employee_record(doc, method=None):
+	"""Employee doc_event (validate). Guards the identity numbers and derives the
+	retirement dates so imported nominal-roll rows can't carry stale/hand-typed values."""
+	for fieldname, label in ((EMPLOYEE_BVN_FIELD, "BVN"), (EMPLOYEE_NIN_FIELD, "NIN")):
+		value = (doc.get(fieldname) or "").strip()
+		# Both are 11-digit numbers; this also catches spreadsheet mangling such as "2.22E+10".
+		if value and not (value.isdigit() and len(value) == 11):
+			frappe.throw(f"{label} must be exactly 11 digits (got {value!r})")
+		doc.set(fieldname, value or None)
+
+	first_appointment = doc.get(EMPLOYEE_FIRST_APPOINTMENT_FIELD) or doc.date_of_joining
+	present_appointment = doc.get("dtmgp_date_of_present_appointment")
+	if first_appointment and present_appointment and getdate(present_appointment) < getdate(first_appointment):
+		frappe.throw("Date of Present APPT cannot be before Date of 1st APPT")
+
+	by_age = add_years(getdate(doc.date_of_birth), RETIREMENT_AGE_YEARS) if doc.date_of_birth else None
+	by_service = add_years(getdate(first_appointment), RETIREMENT_SERVICE_YEARS) if first_appointment else None
+	doc.set(EMPLOYEE_RETIRE_BY_AGE_FIELD, by_age)
+	doc.set(EMPLOYEE_RETIRE_BY_SERVICE_FIELD, by_service)
+	# Only fill an empty Date Of Retirement; an explicitly set one (e.g. an approved extension) wins.
+	candidates = [d for d in (by_age, by_service) if d]
+	if candidates and not doc.date_of_retirement:
+		doc.date_of_retirement = min(candidates)
 
 
 class RestrictedHRDocument(Document):

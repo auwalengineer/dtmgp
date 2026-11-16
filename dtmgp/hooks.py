@@ -285,6 +285,7 @@ doc_events = {
 	"Staffing Plan": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
 	"Employee Transfer": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
 	"Employee Promotion": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
+	"Employee": {"validate": "dtmgp.hr.validate_employee_record"},
 	"Employee Separation": {"on_submit": "dtmgp.audit.audit_hr_change", "on_cancel": "dtmgp.audit.audit_hr_change"},
 	"Project": {"on_update": "dtmgp.audit.audit_projects_change", "after_insert": "dtmgp.audit.audit_projects_change"},
 	"Asset": {"on_submit": "dtmgp.audit.audit_projects_change", "on_cancel": "dtmgp.audit.audit_projects_change", "on_update": "dtmgp.audit.audit_projects_change"},

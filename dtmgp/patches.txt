@@ -9,3 +9,4 @@ dtmgp.patches.v1_0.add_lga_profiles
 dtmgp.patches.v1_0.add_finance_permissions
 dtmgp.patches.v1_0.add_finance_module_extensions
 dtmgp.patches.v1_0.add_system_administration_permissions
+dtmgp.patches.v1_0.add_employee_nominal_roll_fields
