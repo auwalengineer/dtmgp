@@ -1,4 +1,5 @@
 import frappe
+from frappe.custom.doctype.custom_field.custom_field import create_custom_fields
 from frappe.custom.doctype.property_setter.property_setter import make_property_setter
 
 from dtmgp.setup.organization import BENUE_LGAS, PARENT_COMPANY
@@ -9,6 +10,28 @@ USER_LGA_FIELD = "dtmgp_lga"
 EMPLOYEE_GRADE_FIELD = "dtmgp_grade_level"
 EMPLOYEE_VERIFICATION_FIELD = "dtmgp_verification_status"
 EMPLOYEE_SEPARATION_EXIT_TYPE_FIELD = "dtmgp_exit_type"
+EMPLOYEE_BVN_FIELD = "dtmgp_bvn"
+EMPLOYEE_NIN_FIELD = "dtmgp_nin"
+EMPLOYEE_FIRST_APPOINTMENT_FIELD = "dtmgp_date_of_first_appointment"
+EMPLOYEE_RETIRE_BY_AGE_FIELD = "dtmgp_retire_year_by_age"
+EMPLOYEE_RETIRE_BY_SERVICE_FIELD = "dtmgp_retire_year_by_appointment"
+# Public Service Rules: retire at 60 years of age or 35 years of pensionable service, whichever comes first.
+RETIREMENT_AGE_YEARS = 60
+RETIREMENT_SERVICE_YEARS = 35
+NIGERIAN_BANKS = (
+	"AB Microfinance Bank Nigeria Limited", "Accion Microfinance Bank Limited", "Access Bank Plc",
+	"Addosser Microfinance Bank Limited", "Advans La Fayette Microfinance Bank Limited", "Baobab Microfinance Bank Limited",
+	"Citibank Nigeria Limited", "Coronation Merchant Bank", "Ecobank Nigeria Plc", "Ekondo Microfinance Bank Limited",
+	"Fidelity Bank Plc", "Fina Trust Microfinance Bank Limited", "First Bank of Nigeria Limited", "First City Monument Bank Plc",
+	"FSDH Merchant Bank", "Globus Bank Limited", "Guaranty Trust Bank Plc", "Hasal Microfinance Bank Limited", "Heritage Bank Plc",
+	"Jaiz Bank Plc", "Keystone Bank Limited", "Kuda Microfinance Bank Limited", "LapO Microfinance Bank Limited", "Lotus Bank Limited",
+	"Mutual Trust Microfinance Bank Limited", "Nova Merchant Bank", "Optimus Bank Limited", "OKPOGA MICROFINANCE BANK",
+	"Parallex Bank Limited", "Peace Microfinance Bank Limited", "Polaris Bank Limited", "PremiumTrust Bank Limited",
+	"Providus Bank Limited", "Renmoney Microfinance Bank Limited", "Sparkle Microfinance Bank Limited", "Stanbic IBTC Bank Plc",
+	"Standard Chartered Bank Nigeria Limited", "Sterling Bank Plc", "SunTrust Bank Nigeria Limited", "TAJ Bank Limited",
+	"Titan Trust Bank Limited", "Union Bank of Nigeria Plc", "United Bank for Africa Plc", "Unity Bank Plc",
+	"VFD Microfinance Bank Limited", "Wema Bank Plc", "Zenith Bank Plc",
+)
 PROJECT_LOCATION_FIELD = "dtmgp_location"
 PROJECT_FUNDING_SOURCE_FIELD = "dtmgp_funding_source"
 VEHICLE_COMPANY_FIELD = "company"
@@ -109,28 +132,81 @@ def _ensure_user_lga_field():
 	).insert()
 
 
-def _ensure_employee_fields():
-	fields = (
-		{
-			"fieldname": EMPLOYEE_GRADE_FIELD,
-			"label": "Grade Level",
-			"fieldtype": "Data",
-			"insert_after": "designation",
-			"in_list_view": 1,
-		},
+def _employee_fields():
+	"""Employee extensions for the Benue LG personnel record (nominal roll upload
+	template). Labels match the template's column labels so Data Import auto-maps
+	them. Template columns that duplicate native fields are deliberately NOT added
+	again: "Bank" -> bank_name, "Account Number" -> bank_ac_no, "Phone Number" ->
+	cell_number, "File No" -> employee_number (see _ensure_employee_property_setters)."""
+	lga_options = "\n" + "\n".join(lga.name for lga in BENUE_LGAS)
+	return (
+		# Overview > Company Details: grade/step/rank/duty next to designation.
+		{"fieldname": EMPLOYEE_GRADE_FIELD, "label": "Grade Level", "fieldtype": "Data", "insert_after": "designation", "in_list_view": 1},
+		{"fieldname": "dtmgp_step", "label": "Step", "fieldtype": "Int", "insert_after": EMPLOYEE_GRADE_FIELD},
+		{"fieldname": "dtmgp_rank", "label": "Rank", "fieldtype": "Data", "insert_after": "dtmgp_step"},
+		{"fieldname": "dtmgp_schedule_of_duty", "label": "Schedule of Duty", "fieldtype": "Data", "insert_after": "dtmgp_rank"},
 		{
 			"fieldname": EMPLOYEE_VERIFICATION_FIELD,
 			"label": "Verification Status",
 			"fieldtype": "Select",
 			"options": "Pending\nVerified\nReview Due",
 			"default": "Pending",
-			"insert_after": EMPLOYEE_GRADE_FIELD,
+			"insert_after": "dtmgp_schedule_of_duty",
 			"in_list_view": 1,
 		},
+		# Joining tab: appointment history and derived retirement dates (see dtmgp.hr.validate_employee_record).
+		{"fieldname": "dtmgp_appointment_section", "label": "Appointment & Retirement", "fieldtype": "Section Break", "insert_after": "date_of_retirement"},
+		{"fieldname": EMPLOYEE_FIRST_APPOINTMENT_FIELD, "label": "Date of 1st APPT", "fieldtype": "Date", "insert_after": "dtmgp_appointment_section"},
+		{"fieldname": "dtmgp_date_of_present_appointment", "label": "Date of Present APPT", "fieldtype": "Date", "insert_after": EMPLOYEE_FIRST_APPOINTMENT_FIELD},
+		{"fieldname": "dtmgp_appointment_cb", "fieldtype": "Column Break", "insert_after": "dtmgp_date_of_present_appointment"},
+		{
+			"fieldname": EMPLOYEE_RETIRE_BY_AGE_FIELD, "label": "Retire Year by Age", "fieldtype": "Date", "read_only": 1,
+			"insert_after": "dtmgp_appointment_cb", "description": f"Date of Birth + {RETIREMENT_AGE_YEARS} years.",
+		},
+		{
+			"fieldname": EMPLOYEE_RETIRE_BY_SERVICE_FIELD, "label": "Retire Year by APPT", "fieldtype": "Date", "read_only": 1,
+			"insert_after": EMPLOYEE_RETIRE_BY_AGE_FIELD, "description": f"Date of 1st APPT + {RETIREMENT_SERVICE_YEARS} years.",
+		},
+		# Salary tab > Bank Details: pay point.
+		{"fieldname": "dtmgp_local_govt_of_payment", "label": "Local Govt. of Payment (pay point)", "fieldtype": "Select", "options": lga_options, "insert_after": "iban"},
+		# Personal Details tab: origin + identity verification.
+		{"fieldname": "dtmgp_origin_section", "label": "Origin", "fieldtype": "Section Break", "insert_after": "place_of_issue"},
+		{"fieldname": "dtmgp_lg_of_origin", "label": "LG of Origin", "fieldtype": "Data", "insert_after": "dtmgp_origin_section"},
+		{"fieldname": "dtmgp_origin_cb", "fieldtype": "Column Break", "insert_after": "dtmgp_lg_of_origin"},
+		{"fieldname": "dtmgp_council_ward", "label": "Council Ward", "fieldtype": "Data", "insert_after": "dtmgp_origin_cb"},
+		{"fieldname": "dtmgp_identity_section", "label": "Identity Verification (BVN / NIN)", "fieldtype": "Section Break", "insert_after": "dtmgp_council_ward"},
+		{"fieldname": EMPLOYEE_BVN_FIELD, "label": "BVN", "fieldtype": "Data", "length": 11, "insert_after": "dtmgp_identity_section"},
+		{"fieldname": EMPLOYEE_NIN_FIELD, "label": "NIN Number", "fieldtype": "Data", "length": 11, "insert_after": EMPLOYEE_BVN_FIELD},
+		{"fieldname": "dtmgp_name_match_status", "label": "Name Match Status", "fieldtype": "Data", "insert_after": EMPLOYEE_NIN_FIELD},
+		{"fieldname": "dtmgp_identity_cb", "fieldtype": "Column Break", "insert_after": "dtmgp_name_match_status"},
+		{
+			"fieldname": "dtmgp_nin_verification_status", "label": "NIN Verification Status", "fieldtype": "Select",
+			"options": "Pending\nVerified\nFailed", "default": "Pending", "insert_after": "dtmgp_identity_cb",
+		},
+		{"fieldname": "dtmgp_last_verification_attempt", "label": "Last Verification Attempt", "fieldtype": "Date", "insert_after": "dtmgp_nin_verification_status"},
+		{"fieldname": "dtmgp_nin_verification_date", "label": "Verification Date", "fieldtype": "Date", "insert_after": "dtmgp_last_verification_attempt"},
+		{"fieldname": "dtmgp_verification_remarks", "label": "Verification Remarks", "fieldtype": "Small Text", "insert_after": "dtmgp_nin_verification_date"},
+		# Profile tab: free-text qualification summary ahead of the structured Education table.
+		{"fieldname": "dtmgp_qualifications", "label": "Qualifications", "fieldtype": "Small Text", "insert_after": "bio"},
 	)
-	for field in fields:
-		if not frappe.db.exists("Custom Field", {"dt": "Employee", "fieldname": field["fieldname"]}):
-			frappe.get_doc({"doctype": "Custom Field", "dt": "Employee", **field}).insert()
+
+
+def _ensure_employee_fields():
+	# update=True so re-running (migrate/patch) applies changed placement or options
+	# to fields that already exist, instead of silently skipping them.
+	create_custom_fields({"Employee": _employee_fields()}, update=True)
+	_ensure_employee_property_setters()
+
+
+def _ensure_employee_property_setters():
+	"""Reuse native Employee fields for template columns that already have a home:
+	label employee_number as the LG "File No", and restrict bank_name to the
+	recognised Nigerian bank list (Data -> Select is a supported customization)."""
+	make_property_setter("Employee", "employee_number", "label", "File No", "Data", validate_fields_for_doctype=False)
+	make_property_setter("Employee", "bank_name", "label", "Bank", "Data", validate_fields_for_doctype=False)
+	make_property_setter("Employee", "bank_name", "fieldtype", "Select", "Data", validate_fields_for_doctype=False)
+	make_property_setter("Employee", "bank_name", "options", "\n" + "\n".join(NIGERIAN_BANKS), "Text", validate_fields_for_doctype=False)
+	make_property_setter("Employee", "bank_ac_no", "label", "Account Number", "Data", validate_fields_for_doctype=False)
 
 
 def _ensure_employee_separation_fields():

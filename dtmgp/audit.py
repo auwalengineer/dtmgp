@@ -3,7 +3,7 @@ from copy import deepcopy
 import frappe
 from frappe.utils import now_datetime
 
-SENSITIVE_KEYS = {"password", "pwd", "secret", "token", "csrf_token", "authorization", "bank_ac_no", "iban"}
+SENSITIVE_KEYS = {"password", "pwd", "secret", "token", "csrf_token", "authorization", "bank_ac_no", "iban", "dtmgp_bvn", "dtmgp_nin"}
 
 
 def record_event(event_type, summary, outcome="Success", company=None, reference_doctype=None, reference_name=None, metadata=None):
