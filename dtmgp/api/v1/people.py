@@ -4,6 +4,8 @@ from frappe.utils import cint, nowdate
 from dtmgp.permissions.scope import can_manage_hr, get_requested_companies, require_hr_access
 from dtmgp.setup.security import EMPLOYEE_GRADE_FIELD, EMPLOYEE_VERIFICATION_FIELD
 
+IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
+
 
 @frappe.whitelist()
 def get_dashboard(company=None):
@@ -47,7 +49,7 @@ def list_employees(company=None, search=None, department=None, status=None, page
 		or_filters = {"employee_name": ["like", term], "name": ["like", term], "designation": ["like", term]}
 	fields = [
 		"name", "employee_name", "first_name", "last_name", "company", "department", "designation",
-		"status", "date_of_joining", "gender", "date_of_birth", EMPLOYEE_GRADE_FIELD, EMPLOYEE_VERIFICATION_FIELD,
+		"status", "date_of_joining", "gender", "date_of_birth", "image", EMPLOYEE_GRADE_FIELD, EMPLOYEE_VERIFICATION_FIELD,
 	]
 	items = frappe.get_all(
 		"Employee",
@@ -118,6 +120,29 @@ def save_employee(
 	return {"name": doc.name, "employee_name": doc.employee_name}
 
 
+@frappe.whitelist(methods=["POST"])
+def set_employee_image(employee, file_url=None):
+	"""Set (or clear, when file_url is empty) the native Employee.image photo.
+	The file must already be uploaded and attached to this same Employee —
+	upload_file checks Employee write permission, and a private attached File
+	inherits the Employee's LGA-scoped read permission — so a caller can't point
+	the photo at another record's (or another LGA's) file."""
+	require_hr_access(write=True)
+	doc = frappe.get_doc("Employee", employee)
+	_validate_company(doc.company)
+	if file_url:
+		attached = frappe.db.exists(
+			"File", {"file_url": file_url, "attached_to_doctype": "Employee", "attached_to_name": doc.name}
+		)
+		if not attached:
+			frappe.throw("Upload the photo to this employee record first")
+		if not file_url.lower().endswith(IMAGE_EXTENSIONS):
+			frappe.throw("Employee photo must be a JPG, PNG or WebP image")
+	doc.image = file_url or None
+	doc.save()
+	return {"name": doc.name, "image": doc.image}
+
+
 @frappe.whitelist()
 def get_employee_profile(employee):
 	"""Consolidated read view backing the Staff Profiles / Digital Personnel File /
@@ -128,7 +153,7 @@ def get_employee_profile(employee):
 	doc = frappe.get_doc("Employee", employee)
 	_validate_company(doc.company)
 	return {
-		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company,
+		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company, "image": doc.image,
 		"department": doc.department, "designation": doc.designation, "status": doc.status,
 		"gender": doc.gender, "date_of_birth": doc.date_of_birth, "date_of_joining": doc.date_of_joining,
 		"grade_level": doc.get(EMPLOYEE_GRADE_FIELD), "verification_status": doc.get(EMPLOYEE_VERIFICATION_FIELD),

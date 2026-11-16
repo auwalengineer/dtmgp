@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => {
       proxy: {
         "/api": { target: backendOrigin, changeOrigin: true },
         "/assets": { target: backendOrigin, changeOrigin: true },
+        // Employee photos and other attachments are served by Frappe (private ones are session-checked).
+        "/files": { target: backendOrigin, changeOrigin: true },
+        "/private": { target: backendOrigin, changeOrigin: true },
       },
     },
     preview: { host: "0.0.0.0", port: 4173 },

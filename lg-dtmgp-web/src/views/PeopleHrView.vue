@@ -221,7 +221,7 @@ watch(() => session.activeLga, loadModule, { immediate: true });
     <section class="hr-workspace">
       <nav class="hr-tabs" aria-label="People and HR views"><button v-for="tab in visibleTabs" :key="tab" :class="{ active: activeTab === tab }" @click="selectTab(tab)">{{ tab }}</button></nav>
 
-      <StaffSection v-if="activeTab === 'Staff directory'" :employees="employees" :total="total" :page="page" :page-size="pageSize" v-model:search="search" v-model:department="department" :department-options="options.departments" :can-manage="dashboard.can_manage" @apply-filters="applyFilters" @change-page="changePage" @edit-employee="openEditEmployee" />
+      <StaffSection v-if="activeTab === 'Staff directory'" :employees="employees" :total="total" :page="page" :page-size="pageSize" v-model:search="search" v-model:department="department" :department-options="options.departments" :can-manage="dashboard.can_manage" @apply-filters="applyFilters" @change-page="changePage" @edit-employee="openEditEmployee" @photo-changed="loadEmployees" />
 
       <VerificationSection v-else-if="activeTab === 'Verification'" :exercises="exercises" :active-exercise="activeExercise" :verification-records="verificationRecords" :can-manage="dashboard.can_manage" @new-exercise="openForm('exercise', { company: session.activeLga, title: '', cycle_start_date: today(), cycle_end_date: today() })" @select-exercise="selectExercise" @transition-exercise="transitionExercise" @new-record="openForm('record', { company: session.activeLga, exercise: activeExercise, employee: '', biometric_captured: 0 })" @review-record="reviewRecord" />
 

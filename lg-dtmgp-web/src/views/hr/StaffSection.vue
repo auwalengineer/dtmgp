@@ -1,18 +1,18 @@
 <script setup lang="ts">
-import { ChevronLeft, ChevronRight, FilePlus2, Pencil, Plus, Search } from "@lucide/vue";
+import { Camera, ChevronLeft, ChevronRight, FilePlus2, Pencil, Plus, Search, Trash2 } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
 import { apiRequest, uploadFile } from "@/services/api";
 
 import ItemTabs from "../shared/ItemTabs.vue";
+import EmployeeAvatar from "./EmployeeAvatar.vue";
 import type { Employee } from "./types";
-import { initials } from "./types";
 
 interface EmergencyContact { person_to_be_contacted: string | null; relation: string | null; emergency_phone_number: string | null }
 interface WorkHistoryRow { department: string | null; designation: string | null; branch: string | null; from_date: string | null; to_date: string | null }
 interface ExternalHistoryRow { company_name: string | null; designation: string | null; contact: string | null; total_experience: number | null }
-interface EmployeeProfile { name: string; employee_name: string; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
+interface EmployeeProfile { name: string; employee_name: string; image: string | null; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
 interface DocumentRow { name: string; file_name: string; file_url: string; is_private: number; creation: string }
 interface PersonnelFile { name: string; file_status: string; classification: string; retention_category: string; retention_review_date?: string; physical_file_reference?: string }
 interface NextOfKin { name: string; full_name: string; relationship: string; phone: string; alternate_phone?: string; email?: string; address?: string; is_primary: number; verified_on?: string }
@@ -23,7 +23,7 @@ const PROFILE_ITEMS = new Set(["staff-profiles", "digital-personnel-files", "emp
 defineProps<{ employees: Employee[]; total: number; page: number; pageSize: number; departmentOptions: string[]; canManage: boolean }>();
 const search = defineModel<string>("search", { required: true });
 const department = defineModel<string>("department", { required: true });
-defineEmits<{ "apply-filters": []; "change-page": [change: number]; "edit-employee": [employee: Employee] }>();
+const emit = defineEmits<{ "apply-filters": []; "change-page": [change: number]; "edit-employee": [employee: Employee]; "photo-changed": [] }>();
 
 const ITEM_LABELS: Record<string, string> = { "staff-directory": "Staff Directory", "staff-profiles": "Staff Profiles", "digital-personnel-files": "Digital Personnel Files", "employment-history": "Employment History", "next-of-kin": "Next of Kin", "staff-documents": "Staff Documents" };
 const DEFAULT_ITEM = "staff-directory";
@@ -98,6 +98,23 @@ async function saveRestrictedRecord() {
     await loadRestrictedRecords(selectedEmployee.value);
   } catch (reason) { recordError.value = reason instanceof Error ? reason.message : "Unable to save restricted personnel record"; }
 }
+const photoSaving = ref(false);
+const photoError = ref("");
+const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+async function savePhoto(file: File | null) {
+  if (!profile.value) return;
+  photoError.value = "";
+  if (file && !PHOTO_TYPES.includes(file.type)) { photoError.value = "Choose a JPG, PNG or WebP image"; return; }
+  photoSaving.value = true;
+  try {
+    // Private + attached to the Employee: the file inherits the Employee's LGA-scoped read permission.
+    const fileUrl = file ? (await uploadFile(file, { doctype: "Employee", docname: profile.value.name, isPrivate: true })).file_url : null;
+    const result = await apiRequest<{ image: string | null }>("/api/method/dtmgp.api.v1.people.set_employee_image", { method: "POST", body: JSON.stringify({ employee: profile.value.name, file_url: fileUrl }) });
+    profile.value.image = result.image;
+    emit("photo-changed");
+  } catch (reason) { photoError.value = reason instanceof Error ? reason.message : "Unable to update the photo"; }
+  finally { photoSaving.value = false; }
+}
 watch(selectedEmployee, (employee) => { loadProfile(employee); loadRestrictedRecords(employee); if (employee && DOCUMENT_ITEMS.has(activeItem.value)) ensureDocuments(employee); });
 watch(activeItem, (item) => { if (selectedEmployee.value && DOCUMENT_ITEMS.has(item)) ensureDocuments(selectedEmployee.value); });
 
@@ -110,7 +127,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
   <template v-if="activeItem === 'staff-directory'">
     <form class="directory-toolbar" @submit.prevent="$emit('apply-filters')"><label class="directory-search"><Search :size="17" /><input v-model="search" type="search" placeholder="Search name, ID or designation" /></label><select v-model="department" class="toolbar-select"><option value="">All departments</option><option v-for="item in departmentOptions" :key="item">{{ item }}</option></select><button class="secondary-action">Apply</button></form>
     <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Staff member</th><th>Department</th><th>Grade</th><th>Employment</th><th>Verification</th><th></th></tr></thead><tbody>
-      <tr v-for="person in employees" :key="person.name" v-record="{ doctype: 'Employee', name: person.name }"><td><div class="staff-person"><span>{{ initials(person.employee_name) }}</span><div><strong>{{ person.employee_name }}</strong><small>{{ person.name }} · {{ person.designation || "No designation" }}</small></div></div></td><td>{{ person.department || "Unassigned" }}</td><td>{{ person.dtmgp_grade_level || "-" }}</td><td><span class="table-status" :class="person.status === 'Active' ? 'success' : 'neutral'">{{ person.status }}</span></td><td><span class="verification-status" :class="person.dtmgp_verification_status === 'Verified' ? 'verified' : 'pending'">{{ person.dtmgp_verification_status || "Pending" }}</span></td><td><button v-if="canManage" class="icon-button" title="Edit employee" @click="$emit('edit-employee', person)"><Pencil :size="17" /></button></td></tr>
+      <tr v-for="person in employees" :key="person.name" v-record="{ doctype: 'Employee', name: person.name }"><td><div class="staff-person"><EmployeeAvatar :name="person.employee_name" :image="person.image" /><div><strong>{{ person.employee_name }}</strong><small>{{ person.name }} · {{ person.designation || "No designation" }}</small></div></div></td><td>{{ person.department || "Unassigned" }}</td><td>{{ person.dtmgp_grade_level || "-" }}</td><td><span class="table-status" :class="person.status === 'Active' ? 'success' : 'neutral'">{{ person.status }}</span></td><td><span class="verification-status" :class="person.dtmgp_verification_status === 'Verified' ? 'verified' : 'pending'">{{ person.dtmgp_verification_status || "Pending" }}</span></td><td><button v-if="canManage" class="icon-button" title="Edit employee" @click="$emit('edit-employee', person)"><Pencil :size="17" /></button></td></tr>
     </tbody></table><footer class="table-footer"><span>Showing {{ employees.length }} of {{ total }} staff</span><div><button :disabled="page === 1" @click="$emit('change-page', -1)"><ChevronLeft :size="14" /> Previous</button><button class="current">{{ page }}</button><button :disabled="page * pageSize >= total" @click="$emit('change-page', 1)">Next <ChevronRight :size="14" /></button></div></footer></div>
   </template>
 
@@ -122,6 +139,18 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
     <p v-if="recordError" class="login-error" role="alert">{{ recordError }}</p>
 
     <template v-else-if="profile && activeItem === 'staff-profiles'">
+      <div class="employee-photo-panel">
+        <EmployeeAvatar :name="profile.employee_name" :image="profile.image" large />
+        <div>
+          <strong>{{ profile.employee_name }}</strong>
+          <small>{{ profile.name }} · {{ profile.designation || "No designation" }}</small>
+          <div v-if="canManage" class="employee-photo-actions">
+            <label class="secondary-action" :aria-disabled="photoSaving"><Camera :size="15" /> {{ photoSaving ? "Saving..." : profile.image ? "Change photo" : "Upload photo" }}<input type="file" accept="image/jpeg,image/png,image/webp" hidden :disabled="photoSaving" @change="savePhoto(($event.target as HTMLInputElement).files?.[0] || null); ($event.target as HTMLInputElement).value = ''" /></label>
+            <button v-if="profile.image" type="button" class="secondary-action" :disabled="photoSaving" @click="savePhoto(null)"><Trash2 :size="15" /> Remove</button>
+          </div>
+          <p v-if="photoError" class="login-error" role="alert">{{ photoError }}</p>
+        </div>
+      </div>
       <div class="staff-table-wrap"><table class="staff-table"><tbody>
         <tr><td>Name</td><td>{{ profile.employee_name }}</td></tr>
         <tr><td>Department</td><td>{{ profile.department || '-' }}</td></tr>
