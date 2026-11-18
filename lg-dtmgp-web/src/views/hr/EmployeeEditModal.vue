@@ -35,6 +35,8 @@ const editSchema = z.object({
   values: z.record(z.string(), scalar),
   readonly: z.object({
     name: z.string(), employee_name: z.string(), company: z.string(), image: z.string().nullable().optional(),
+    // True when `image` is a Desk attachment standing in for an empty Image field.
+    image_from_attachment: z.boolean().optional(),
     dtmgp_retire_year_by_age: z.string().nullable().optional(), dtmgp_retire_year_by_appointment: z.string().nullable().optional(),
   }).passthrough(),
   pay_points: z.array(z.string()),
@@ -151,7 +153,7 @@ onBeforeUnmount(clearPendingPhoto);
           <p v-if="payload">{{ payload.readonly.employee_name }} · {{ payload.readonly.name }} · {{ payload.readonly.company.replace(" Local Government Area", " LGA") }}</p>
           <div v-if="payload && !showCamera" class="employee-edit-photo-actions">
             <button type="button" class="secondary-action" @click="showCamera = true"><Camera :size="15" /> {{ shownImage ? "Retake photo" : "Take photo" }}</button>
-            <button v-if="shownImage" type="button" class="secondary-action" @click="markPhotoRemoved"><Trash2 :size="15" /> Remove</button>
+            <button v-if="shownImage && (pendingPreview || !payload.readonly.image_from_attachment)" type="button" class="secondary-action" @click="markPhotoRemoved"><Trash2 :size="15" /> Remove</button>
             <button v-if="photoChanged" type="button" class="secondary-action" @click="undoPhotoChange"><Undo2 :size="15" /> Undo photo change</button>
             <small v-if="photoChanged">{{ removePhoto ? "Photo will be removed" : "New photo" }} — applied when you save</small>
           </div>
