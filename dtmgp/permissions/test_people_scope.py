@@ -7,6 +7,7 @@ from dtmgp.api.v1.people import (
 	get_dashboard,
 	get_employee_for_edit,
 	get_employee_profile,
+	get_form_options,
 	list_employees,
 	save_employee,
 	set_employee_image,
@@ -103,6 +104,44 @@ class TestPeopleScope(FrappeTestCase):
 		set_employee_image(employee, None)
 		self.assertIsNone(get_employee_profile(employee)["image"])
 		self.assertIsNone(list_employees(self.makurdi, search=employee)["items"][0].image)
+
+	def test_directory_filters_narrow_the_scoped_list(self):
+		tag = uuid4().hex[:8]
+		rows = {
+			"a": {"gender": "Female", "dtmgp_grade_level": "GL 08", "dtmgp_verification_status": "Verified", "status": "Active"},
+			"b": {"gender": "Male", "dtmgp_grade_level": "GL 12", "dtmgp_verification_status": None, "status": "Active"},
+			"c": {"gender": "Male", "dtmgp_grade_level": "GL 08", "dtmgp_verification_status": "Pending", "status": "Suspended"},
+		}
+		names = {}
+		for key, values in rows.items():
+			names[key] = frappe.get_doc({
+				"doctype": "Employee", "first_name": f"Filter{key}", "last_name": tag, "company": self.makurdi,
+				"gender": values["gender"], "date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01", "status": values["status"],
+				"dtmgp_grade_level": values["dtmgp_grade_level"],
+			}).insert().name
+			# Set directly so a never-verified record really has an empty status.
+			frappe.db.set_value("Employee", names[key], "dtmgp_verification_status", values["dtmgp_verification_status"])
+		other_lga = frappe.get_doc({
+			"doctype": "Employee", "first_name": "Filterx", "last_name": tag, "company": self.gboko, "gender": "Female",
+			"date_of_birth": "1990-01-01", "date_of_joining": "2020-01-01", "status": "Active", "dtmgp_grade_level": "GL 08",
+		}).insert().name
+
+		frappe.set_user(self.hr_officer.name)
+
+		def found(**filters):
+			return {row.name for row in list_employees(self.makurdi, search=tag, **filters)["items"]}
+
+		self.assertEqual(found(), set(names.values()))
+		self.assertNotIn(other_lga, found(gender="Female"))
+		self.assertEqual(found(gender="Female"), {names["a"]})
+		self.assertEqual(found(grade_level="GL 08"), {names["a"], names["c"]})
+		self.assertEqual(found(grade_level="GL 08", status="Suspended"), {names["c"]})
+		# "Pending" includes records with no verification status at all.
+		self.assertEqual(found(verification_status="Pending"), {names["b"], names["c"]})
+		self.assertEqual(list_employees(self.makurdi, search=tag, gender="Male")["total"], 2)
+		self.assertIn("GL 12", get_form_options(self.makurdi)["grade_levels"])
+		with self.assertRaises(frappe.ValidationError):
+			list_employees(self.makurdi, status="Retired")
 
 	def test_photo_cannot_be_set_across_lga(self):
 		employee = self._make_employee(self.gboko)

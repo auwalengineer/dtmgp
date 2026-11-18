@@ -71,3 +71,28 @@ test("HR role sees the overall employee dashboard without critical accessibility
   const results = await new AxeBuilder({ page }).analyze();
   expect(results.violations.filter(item => item.impact === "critical")).toEqual([]);
 });
+
+test("staff directory filters send their values to the server and stay accessible", async ({ page }) => {
+  await mockSession(page, "HR Officer", true);
+  const employee = { name: "HR-EMP-00001", employee_name: "Amina Bello", first_name: "Amina", last_name: "Bello", company: makurdi, department: "Finance", designation: "Officer", status: "Active", date_of_joining: "2020-01-01", date_of_birth: "1990-01-01", gender: "Female", image: null, dtmgp_grade_level: "GL 08", dtmgp_verification_status: "Verified" };
+  const listRequests: URLSearchParams[] = [];
+  await page.route("**/api/method/dtmgp.api.v1.people.get_dashboard**", route => route.fulfill({ json: { message: { total: 1, active: 1, verified: 1, on_leave: 0, needs_attention: 0, can_manage: false } } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.get_form_options**", route => route.fulfill({ json: { message: { departments: ["Finance"], designations: ["Officer"], genders: ["Male", "Female"], statuses: ["Active", "Inactive", "Suspended", "Left"], verification_statuses: ["Pending", "Verified", "Review Due"], grade_levels: ["GL 07", "GL 08"] } } }));
+  await page.route("**/api/method/dtmgp.api.v1.hr.list_lga_companies**", route => route.fulfill({ json: { message: [makurdi] } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.list_employees**", route => {
+    listRequests.push(new URL(route.request().url()).searchParams);
+    return route.fulfill({ json: { message: { items: [employee], total: 1, page: 1, page_size: 25 } } });
+  });
+  await page.goto("/people");
+  await page.getByRole("combobox", { name: "Gender" }).selectOption("Female");
+  await page.getByRole("combobox", { name: "Grade level" }).selectOption("GL 08");
+  await expect(page.getByRole("button", { name: "Clear filters (2)" })).toBeVisible();
+  await expect.poll(() => listRequests.at(-1)?.get("grade_level")).toBe("GL 08");
+  expect(listRequests.at(-1)?.get("gender")).toBe("Female");
+  const results = await new AxeBuilder({ page }).include(".directory-filters").analyze();
+  expect(results.violations.filter(item => item.impact === "critical" || item.impact === "serious")).toEqual([]);
+  await page.screenshot({ path: test.info().outputPath("directory-filters.png") });
+
+  await page.getByRole("button", { name: "Clear filters (2)" }).click();
+  await expect.poll(() => listRequests.at(-1)?.get("gender")).toBeNull();
+});

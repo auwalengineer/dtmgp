@@ -16,7 +16,8 @@ import ReportsSection from "./hr/ReportsSection.vue";
 import RetirementExitSection from "./hr/RetirementExitSection.vue";
 import StaffAuditSection from "./hr/StaffAuditSection.vue";
 import StaffSection from "./hr/StaffSection.vue";
-import type { AttendanceItem, AttendanceSummary, AuditExceptions, Dashboard, Department, Employee, Exercise, HRReports, Leave, LeaveBalance, Options, PayrollOverview, Position, Promotion, RetirementItem, Separation, StaffingPlan, Transfer, VerificationRecord } from "./hr/types";
+import type { AttendanceItem, AttendanceSummary, AuditExceptions, Dashboard, Department, DirectoryFilters, Employee, Exercise, HRReports, Leave, LeaveBalance, Options, PayrollOverview, Position, Promotion, RetirementItem, Separation, StaffingPlan, Transfer, VerificationRecord } from "./hr/types";
+import { emptyDirectoryFilters } from "./hr/types";
 import VerificationSection from "./hr/VerificationSection.vue";
 
 const TAB_LABELS = ["Staff directory", "Verification", "Establishment", "Postings & Transfers", "Promotions", "Leave", "Attendance", "Exit & Retirement", "Payroll", "Staff Audit", "Reports"] as const;
@@ -51,6 +52,7 @@ const auditExceptions = ref<AuditExceptions | null>(null);
 const hrReports = ref<HRReports | null>(null);
 const search = ref("");
 const department = ref("");
+const directoryFilters = ref<DirectoryFilters>(emptyDirectoryFilters());
 const page = ref(1);
 const total = ref(0);
 const pageSize = 25;
@@ -96,6 +98,7 @@ async function loadEmployees() {
   const params = new URLSearchParams({ company: session.activeLga, page: String(page.value), page_size: String(pageSize) });
   if (search.value.trim()) params.set("search", search.value.trim());
   if (department.value) params.set("department", department.value);
+  for (const [key, value] of Object.entries(directoryFilters.value)) if (value) params.set(key, value);
   const result = await apiRequest<{ items: Employee[]; total: number }>(`/api/method/dtmgp.api.v1.people.list_employees?${params}`);
   employees.value = result.items;
   total.value = result.total;
@@ -215,7 +218,7 @@ watch(() => session.activeLga, loadModule, { immediate: true });
     <section class="hr-workspace">
       <nav class="hr-tabs" aria-label="People and HR views"><button v-for="tab in visibleTabs" :key="tab" :class="{ active: activeTab === tab }" @click="selectTab(tab)">{{ tab }}</button></nav>
 
-      <StaffSection v-if="activeTab === 'Staff directory'" :employees="employees" :total="total" :page="page" :page-size="pageSize" v-model:search="search" v-model:department="department" :department-options="options.departments" :can-manage="dashboard.can_manage" @apply-filters="applyFilters" @change-page="changePage" :form-options="options" @employee-saved="loadEmployees" @photo-changed="loadEmployees" />
+      <StaffSection v-if="activeTab === 'Staff directory'" :employees="employees" :total="total" :page="page" :page-size="pageSize" v-model:search="search" v-model:department="department" v-model:filters="directoryFilters" :department-options="options.departments" :can-manage="dashboard.can_manage" @apply-filters="applyFilters" @change-page="changePage" :form-options="options" @employee-saved="loadEmployees" @photo-changed="loadEmployees" />
 
       <VerificationSection v-else-if="activeTab === 'Verification'" :exercises="exercises" :active-exercise="activeExercise" :verification-records="verificationRecords" :can-manage="dashboard.can_manage" @new-exercise="openForm('exercise', { company: session.activeLga, title: '', cycle_start_date: today(), cycle_end_date: today() })" @select-exercise="selectExercise" @transition-exercise="transitionExercise" @new-record="openForm('record', { company: session.activeLga, exercise: activeExercise, employee: '', biometric_captured: 0 })" @review-record="reviewRecord" />
 

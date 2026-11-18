@@ -1,6 +1,9 @@
 export interface Dashboard { total: number; active: number; verified: number; on_leave: number; needs_attention: number; can_manage: boolean }
 export interface Employee { name: string; employee_name: string; first_name: string; last_name: string; company: string; department: string | null; designation: string | null; status: string; date_of_joining: string; date_of_birth: string; gender: string; image?: string | null; dtmgp_grade_level: string; dtmgp_verification_status: string }
-export interface Options { departments: string[]; designations: string[]; genders: string[]; statuses: string[]; verification_statuses: string[] }
+export interface Options { departments: string[]; designations: string[]; genders: string[]; statuses: string[]; verification_statuses: string[]; grade_levels?: string[] }
+/** Staff-directory list filters; an empty string means "any". */
+export interface DirectoryFilters { status: string; gender: string; designation: string; grade_level: string; verification_status: string }
+export function emptyDirectoryFilters(): DirectoryFilters { return { status: "", gender: "", designation: "", grade_level: "", verification_status: "" }; }
 export interface Leave { name: string; employee: string; employee_name: string; leave_type: string; from_date: string; to_date: string; total_leave_days: number; status: string }
 export interface Department { name: string; department_name: string; company: string; employee_count: number }
 export interface StaffingPlan { name: string; company: string; department: string | null; from_date: string; to_date: string; docstatus: number; total_estimated_budget: number }

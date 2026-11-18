@@ -18,7 +18,7 @@ const uploadFile = vi.fn((_file: File, _params: Record<string, unknown>) => Prom
 vi.mock("@/services/api", () => ({ apiRequest: (...args: [string, RequestInit?]) => apiRequest(...args), uploadFile: (...args: [File, Record<string, unknown>]) => uploadFile(...args) }));
 
 import StaffSection from "./StaffSection.vue";
-import type { Employee } from "./types";
+import type { DirectoryFilters, Employee } from "./types";
 
 const CAPTURED = new File(["x"], "employee-photo.jpg", { type: "image/jpeg" });
 // Stands in for the real getUserMedia component, which jsdom can't run.
@@ -108,5 +108,31 @@ describe("StaffSection", () => {
     expect(wrapper.find(".employee-avatar.large img").attributes("src")).toBe("/private/files/amina.png");
     expect(wrapper.find(".camera-modal").exists()).toBe(false);
     expect(wrapper.emitted("photo-changed")).toHaveLength(1);
+  });
+
+  it("applies dropdown filters immediately and clears them all", async () => {
+    mockRouteParams = { section: "staff" };
+    const formOptions = { departments: [], designations: ["Officer"], genders: ["Male", "Female"], statuses: ["Active", "Left"], verification_statuses: ["Pending", "Verified"], grade_levels: ["GL 07", "GL 08"] };
+    const wrapper = mount(StaffSection, { props: { employees: EMPLOYEES, total: 1, page: 1, pageSize: 25, search: "", department: "", departmentOptions: ["Finance"], canManage: false, formOptions } });
+    expect(wrapper.find(".directory-clear").exists()).toBe(false);
+
+    await wrapper.get('select[aria-label="Gender"]').setValue("Female");
+    await wrapper.get('select[aria-label="Grade level"]').setValue("GL 08");
+    expect(wrapper.emitted("apply-filters")).toHaveLength(2);
+    const updates = wrapper.emitted("update:filters") as [DirectoryFilters][];
+    expect(updates.at(-1)?.[0]).toMatchObject({ gender: "Female", grade_level: "GL 08", status: "" });
+
+    await wrapper.setProps({ filters: updates.at(-1)?.[0], department: "Finance" });
+    expect(wrapper.get(".directory-clear").text()).toContain("Clear filters (3)");
+    await wrapper.get(".directory-clear").trigger("click");
+    expect((wrapper.emitted("update:filters") as [DirectoryFilters][]).at(-1)?.[0]).toEqual({ status: "", gender: "", designation: "", grade_level: "", verification_status: "" });
+    expect((wrapper.emitted("update:department") as string[][]).at(-1)?.[0]).toBe("");
+    expect(wrapper.emitted("apply-filters")).toHaveLength(3);
+  });
+
+  it("explains an empty filtered result", async () => {
+    mockRouteParams = { section: "staff" };
+    const wrapper = mount(StaffSection, { props: { employees: [], total: 0, page: 1, pageSize: 25, search: "", department: "Finance", departmentOptions: ["Finance"], canManage: false, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } } });
+    expect(wrapper.text()).toContain("No staff match these filters.");
   });
 });

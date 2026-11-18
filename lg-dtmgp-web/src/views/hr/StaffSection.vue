@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Camera, ChevronLeft, ChevronRight, FilePlus2, Pencil, Plus, Search, Trash2 } from "@lucide/vue";
+import { Camera, ChevronLeft, ChevronRight, FilePlus2, Pencil, Plus, Search, Trash2, X } from "@lucide/vue";
 import { computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 
@@ -9,7 +9,7 @@ import ItemTabs from "../shared/ItemTabs.vue";
 import EmployeeAvatar from "./EmployeeAvatar.vue";
 import CameraCapture from "./CameraCapture.vue";
 import EmployeeEditModal from "./EmployeeEditModal.vue";
-import type { Employee, Options } from "./types";
+import { emptyDirectoryFilters, type DirectoryFilters, type Employee, type Options } from "./types";
 
 interface EmergencyContact { person_to_be_contacted: string | null; relation: string | null; emergency_phone_number: string | null }
 interface WorkHistoryRow { department: string | null; designation: string | null; branch: string | null; from_date: string | null; to_date: string | null }
@@ -22,10 +22,32 @@ interface StaffDocument { name: string; document_type: string; document_date?: s
 
 const PROFILE_ITEMS = new Set(["staff-profiles", "digital-personnel-files", "employment-history", "next-of-kin", "staff-documents"]);
 
-defineProps<{ employees: Employee[]; total: number; page: number; pageSize: number; departmentOptions: string[]; canManage: boolean; formOptions: Options }>();
+const props = defineProps<{ employees: Employee[]; total: number; page: number; pageSize: number; departmentOptions: string[]; canManage: boolean; formOptions: Options }>();
 const search = defineModel<string>("search", { required: true });
 const department = defineModel<string>("department", { required: true });
+const filters = defineModel<DirectoryFilters>("filters", { default: emptyDirectoryFilters });
 const emit = defineEmits<{ "apply-filters": []; "change-page": [change: number]; "employee-saved": []; "photo-changed": [] }>();
+
+// Dropdown filters apply as soon as they change; the text search applies on Enter/Apply.
+const FILTER_FIELDS = computed(() => [
+  { key: "status" as const, label: "Employment status", any: "All statuses", options: props.formOptions.statuses },
+  { key: "gender" as const, label: "Gender", any: "All genders", options: props.formOptions.genders },
+  { key: "designation" as const, label: "Designation", any: "All designations", options: props.formOptions.designations },
+  { key: "grade_level" as const, label: "Grade level", any: "All grade levels", options: props.formOptions.grade_levels ?? [] },
+  { key: "verification_status" as const, label: "Verification", any: "Any verification", options: props.formOptions.verification_statuses },
+]);
+const activeFilterCount = computed(() => Object.values(filters.value).filter(Boolean).length + (department.value ? 1 : 0) + (search.value.trim() ? 1 : 0));
+function setFilter(key: keyof DirectoryFilters, value: string) {
+  filters.value = { ...filters.value, [key]: value };
+  emit("apply-filters");
+}
+function setDepartment(value: string) { department.value = value; emit("apply-filters"); }
+function clearFilters() {
+  filters.value = emptyDirectoryFilters();
+  department.value = "";
+  search.value = "";
+  emit("apply-filters");
+}
 
 const ITEM_LABELS: Record<string, string> = { "staff-directory": "Staff Directory", "staff-profiles": "Staff Profiles", "digital-personnel-files": "Digital Personnel Files", "employment-history": "Employment History", "next-of-kin": "Next of Kin", "staff-documents": "Staff Documents" };
 const DEFAULT_ITEM = "staff-directory";
@@ -139,10 +161,17 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
   <ItemTabs :items="Object.entries(ITEM_LABELS).map(([id, label]) => ({ id, label }))" :active-id="activeItem" @select="activeItem = $event" />
 
   <template v-if="activeItem === 'staff-directory'">
-    <form class="directory-toolbar" @submit.prevent="$emit('apply-filters')"><label class="directory-search"><Search :size="17" /><input v-model="search" type="search" placeholder="Search name, ID or designation" /></label><select v-model="department" class="toolbar-select"><option value="">All departments</option><option v-for="item in departmentOptions" :key="item">{{ item }}</option></select><button class="secondary-action">Apply</button></form>
+    <form class="directory-toolbar" @submit.prevent="$emit('apply-filters')"><label class="directory-search"><Search :size="17" /><input v-model="search" type="search" placeholder="Search name, ID or designation" /></label><select :value="department" class="toolbar-select" aria-label="Department" @change="setDepartment(($event.target as HTMLSelectElement).value)"><option value="">All departments</option><option v-for="item in departmentOptions" :key="item">{{ item }}</option></select><button class="secondary-action">Apply</button></form>
+    <div class="directory-filters" role="group" aria-label="Filter staff">
+      <select v-for="field in FILTER_FIELDS" :key="field.key" class="toolbar-select" :class="{ active: filters[field.key] }" :aria-label="field.label" :title="field.label" :value="filters[field.key]" @change="setFilter(field.key, ($event.target as HTMLSelectElement).value)">
+        <option value="">{{ field.any }}</option>
+        <option v-for="item in field.options" :key="item" :value="item">{{ item }}</option>
+      </select>
+      <button v-if="activeFilterCount" type="button" class="secondary-action directory-clear" @click="clearFilters"><X :size="14" /> Clear filters ({{ activeFilterCount }})</button>
+    </div>
     <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Staff member</th><th>Department</th><th>Grade</th><th>Employment</th><th>Verification</th><th></th></tr></thead><tbody>
       <tr v-for="person in employees" :key="person.name" v-record="{ doctype: 'Employee', name: person.name }"><td><div class="staff-person"><EmployeeAvatar :name="person.employee_name" :image="person.image" /><div><strong>{{ person.employee_name }}</strong><small>{{ person.name }} · {{ person.designation || "No designation" }}</small></div></div></td><td>{{ person.department || "Unassigned" }}</td><td>{{ person.dtmgp_grade_level || "-" }}</td><td><span class="table-status" :class="person.status === 'Active' ? 'success' : 'neutral'">{{ person.status }}</span></td><td><span class="verification-status" :class="person.dtmgp_verification_status === 'Verified' ? 'verified' : 'pending'">{{ person.dtmgp_verification_status || "Pending" }}</span></td><td><button v-if="canManage" class="icon-button" title="Edit employee" @click="editingEmployee = person.name"><Pencil :size="17" /></button></td></tr>
-    </tbody></table><footer class="table-footer"><span>Showing {{ employees.length }} of {{ total }} staff</span><div><button :disabled="page === 1" @click="$emit('change-page', -1)"><ChevronLeft :size="14" /> Previous</button><button class="current">{{ page }}</button><button :disabled="page * pageSize >= total" @click="$emit('change-page', 1)">Next <ChevronRight :size="14" /></button></div></footer></div>
+    </tbody></table><p v-if="!employees.length" class="users-empty">{{ activeFilterCount ? "No staff match these filters." : "No staff records in scope yet." }}</p><footer class="table-footer"><span>Showing {{ employees.length }} of {{ total }} staff{{ activeFilterCount ? " matching filters" : "" }}</span><div><button :disabled="page === 1" @click="$emit('change-page', -1)"><ChevronLeft :size="14" /> Previous</button><button class="current">{{ page }}</button><button :disabled="page * pageSize >= total" @click="$emit('change-page', 1)">Next <ChevronRight :size="14" /></button></div></footer></div>
   </template>
 
   <template v-else-if="showPicker">

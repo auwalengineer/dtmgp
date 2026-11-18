@@ -203,3 +203,8 @@ body.drawer-open { overflow: hidden; }
   body { background: #fff; color: #000; }
 }
 .employee-avatar { align-items: center; background: var(--green-100); color: var(--green-900); display: flex; flex: 0 0 34px; font-size: .68rem; font-weight: 800; height: 34px; justify-content: center; overflow: hidden; width: 34px; }.employee-avatar img { height: 100%; object-fit: cover; width: 100%; }.employee-avatar.large { flex-basis: 96px; font-size: 1.6rem; height: 96px; width: 96px; }.employee-photo-panel { align-items: center; display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 16px; }.employee-photo-panel > div { display: flex; flex-direction: column; gap: 4px; }.employee-photo-panel small { color: var(--muted); font-size: .72rem; }.employee-photo-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }.employee-photo-actions label { cursor: pointer; }.camera-modal { max-width: 640px; }.employee-saved-notice { background: var(--green-100); color: var(--green-900); font-size: .8rem; margin: 12px 0 0; padding: 10px 14px; }
+.directory-filters { align-items: center; display: flex; flex-wrap: wrap; gap: 8px; padding: 0 20px 14px; }
+.directory-filters .toolbar-select { flex: 1 1 150px; max-width: 200px; }
+.directory-filters .toolbar-select.active { border-color: var(--green-700); box-shadow: inset 0 0 0 1px var(--green-700); }
+.directory-clear { align-items: center; display: inline-flex; gap: 6px; white-space: nowrap; }
+@media (max-width: 720px) { .directory-filters { padding: 0 12px 12px; } .directory-filters .toolbar-select { flex-basis: calc(50% - 4px); max-width: none; } }

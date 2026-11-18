@@ -35,6 +35,8 @@ EDITABLE_EMPLOYEE_FIELDS = (
 READONLY_EMPLOYEE_FIELDS = ("name", "employee_name", "company", "image", EMPLOYEE_RETIRE_BY_AGE_FIELD, EMPLOYEE_RETIRE_BY_SERVICE_FIELD)
 REQUIRED_EMPLOYEE_FIELDS = ("first_name", "gender", "date_of_birth", "date_of_joining", "status")
 EMPLOYEE_GENDERS = ("Male", "Female")
+EMPLOYEE_STATUSES = ("Active", "Inactive", "Suspended", "Left")
+VERIFICATION_STATUSES = ("Pending", "Verified", "Review Due")
 SALARY_MODES = ("Bank", "Cash", "Cheque")
 BANK_FIELDS = ("salary_mode", "bank_name", "bank_ac_no")
 
@@ -106,16 +108,45 @@ def employee_photo_fields(doc):
 	return {"image": attached, "image_from_attachment": bool(attached)}
 
 
+def _directory_filters(companies, department, status, gender, designation, grade_level, verification_status):
+	"""Staff-directory filters. Enumerated values are checked against their allowed
+	options so a bad value is an error, not a silently empty list."""
+	filters = [["company", "in", companies]]
+	for value, allowed, label in (
+		(status, EMPLOYEE_STATUSES, "employment status"),
+		(gender, EMPLOYEE_GENDERS, "gender"),
+		(verification_status, VERIFICATION_STATUSES, "verification status"),
+	):
+		if value and value not in allowed:
+			frappe.throw(f"Unknown {label}: {value}")
+	if department:
+		filters.append(["department", "=", department])
+	if status:
+		filters.append(["status", "=", status])
+	if gender:
+		filters.append(["gender", "=", gender])
+	if designation:
+		filters.append(["designation", "=", designation])
+	if grade_level:
+		filters.append([EMPLOYEE_GRADE_FIELD, "=", grade_level])
+	if verification_status == "Pending":
+		# Records never verified have no status at all; the UI shows those as Pending too.
+		# Frappe applies ifnull() for "not in", so empty values match.
+		filters.append([EMPLOYEE_VERIFICATION_FIELD, "not in", [s for s in VERIFICATION_STATUSES if s != "Pending"]])
+	elif verification_status:
+		filters.append([EMPLOYEE_VERIFICATION_FIELD, "=", verification_status])
+	return filters
+
+
 @frappe.whitelist()
-def list_employees(company=None, search=None, department=None, status=None, page=1, page_size=25):
+def list_employees(
+	company=None, search=None, department=None, status=None, page=1, page_size=25,
+	gender=None, designation=None, grade_level=None, verification_status=None,
+):
 	require_hr_access()
 	companies = get_requested_companies(company)
 	page, page_size = max(cint(page), 1), min(max(cint(page_size), 1), 100)
-	filters = {"company": ["in", companies]}
-	if department:
-		filters["department"] = department
-	if status:
-		filters["status"] = status
+	filters = _directory_filters(companies, department, status, gender, designation, grade_level, verification_status)
 	or_filters = None
 	if search and search.strip():
 		term = f"%{search.strip()}%"
@@ -151,9 +182,23 @@ def get_form_options(company=None):
 		),
 		"designations": frappe.get_all("Designation", pluck="name", order_by="designation_name asc"),
 		"genders": list(EMPLOYEE_GENDERS),
-		"statuses": ["Active", "Inactive", "Suspended", "Left"],
-		"verification_statuses": ["Pending", "Verified", "Review Due"],
+		"statuses": list(EMPLOYEE_STATUSES),
+		"verification_statuses": list(VERIFICATION_STATUSES),
+		"grade_levels": _grade_levels(companies),
 	}
+
+
+def _grade_levels(companies):
+	"""Grade levels actually recorded in scope (the field is free text), in GL order."""
+	values = frappe.get_all(
+		"Employee", filters={"company": ["in", companies], EMPLOYEE_GRADE_FIELD: ["is", "set"]},
+		pluck=EMPLOYEE_GRADE_FIELD, distinct=True,
+	)
+
+	def order(value):
+		return (int("".join(ch for ch in value if ch.isdigit()) or 0), value)
+
+	return sorted({value.strip() for value in values if value and value.strip()}, key=order)
 
 
 @frappe.whitelist(methods=["POST"])
