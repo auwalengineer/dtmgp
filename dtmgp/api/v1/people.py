@@ -1,11 +1,35 @@
 import frappe
 from frappe.utils import cint, nowdate
 
+from dtmgp.audit import record_event
 from dtmgp.permissions.scope import can_manage_hr, get_requested_companies, require_hr_access
-from dtmgp.setup.security import EMPLOYEE_GRADE_FIELD, EMPLOYEE_VERIFICATION_FIELD
+from dtmgp.setup.organization import BENUE_LGAS
+from dtmgp.setup.security import (
+	EMPLOYEE_GRADE_FIELD,
+	EMPLOYEE_RETIRE_BY_AGE_FIELD,
+	EMPLOYEE_RETIRE_BY_SERVICE_FIELD,
+	EMPLOYEE_VERIFICATION_FIELD,
+)
 from dtmgp.workforce import get_workforce_summary
 
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
+
+# Fields an HR manager may edit from the Vue app. Deliberately excluded:
+# - company (LGA): moves between LGAs go through Employee Transfer, not an edit;
+# - bank_name / bank_ac_no / iban: salary-redirection risk, owned by payroll;
+# - NIN verification outcome fields: set by the verification process, not by hand;
+# - derived retire-by dates: recomputed in dtmgp.hr.validate_employee_record.
+EDITABLE_EMPLOYEE_FIELDS = (
+	"first_name", "middle_name", "last_name", "gender", "date_of_birth", "date_of_joining",
+	"department", "designation", "status", "relieving_date", "reason_for_leaving",
+	"employee_number", EMPLOYEE_GRADE_FIELD, "dtmgp_step", "dtmgp_rank", "dtmgp_schedule_of_duty",
+	EMPLOYEE_VERIFICATION_FIELD, "dtmgp_date_of_first_appointment", "dtmgp_date_of_present_appointment",
+	"date_of_retirement", "dtmgp_local_govt_of_payment",
+	"cell_number", "personal_email", "person_to_be_contacted", "relation", "emergency_phone_number",
+	"dtmgp_lg_of_origin", "dtmgp_council_ward", "dtmgp_bvn", "dtmgp_nin", "dtmgp_qualifications",
+)
+READONLY_EMPLOYEE_FIELDS = ("name", "employee_name", "company", "image", EMPLOYEE_RETIRE_BY_AGE_FIELD, EMPLOYEE_RETIRE_BY_SERVICE_FIELD)
+REQUIRED_EMPLOYEE_FIELDS = ("first_name", "gender", "date_of_birth", "date_of_joining", "status")
 
 
 @frappe.whitelist()
@@ -127,6 +151,55 @@ def save_employee(
 	else:
 		doc.insert()
 	return {"name": doc.name, "employee_name": doc.employee_name}
+
+
+@frappe.whitelist()
+def get_employee_for_edit(employee):
+	"""Current values of the editable allowlist (plus read-only context) for the
+	edit form. Manage-only, since it includes identity numbers (BVN/NIN)."""
+	require_hr_access(write=True)
+	doc = frappe.get_doc("Employee", employee)
+	_validate_company(doc.company)
+	return {
+		"values": {field: doc.get(field) for field in EDITABLE_EMPLOYEE_FIELDS},
+		"readonly": {field: doc.get(field) for field in READONLY_EMPLOYEE_FIELDS},
+		"pay_points": [lga.name for lga in BENUE_LGAS],
+	}
+
+
+@frappe.whitelist(methods=["POST"])
+def update_employee(employee, values):
+	"""Apply an allowlisted partial update to an existing Employee. Unknown keys are
+	rejected rather than ignored so a client can't silently think it changed e.g. the LGA."""
+	require_hr_access(write=True)
+	values = frappe.parse_json(values) if isinstance(values, str) else (values or {})
+	unknown = sorted(set(values) - set(EDITABLE_EMPLOYEE_FIELDS))
+	if unknown:
+		frappe.throw(f"These fields cannot be edited here: {', '.join(unknown)}")
+	doc = frappe.get_doc("Employee", employee)
+	_validate_company(doc.company)
+	for field in REQUIRED_EMPLOYEE_FIELDS:
+		if field in values and not str(values[field] or "").strip():
+			frappe.throw(f"{doc.meta.get_label(field)} is required")
+	if values.get("dtmgp_local_govt_of_payment") and values["dtmgp_local_govt_of_payment"] not in {lga.name for lga in BENUE_LGAS}:
+		frappe.throw("Local Govt. of Payment must be one of the Benue LGAs")
+
+	changed = []
+	for field, value in values.items():
+		value = value.strip() if isinstance(value, str) else value
+		value = None if value == "" else value
+		if _normalized(doc.get(field)) != _normalized(value):
+			doc.set(field, value)
+			changed.append(field)
+	if not changed:
+		return {"name": doc.name, "employee_name": doc.employee_name, "changed": []}
+	doc.save()
+	# Field names only, never values: the set includes BVN/NIN and contact details.
+	record_event(
+		"hr_record_change", f"Employee {doc.name} updated", company=doc.company,
+		reference_doctype="Employee", reference_name=doc.name, metadata={"changed_fields": changed},
+	)
+	return {"name": doc.name, "employee_name": doc.employee_name, "changed": changed}
 
 
 @frappe.whitelist(methods=["POST"])
@@ -251,6 +324,11 @@ def _employees(companies):
 		filters={"company": ["in", companies]},
 		fields=["name", "status", EMPLOYEE_VERIFICATION_FIELD],
 	)
+
+
+def _normalized(value):
+	# DB-loaded dates are date objects and ints are ints; the client sends strings.
+	return None if value is None or value == "" else str(value)
 
 
 def _validate_company(company):

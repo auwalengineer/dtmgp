@@ -24,7 +24,7 @@ const EMPLOYEES: Employee[] = [{ name: "HR-0001", employee_name: "Amina Bello", 
 
 function mountSection(routeItem?: string) {
   mockRouteParams = routeItem ? { section: "staff", item: routeItem } : { section: "staff" };
-  return mount(StaffSection, { props: { employees: EMPLOYEES, total: 1, page: 1, pageSize: 25, search: "", department: "", departmentOptions: ["Finance"], canManage: true } });
+  return mount(StaffSection, { props: { employees: EMPLOYEES, total: 1, page: 1, pageSize: 25, search: "", department: "", departmentOptions: ["Finance"], canManage: true, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } } });
 }
 
 describe("StaffSection", () => {
@@ -77,7 +77,7 @@ describe("StaffSection", () => {
 
   it("shows the employee photo in the directory and falls back to initials", async () => {
     const withPhoto = { ...EMPLOYEES[0], image: "/files/amina.png" };
-    const wrapper = mount(StaffSection, { props: { employees: [withPhoto, { ...EMPLOYEES[0], name: "HR-0002", employee_name: "Tersoo Iorliam" }], total: 2, page: 1, pageSize: 25, search: "", department: "", departmentOptions: [], canManage: false } });
+    const wrapper = mount(StaffSection, { props: { employees: [withPhoto, { ...EMPLOYEES[0], name: "HR-0002", employee_name: "Tersoo Iorliam" }], total: 2, page: 1, pageSize: 25, search: "", department: "", departmentOptions: [], canManage: false, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } } });
     const avatars = wrapper.findAll(".employee-avatar");
     expect(avatars[0].find("img").attributes("src")).toBe("/files/amina.png");
     expect(avatars[1].find("img").exists()).toBe(false);
