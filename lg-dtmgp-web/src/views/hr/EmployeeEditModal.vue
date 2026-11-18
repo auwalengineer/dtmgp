@@ -32,7 +32,7 @@ type FormValues = Record<Field, string>;
 
 const scalar = z.union([z.string(), z.number(), z.null()]).optional();
 const editSchema = z.object({
-  values: z.record(scalar),
+  values: z.record(z.string(), scalar),
   readonly: z.object({
     name: z.string(), employee_name: z.string(), company: z.string(), image: z.string().nullable().optional(),
     dtmgp_retire_year_by_age: z.string().nullable().optional(), dtmgp_retire_year_by_appointment: z.string().nullable().optional(),
