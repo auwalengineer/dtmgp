@@ -6,7 +6,7 @@ import { recordRecentlyViewed } from "./recentlyViewed";
 export interface RecordReference { doctype: string; name: string; }
 export interface DetailField { label: string; type: string; value: string | number | boolean | DetailField[][]; }
 export interface DetailSection { label: string; fields: DetailField[]; }
-export interface RecordDetails { doctype: string; doctype_label: string; name: string; title: string; status: string; modified: string; sections: DetailSection[]; }
+export interface RecordDetails { doctype: string; doctype_label: string; name: string; title: string; status: string; modified: string; image?: string | null; sections: DetailSection[]; }
 
 export const recordDetailState = reactive<{ open: boolean; loading: boolean; error: string; record: RecordDetails | null }>({
   open: false,

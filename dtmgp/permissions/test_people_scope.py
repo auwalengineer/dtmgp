@@ -12,6 +12,7 @@ from dtmgp.api.v1.people import (
 	set_employee_image,
 	update_employee,
 )
+from dtmgp.api.v1.records import get_record
 from dtmgp.setup.organization import BENUE_LGAS
 from dtmgp.setup.security import seed_security_setup
 
@@ -89,6 +90,8 @@ class TestPeopleScope(FrappeTestCase):
 		self.assertTrue(profile["image_from_attachment"])
 		self.assertEqual(list_employees(self.makurdi, search=employee)["items"][0].image, attached)
 		self.assertEqual(get_employee_for_edit(employee)["readonly"]["image"], attached)
+		# The record drawer (get_record) shows the same photo.
+		self.assertEqual(get_record("Employee", employee)["image"], attached)
 
 		# The Image field, once set, wins; removing the photo doesn't resurrect an attachment.
 		frappe.set_user("Administrator")

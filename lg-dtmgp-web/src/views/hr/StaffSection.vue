@@ -154,7 +154,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
 
     <template v-else-if="profile && activeItem === 'staff-profiles'">
       <div class="employee-photo-panel">
-        <EmployeeAvatar :name="profile.employee_name" :image="profile.image" large />
+        <EmployeeAvatar :name="profile.employee_name" :image="profile.image" large expandable />
         <div>
           <strong>{{ profile.employee_name }}</strong>
           <small>{{ profile.name }} · {{ profile.designation || "No designation" }}</small>

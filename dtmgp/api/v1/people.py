@@ -98,7 +98,7 @@ def _attached_photos(employees):
 	return {name: url for name, (url, _field) in photos.items()}
 
 
-def _photo_fields(doc):
+def employee_photo_fields(doc):
 	"""`image` plus whether it came from an attachment rather than the Image field."""
 	if doc.image:
 		return {"image": doc.image, "image_from_attachment": False}
@@ -207,7 +207,7 @@ def get_employee_for_edit(employee):
 	_validate_company(doc.company)
 	return {
 		"values": {field: doc.get(field) for field in EDITABLE_EMPLOYEE_FIELDS},
-		"readonly": {**{field: doc.get(field) for field in READONLY_EMPLOYEE_FIELDS}, **_photo_fields(doc)},
+		"readonly": {**{field: doc.get(field) for field in READONLY_EMPLOYEE_FIELDS}, **employee_photo_fields(doc)},
 		"pay_points": [lga.name for lga in BENUE_LGAS],
 		"salary_modes": list(SALARY_MODES),
 		# bank_name may be a Select (Nigerian banks, via property setter) or free text; return its options if any.
@@ -303,7 +303,7 @@ def get_employee_profile(employee):
 	doc = frappe.get_doc("Employee", employee)
 	_validate_company(doc.company)
 	return {
-		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company, **_photo_fields(doc),
+		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company, **employee_photo_fields(doc),
 		"department": doc.department, "designation": doc.designation, "status": doc.status,
 		"gender": doc.gender, "date_of_birth": doc.date_of_birth, "date_of_joining": doc.date_of_joining,
 		"grade_level": doc.get(EMPLOYEE_GRADE_FIELD), "verification_status": doc.get(EMPLOYEE_VERIFICATION_FIELD),

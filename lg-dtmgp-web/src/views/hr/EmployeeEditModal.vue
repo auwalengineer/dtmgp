@@ -147,7 +147,7 @@ onBeforeUnmount(clearPendingPhoto);
   <div class="modal-backdrop" @click.self="emit('close')">
     <form class="user-modal employee-edit-modal" aria-labelledby="employee-edit-title" @submit.prevent="save">
       <header class="employee-edit-header">
-        <EmployeeAvatar v-if="payload" :name="payload.readonly.employee_name" :image="shownImage" large />
+        <EmployeeAvatar v-if="payload" :name="payload.readonly.employee_name" :image="shownImage" large expandable />
         <div>
           <h2 id="employee-edit-title">Edit employee</h2>
           <p v-if="payload">{{ payload.readonly.employee_name }} · {{ payload.readonly.name }} · {{ payload.readonly.company.replace(" Local Government Area", " LGA") }}</p>

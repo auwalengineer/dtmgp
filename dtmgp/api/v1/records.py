@@ -162,6 +162,19 @@ def _require_record_access(doctype, name):
 	return doc
 
 
+def _record_image(doc):
+	"""The record's picture (its DocType's image_field), for the drawer header.
+	Employee also falls back to a Desk-attached photo, matching the people API.
+	The caller is already authorized for this record, and a private image is
+	served by Frappe only to users who can read the record it's attached to."""
+	if doc.doctype == "Employee":
+		from dtmgp.api.v1.people import employee_photo_fields
+
+		return employee_photo_fields(doc)["image"]
+	image_field = doc.meta.image_field
+	return doc.get(image_field) if image_field and doc.meta.has_field(image_field) else None
+
+
 @frappe.whitelist(methods=["GET"])
 def get_record(doctype, name):
 	doc = _require_record_access(doctype, name)
@@ -174,6 +187,7 @@ def get_record(doctype, name):
 		"title": title or doc.name,
 		"status": doc.get("status") or ("Submitted" if doc.docstatus == 1 else "Cancelled" if doc.docstatus == 2 else "Draft"),
 		"modified": format_datetime(doc.modified),
+		"image": _record_image(doc) or None,
 		"sections": _serialize_fields(doc, doc.meta),
 	}
 
