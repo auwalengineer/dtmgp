@@ -3,6 +3,7 @@ from frappe.utils import cint, nowdate
 
 from dtmgp.permissions.scope import can_manage_hr, get_requested_companies, require_hr_access
 from dtmgp.setup.security import EMPLOYEE_GRADE_FIELD, EMPLOYEE_VERIFICATION_FIELD
+from dtmgp.workforce import get_workforce_summary
 
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
 
@@ -31,6 +32,14 @@ def get_dashboard(company=None):
 		"needs_attention": len(employees) - verified,
 		"can_manage": can_manage_hr(),
 	}
+
+
+@frappe.whitelist()
+def get_workforce_dashboard(company=None):
+	"""Overall employee dashboard: totals and breakdowns across every LGA the caller
+	may see (or just the one requested LGA). Aggregates only — no per-person fields."""
+	require_hr_access()
+	return get_workforce_summary(get_requested_companies(company))
 
 
 @frappe.whitelist()

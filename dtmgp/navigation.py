@@ -53,6 +53,7 @@ NAVIGATION = (
 		"id": "hr", "label": "Human Resources & Staff", "icon": "users", "roles": HR,
 		"children": [
 			_section("hr", "HR Overview", to="/people"),
+			_section("hr", "Employee Dashboard", to="/people/dashboard"),
 			_section("hr", "Staff", "Staff Directory|Staff Profiles|Digital Personnel Files|Employment History|Next of Kin|Staff Documents"),
 			_section("hr", "Verification & Biometrics", "Verification Exercises|Pending Verification|Verified Staff|Biometric Enrolment|Verification Exceptions|Verification Reports"),
 			_section("hr", "Establishment Control", "Approved Establishment|Establishment Positions|Vacant Positions|Occupied Positions|Overstaffing|Staffing Shortages"),

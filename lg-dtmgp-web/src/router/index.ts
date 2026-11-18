@@ -3,6 +3,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import ModulePlaceholder from "@/views/ModulePlaceholder.vue";
 import OverviewView from "@/views/OverviewView.vue";
 import PeopleHrView from "@/views/PeopleHrView.vue";
+import WorkforceDashboardView from "@/views/hr/WorkforceDashboardView.vue";
 import LoginView from "@/views/LoginView.vue";
 import UsersView from "@/views/UsersView.vue";
 import AdministrationView from "@/views/AdministrationView.vue";
@@ -26,6 +27,7 @@ export const router = createRouter({
     { path: "/login", name: "login", component: LoginView, meta: { public: true } },
     { path: "/", name: "overview", component: OverviewView, meta: { title: "Overview" } },
     { path: "/people", name: "people", component: PeopleHrView, meta: { title: "People & HR", requiresHrAccess: true } },
+    { path: "/people/dashboard", name: "employee-dashboard", component: WorkforceDashboardView, meta: { title: "Employee Dashboard", requiresHrAccess: true } },
     { path: "/finance", name: "finance", component: FinanceView, meta: { title: "Finance, Revenue & Procurement", requiresFinanceAccess: true } },
     { path: "/governance", name: "governance", component: GovernanceView, meta: { title: "Administration & Governance", requiresGovernanceAccess: true } },
     { path: "/traditional-affairs", name: "traditional-affairs", component: TraditionalAffairsView, meta: { title: "Chieftaincy & Traditional Institutions", requiresTraditionalAccess: true } },
