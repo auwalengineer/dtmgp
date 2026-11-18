@@ -1,9 +1,34 @@
 {
  "charts": [
   {
-   "chart_name": "Workforce by LGA",
+   "chart_name": "Workforce LGA Comparison",
    "doctype": "Workspace Chart",
-   "label": "Active staff by LGA"
+   "label": "LGA comparison: active, verified, retiring in 12 months"
+  },
+  {
+   "chart_name": "Workforce Gender by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Gender by LGA (active staff)"
+  },
+  {
+   "chart_name": "Workforce Grade Band by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Grade band by LGA (active staff)"
+  },
+  {
+   "chart_name": "Workforce Verification Rate by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Verification rate by LGA (%)"
+  },
+  {
+   "chart_name": "Workforce Records Completeness by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Records completeness by LGA (%)"
+  },
+  {
+   "chart_name": "Workforce Average Age by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Average age by LGA (active staff)"
   },
   {
    "chart_name": "Workforce by Status",
@@ -11,19 +36,19 @@
    "label": "All staff by status"
   },
   {
+   "chart_name": "Workforce Verification Status",
+   "doctype": "Workspace Chart",
+   "label": "Verification status (active staff)"
+  },
+  {
    "chart_name": "Workforce by Gender",
    "doctype": "Workspace Chart",
    "label": "Active staff by gender"
   },
   {
-   "chart_name": "Workforce by Grade Level",
+   "chart_name": "Workforce by Grade Band",
    "doctype": "Workspace Chart",
-   "label": "Active staff by grade level"
-  },
-  {
-   "chart_name": "Workforce Verification Status",
-   "doctype": "Workspace Chart",
-   "label": "Verification status (active staff)"
+   "label": "Active staff by grade band"
   },
   {
    "chart_name": "Workforce by Age Band",
@@ -31,9 +56,34 @@
    "label": "Active staff by age band"
   },
   {
+   "chart_name": "Workforce by Years of Service",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by years of service"
+  },
+  {
+   "chart_name": "Workforce Data Completeness",
+   "doctype": "Workspace Chart",
+   "label": "Records completeness (% of active staff)"
+  },
+  {
+   "chart_name": "Workforce by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by LGA"
+  },
+  {
+   "chart_name": "Workforce by Grade Level",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by grade level"
+  },
+  {
    "chart_name": "Workforce by Department",
    "doctype": "Workspace Chart",
    "label": "Active staff by department (top 10)"
+  },
+  {
+   "chart_name": "Workforce by Designation",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by designation (top 10)"
   },
   {
    "chart_name": "Upcoming Retirements by Year",
@@ -46,8 +96,8 @@
    "label": "First appointments by year"
   }
  ],
- "content": "[{\"id\": \"hdr-summary\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Workforce at a glance</b></span>\", \"col\": 12}}, {\"id\": \"nc-0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Total Employees\", \"col\": 4}}, {\"id\": \"nc-1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Active Employees\", \"col\": 4}}, {\"id\": \"nc-2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Verified Employees\", \"col\": 4}}, {\"id\": \"nc-3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Pending Verification\", \"col\": 4}}, {\"id\": \"nc-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Retiring in 12 Months\", \"col\": 4}}, {\"id\": \"nc-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Past Retirement Date\", \"col\": 4}}, {\"id\": \"hdr-dist\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Distribution</b></span>\", \"col\": 12}}, {\"id\": \"ch-0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by LGA\", \"col\": 12}}, {\"id\": \"ch-1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Status\", \"col\": 6}}, {\"id\": \"ch-2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Gender\", \"col\": 6}}, {\"id\": \"ch-3\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Grade Level\", \"col\": 6}}, {\"id\": \"ch-4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce Verification Status\", \"col\": 6}}, {\"id\": \"ch-5\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Age Band\", \"col\": 6}}, {\"id\": \"ch-6\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Department\", \"col\": 12}}, {\"id\": \"ch-7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Upcoming Retirements by Year\", \"col\": 6}}, {\"id\": \"ch-8\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Appointments by Year\", \"col\": 12}}, {\"id\": \"hdr-links\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Go to</b></span>\", \"col\": 12}}, {\"id\": \"sc-0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Employees\", \"col\": 3}}, {\"id\": \"sc-1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Leave Applications\", \"col\": 3}}, {\"id\": \"sc-2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Exit Cases\", \"col\": 3}}, {\"id\": \"sc-3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Staffing Plans\", \"col\": 3}}]",
- "creation": "2026-11-18 10:00:00.000000",
+ "content": "[{\"id\": \"hdr-sum\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Workforce at a glance</b></span>\", \"col\": 12}}, {\"id\": \"nc-0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Employees on Record\", \"col\": 3}}, {\"id\": \"nc-1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Employees\", \"col\": 3}}, {\"id\": \"nc-2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Verified (Active)\", \"col\": 3}}, {\"id\": \"nc-3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Pending Verification\", \"col\": 3}}, {\"id\": \"nc-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Female (Active)\", \"col\": 3}}, {\"id\": \"nc-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Male (Active)\", \"col\": 3}}, {\"id\": \"nc-6\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Retiring in 12 Months\", \"col\": 3}}, {\"id\": \"nc-7\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Retiring in 5 Years\", \"col\": 3}}, {\"id\": \"nc-8\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Past Retirement Date\", \"col\": 3}}, {\"id\": \"nc-9\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Active Without BVN\", \"col\": 3}}, {\"id\": \"nc-10\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Suspended or Inactive\", \"col\": 3}}, {\"id\": \"nc-11\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Exited\", \"col\": 3}}, {\"id\": \"hdr-go\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Go to</b></span>\", \"col\": 12}}, {\"id\": \"sc-0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"LGA Workforce Comparison\", \"col\": 4}}, {\"id\": \"sc-1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Employees\", \"col\": 4}}, {\"id\": \"sc-2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Leave Applications\", \"col\": 4}}, {\"id\": \"sc-3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Exit Cases\", \"col\": 4}}, {\"id\": \"sc-4\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Staffing Plans\", \"col\": 4}}, {\"id\": \"hdr-cmp\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>LGA comparison</b></span>\", \"col\": 12}}, {\"id\": \"cmp-0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"LGA comparison: active, verified, retiring in 12 months\", \"col\": 12}}, {\"id\": \"cmp-1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Gender by LGA (active staff)\", \"col\": 12}}, {\"id\": \"cmp-2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Grade band by LGA (active staff)\", \"col\": 12}}, {\"id\": \"cmp-3\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Verification rate by LGA (%)\", \"col\": 12}}, {\"id\": \"cmp-4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Records completeness by LGA (%)\", \"col\": 12}}, {\"id\": \"cmp-5\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Average age by LGA (active staff)\", \"col\": 12}}, {\"id\": \"hdr-dist\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Distribution</b></span>\", \"col\": 12}}, {\"id\": \"ch-0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"All staff by status\", \"col\": 6}}, {\"id\": \"ch-1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Verification status (active staff)\", \"col\": 6}}, {\"id\": \"ch-2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by gender\", \"col\": 6}}, {\"id\": \"ch-3\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by grade band\", \"col\": 6}}, {\"id\": \"ch-4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by age band\", \"col\": 6}}, {\"id\": \"ch-5\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by years of service\", \"col\": 6}}, {\"id\": \"ch-6\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Records completeness (% of active staff)\", \"col\": 6}}, {\"id\": \"ch-7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by LGA\", \"col\": 12}}, {\"id\": \"ch-8\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by grade level\", \"col\": 12}}, {\"id\": \"ch-9\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by department (top 10)\", \"col\": 12}}, {\"id\": \"ch-10\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Active staff by designation (top 10)\", \"col\": 12}}, {\"id\": \"ch-11\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Retirements due by year\", \"col\": 12}}, {\"id\": \"ch-12\", \"type\": \"chart\", \"data\": {\"chart_name\": \"First appointments by year\", \"col\": 12}}]",
+ "creation": "2026-11-18 22:30:00.000000",
  "custom_blocks": [],
  "docstatus": 0,
  "doctype": "Workspace",
@@ -58,7 +108,7 @@
  "is_hidden": 0,
  "label": "Employee Dashboard",
  "links": [],
- "modified": "2026-11-18 10:00:00.000000",
+ "modified": "2026-11-18 23:00:00.000000",
  "modified_by": "Administrator",
  "module": "dtmgp",
  "name": "Employee Dashboard",
@@ -85,17 +135,47 @@
   },
   {
    "doctype": "Workspace Number Card",
+   "label": "Female (Active)",
+   "number_card_name": "Workforce Female Staff"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Male (Active)",
+   "number_card_name": "Workforce Male Staff"
+  },
+  {
+   "doctype": "Workspace Number Card",
    "label": "Retiring in 12 Months",
    "number_card_name": "Workforce Retiring in 12 Months"
   },
   {
    "doctype": "Workspace Number Card",
+   "label": "Retiring in 5 Years",
+   "number_card_name": "Workforce Retiring in 5 Years"
+  },
+  {
+   "doctype": "Workspace Number Card",
    "label": "Active Past Retirement Date",
    "number_card_name": "Workforce Past Retirement Date"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Active Without BVN",
+   "number_card_name": "Workforce Missing BVN"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Suspended or Inactive",
+   "number_card_name": "Workforce Suspended or Inactive"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Exited",
+   "number_card_name": "Workforce Exited Employees"
   }
  ],
  "owner": "Administrator",
- "parent_page": "",
+ "parent_page": "HR",
  "public": 1,
  "quick_lists": [],
  "restrict_to_domain": "",
@@ -141,8 +221,17 @@
    "role": "Read-only Officer"
   }
  ],
- "sequence_id": 9.0,
+ "sequence_id": 1.0,
  "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "",
+   "doctype": "Workspace Shortcut",
+   "label": "LGA Workforce Comparison",
+   "link_to": "LGA Workforce Comparison",
+   "report_ref_doctype": "Employee",
+   "type": "Report"
+  },
   {
    "color": "Green",
    "doc_view": "List",

@@ -36,6 +36,10 @@ REPORT_COLUMNS = {
 	"hr.staff-strength": ["Department", "Staff"],
 	"hr.staff-distribution": ["Gender", "Staff"],
 	"hr.workforce-by-lga": ["LGA", "Active staff", "Verified", "Verified %"],
+	"hr.lga-comparison": [
+		"LGA", "Active", "Share %", "Verified %", "Female %", "Avg age", "Avg service (yrs)", "GL 13+ %", "Retiring 12m",
+		"Past retirement", "Appointed this yr", "BVN %", "NIN %", "Photo %", "Bank %",
+	],
 	"hr.retirement-forecast": ["Measure", "Value"],
 	"hr.leave": ["Leave type", "Days taken"],
 	"hr.establishment": ["Measure", "Value"],

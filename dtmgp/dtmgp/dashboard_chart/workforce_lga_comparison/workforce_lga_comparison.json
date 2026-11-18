@@ -1,0 +1,70 @@
+{
+ "chart_name": "Workforce LGA Comparison",
+ "chart_type": "Custom",
+ "creation": "2026-11-18 22:30:00.000000",
+ "custom_options": "{\"colors\": [\"#1F7A4D\", \"#C8962E\", \"#2F6FB0\"], \"barOptions\": {\"spaceRatio\": 0.4, \"stacked\": 0}, \"axisOptions\": {\"xIsSeries\": 0, \"xAxisMode\": \"tick\"}}",
+ "docstatus": 0,
+ "doctype": "Dashboard Chart",
+ "document_type": "",
+ "dynamic_filters_json": "{}",
+ "filters_json": "{}",
+ "idx": 0,
+ "is_public": 1,
+ "is_standard": 1,
+ "modified": "2026-11-18 22:30:00.000000",
+ "modified_by": "Administrator",
+ "module": "dtmgp",
+ "name": "Workforce LGA Comparison",
+ "number_of_groups": 0,
+ "owner": "Administrator",
+ "parent_document_type": "",
+ "roles": [
+  {
+   "doctype": "Has Role",
+   "role": "System Manager"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "State Administrator"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "State Executive Viewer"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "State Auditor"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "LGA Administrator"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "LGA Chairman"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "LGA Secretary"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "HR Officer"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "Internal Auditor"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "Read-only Officer"
+  }
+ ],
+ "source": "DTMGP Workforce Breakdown",
+ "time_interval": "Yearly",
+ "timeseries": 0,
+ "timespan": "Last Year",
+ "type": "Bar",
+ "use_report_chart": 0,
+ "y_axis": []
+}
