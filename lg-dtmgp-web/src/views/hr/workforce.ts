@@ -29,7 +29,7 @@ export const comparisonRowSchema = z.object({
   bank_pct: z.number(),
   phone_pct: z.number(),
   first_appointment_pct: z.number(),
-  grade_bands: z.record(z.number()),
+  grade_bands: z.record(z.string(), z.number()),
 });
 
 export const comparisonMetricSchema = z.object({ key: z.string(), label: z.string(), unit: z.enum(["count", "pct", "years"]) });
@@ -51,7 +51,7 @@ export const workforceSummarySchema = z.object({
     joined_this_year: z.number(),
     average_age: nullableNumber,
     average_service: nullableNumber,
-    completeness: z.record(z.number()),
+    completeness: z.record(z.string(), z.number()),
   }),
   breakdowns: z.object({
     lga: z.array(lgaRow),
