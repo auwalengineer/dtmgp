@@ -63,7 +63,7 @@ class TestEmployeeNominalRollFields(FrappeTestCase):
 		validate_employee_record(doc)
 		self.assertEqual(doc.dtmgp_bvn, "22195819885")
 
-	def test_present_appointment_cannot_precede_first(self):
+	def test_present_appointment_is_not_restricted_by_first_appointment(self):
 		doc = self._employee(dtmgp_date_of_first_appointment="2005-01-05", dtmgp_date_of_present_appointment="2004-01-01")
-		with self.assertRaises(frappe.ValidationError):
-			validate_employee_record(doc)
+		validate_employee_record(doc)
+		self.assertEqual(str(doc.dtmgp_date_of_present_appointment), "2004-01-01")
