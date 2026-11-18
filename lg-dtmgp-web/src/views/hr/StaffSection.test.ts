@@ -20,11 +20,15 @@ vi.mock("@/services/api", () => ({ apiRequest: (...args: [string, RequestInit?])
 import StaffSection from "./StaffSection.vue";
 import type { Employee } from "./types";
 
+const CAPTURED = new File(["x"], "employee-photo.jpg", { type: "image/jpeg" });
+// Stands in for the real getUserMedia component, which jsdom can't run.
+const CameraCaptureStub = { emits: ["captured", "cancel"], template: '<button class="fake-capture" type="button" @click="$emit(\'captured\', file)">Capture</button>', data: () => ({ file: CAPTURED }) };
+
 const EMPLOYEES: Employee[] = [{ name: "HR-0001", employee_name: "Amina Bello", first_name: "Amina", last_name: "Bello", company: "Makurdi Local Government Area", department: "Finance", designation: "Officer", status: "Active", date_of_joining: "2020-01-01", date_of_birth: "1990-01-01", gender: "Female", dtmgp_grade_level: "GL 08", dtmgp_verification_status: "Verified" }];
 
 function mountSection(routeItem?: string) {
   mockRouteParams = routeItem ? { section: "staff", item: routeItem } : { section: "staff" };
-  return mount(StaffSection, { props: { employees: EMPLOYEES, total: 1, page: 1, pageSize: 25, search: "", department: "", departmentOptions: ["Finance"], canManage: true, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } } });
+  return mount(StaffSection, { props: { employees: EMPLOYEES, total: 1, page: 1, pageSize: 25, search: "", department: "", departmentOptions: ["Finance"], canManage: true, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } }, global: { stubs: { CameraCapture: CameraCaptureStub } } });
 }
 
 describe("StaffSection", () => {
@@ -87,34 +91,22 @@ describe("StaffSection", () => {
     expect(wrapper.findAll(".employee-avatar")[0].text()).toBe("AB");
   });
 
-  it("uploads a private photo attached to the employee and sets it on the profile", async () => {
+  it("takes the photo with the device camera and saves it as a private file on the employee", async () => {
     const wrapper = mountSection("staff-profiles");
     await wrapper.find("select").setValue("HR-0001");
     await flushPromises();
     expect(wrapper.find(".employee-avatar.large").text()).toBe("AB");
+    // Camera-only: there is no file picker anywhere in the profile.
+    expect(wrapper.find("input[type=file]").exists()).toBe(false);
 
-    const input = wrapper.find<HTMLInputElement>(".employee-photo-actions input[type=file]");
-    const photo = new File(["x"], "amina.png", { type: "image/png" });
-    Object.defineProperty(input.element, "files", { value: [photo] });
-    await input.trigger("change");
+    await wrapper.findAll(".employee-photo-actions button").find((button) => button.text().includes("Take photo"))!.trigger("click");
+    await wrapper.find(".fake-capture").trigger("click");
     await flushPromises();
 
-    expect(uploadFile).toHaveBeenCalledWith(photo, { doctype: "Employee", docname: "HR-0001", isPrivate: true });
+    expect(uploadFile).toHaveBeenCalledWith(CAPTURED, { doctype: "Employee", docname: "HR-0001", isPrivate: true });
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("set_employee_image"), expect.objectContaining({ method: "POST" }));
     expect(wrapper.find(".employee-avatar.large img").attributes("src")).toBe("/private/files/amina.png");
+    expect(wrapper.find(".camera-modal").exists()).toBe(false);
     expect(wrapper.emitted("photo-changed")).toHaveLength(1);
-  });
-
-  it("rejects non-image files before uploading", async () => {
-    const wrapper = mountSection("staff-profiles");
-    await wrapper.find("select").setValue("HR-0001");
-    await flushPromises();
-    const input = wrapper.find<HTMLInputElement>(".employee-photo-actions input[type=file]");
-    Object.defineProperty(input.element, "files", { value: [new File(["x"], "cv.pdf", { type: "application/pdf" })] });
-    await input.trigger("change");
-    await flushPromises();
-
-    expect(uploadFile).not.toHaveBeenCalled();
-    expect(wrapper.text()).toContain("Choose a JPG, PNG or WebP image");
   });
 });

@@ -37,7 +37,7 @@ class TestPeopleScope(FrappeTestCase):
 		verified_before = get_dashboard(self.makurdi)["verified"]
 
 		frappe.set_user(self.hr_officer.name)
-		gender = frappe.get_all("Gender", pluck="name", limit=1)[0]
+		gender = "Male"
 		created = save_employee(
 			"Aondo",
 			self.makurdi,
@@ -129,11 +129,39 @@ class TestPeopleScope(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			update_employee(employee, {"company": self.gboko})
 		with self.assertRaises(frappe.ValidationError):
-			update_employee(employee, {"bank_ac_no": "0123456789"})
+			update_employee(employee, {"iban": "NG00TEST"})
 		with self.assertRaises(frappe.ValidationError):
 			update_employee(employee, {"first_name": "  "})
 		with self.assertRaises(frappe.ValidationError):
 			update_employee(employee, {"dtmgp_bvn": "123"})
+
+	def test_gender_is_limited_to_male_and_female(self):
+		employee = self._make_employee(self.makurdi)
+		frappe.set_user(self.hr_officer.name)
+		with self.assertRaises(frappe.ValidationError):
+			update_employee(employee, {"gender": "Prefer not to say"})
+		with self.assertRaises(frappe.ValidationError):
+			save_employee("Ada", self.makurdi, "Other", "1990-01-01", "2020-01-01")
+		update_employee(employee, {"gender": "Female"})
+		self.assertEqual(get_employee_for_edit(employee)["values"]["gender"], "Female")
+
+	def test_bank_details_are_editable_validated_and_audited_without_values(self):
+		employee = self._make_employee(self.makurdi)
+		frappe.set_user(self.hr_officer.name)
+		with self.assertRaises(frappe.ValidationError):
+			update_employee(employee, {"bank_ac_no": "12345"})
+		with self.assertRaises(frappe.ValidationError):
+			update_employee(employee, {"salary_mode": "Bank", "bank_name": "First Bank of Nigeria Limited"})
+		with self.assertRaises(frappe.ValidationError):
+			update_employee(employee, {"salary_mode": "Barter"})
+		update_employee(employee, {"salary_mode": "Bank", "bank_name": "First Bank of Nigeria Limited", "bank_ac_no": "3012345678"})
+		values = get_employee_for_edit(employee)["values"]
+		self.assertEqual((values["salary_mode"], values["bank_name"], values["bank_ac_no"]), ("Bank", "First Bank of Nigeria Limited", "3012345678"))
+
+		frappe.set_user("Administrator")
+		event = frappe.get_last_doc("DTMGP Audit Event", filters={"reference_name": employee, "event_type": "hr_record_change"})
+		self.assertIn("bank_ac_no", event.metadata_json)
+		self.assertNotIn("3012345678", event.metadata_json)
 
 	def test_edit_is_denied_across_lga_and_for_read_only_roles(self):
 		employee = self._make_employee(self.gboko)
@@ -153,7 +181,7 @@ class TestPeopleScope(FrappeTestCase):
 			update_employee(own, {"dtmgp_rank": "X"})
 
 	def _make_employee(self, company):
-		gender = frappe.get_all("Gender", pluck="name", limit=1)[0]
+		gender = "Male"
 		return frappe.get_doc(
 			{
 				"doctype": "Employee", "first_name": "Photo", "last_name": uuid4().hex[:6], "company": company,

@@ -16,7 +16,7 @@ IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
 
 # Fields an HR manager may edit from the Vue app. Deliberately excluded:
 # - company (LGA): moves between LGAs go through Employee Transfer, not an edit;
-# - bank_name / bank_ac_no / iban: salary-redirection risk, owned by payroll;
+# - iban: not used for Nigerian (NUBAN) accounts;
 # - NIN verification outcome fields: set by the verification process, not by hand;
 # - derived retire-by dates: recomputed in dtmgp.hr.validate_employee_record.
 EDITABLE_EMPLOYEE_FIELDS = (
@@ -24,12 +24,15 @@ EDITABLE_EMPLOYEE_FIELDS = (
 	"department", "designation", "status", "relieving_date", "reason_for_leaving",
 	"employee_number", EMPLOYEE_GRADE_FIELD, "dtmgp_step", "dtmgp_rank", "dtmgp_schedule_of_duty",
 	EMPLOYEE_VERIFICATION_FIELD, "dtmgp_date_of_first_appointment", "dtmgp_date_of_present_appointment",
-	"date_of_retirement", "dtmgp_local_govt_of_payment",
+	"date_of_retirement", "dtmgp_local_govt_of_payment", "salary_mode", "bank_name", "bank_ac_no",
 	"cell_number", "personal_email", "person_to_be_contacted", "relation", "emergency_phone_number",
 	"dtmgp_lg_of_origin", "dtmgp_council_ward", "dtmgp_bvn", "dtmgp_nin", "dtmgp_qualifications",
 )
 READONLY_EMPLOYEE_FIELDS = ("name", "employee_name", "company", "image", EMPLOYEE_RETIRE_BY_AGE_FIELD, EMPLOYEE_RETIRE_BY_SERVICE_FIELD)
 REQUIRED_EMPLOYEE_FIELDS = ("first_name", "gender", "date_of_birth", "date_of_joining", "status")
+EMPLOYEE_GENDERS = ("Male", "Female")
+SALARY_MODES = ("Bank", "Cash", "Cheque")
+BANK_FIELDS = ("salary_mode", "bank_name", "bank_ac_no")
 
 
 @frappe.whitelist()
@@ -106,7 +109,7 @@ def get_form_options(company=None):
 			"Department", filters={"company": ["in", companies], "disabled": 0}, pluck="name", order_by="department_name asc"
 		),
 		"designations": frappe.get_all("Designation", pluck="name", order_by="designation_name asc"),
-		"genders": frappe.get_all("Gender", pluck="name", order_by="name asc"),
+		"genders": list(EMPLOYEE_GENDERS),
 		"statuses": ["Active", "Inactive", "Suspended", "Left"],
 		"verification_statuses": ["Pending", "Verified", "Review Due"],
 	}
@@ -129,6 +132,7 @@ def save_employee(
 ):
 	require_hr_access(write=True)
 	_validate_company(company)
+	_validate_gender(gender)
 	if employee:
 		doc = frappe.get_doc("Employee", employee)
 		_validate_company(doc.company)
@@ -164,6 +168,9 @@ def get_employee_for_edit(employee):
 		"values": {field: doc.get(field) for field in EDITABLE_EMPLOYEE_FIELDS},
 		"readonly": {field: doc.get(field) for field in READONLY_EMPLOYEE_FIELDS},
 		"pay_points": [lga.name for lga in BENUE_LGAS],
+		"salary_modes": list(SALARY_MODES),
+		# bank_name may be a Select (Nigerian banks, via property setter) or free text; return its options if any.
+		"banks": [option for option in (frappe.get_meta("Employee").get_field("bank_name").options or "").split("\n") if option],
 	}
 
 
@@ -181,6 +188,12 @@ def update_employee(employee, values):
 	for field in REQUIRED_EMPLOYEE_FIELDS:
 		if field in values and not str(values[field] or "").strip():
 			frappe.throw(f"{doc.meta.get_label(field)} is required")
+	if "gender" in values:
+		_validate_gender(values["gender"])
+	if values.get("salary_mode") and values["salary_mode"] not in SALARY_MODES:
+		frappe.throw(f"Salary mode must be one of: {', '.join(SALARY_MODES)}")
+	if values.get("bank_ac_no") and not (str(values["bank_ac_no"]).strip().isdigit() and len(str(values["bank_ac_no"]).strip()) == 10):
+		frappe.throw("Bank account number must be exactly 10 digits (NUBAN)")
 	if values.get("dtmgp_local_govt_of_payment") and values["dtmgp_local_govt_of_payment"] not in {lga.name for lga in BENUE_LGAS}:
 		frappe.throw("Local Govt. of Payment must be one of the Benue LGAs")
 
@@ -193,6 +206,10 @@ def update_employee(employee, values):
 			changed.append(field)
 	if not changed:
 		return {"name": doc.name, "employee_name": doc.employee_name, "changed": []}
+	# Only enforced when pay details are being edited, so an unrelated edit to an
+	# imported record with incomplete bank data isn't blocked.
+	if set(changed) & set(BANK_FIELDS) and doc.salary_mode == "Bank" and not (doc.bank_name and doc.bank_ac_no):
+		frappe.throw("Bank name and account number are required when salary mode is Bank")
 	doc.save()
 	# Field names only, never values: the set includes BVN/NIN and contact details.
 	record_event(
@@ -324,6 +341,11 @@ def _employees(companies):
 		filters={"company": ["in", companies]},
 		fields=["name", "status", EMPLOYEE_VERIFICATION_FIELD],
 	)
+
+
+def _validate_gender(gender):
+	if gender not in EMPLOYEE_GENDERS:
+		frappe.throw("Gender must be Male or Female")
 
 
 def _normalized(value):

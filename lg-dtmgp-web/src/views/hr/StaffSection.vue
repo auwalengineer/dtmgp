@@ -7,6 +7,7 @@ import { apiRequest, uploadFile } from "@/services/api";
 
 import ItemTabs from "../shared/ItemTabs.vue";
 import EmployeeAvatar from "./EmployeeAvatar.vue";
+import CameraCapture from "./CameraCapture.vue";
 import EmployeeEditModal from "./EmployeeEditModal.vue";
 import type { Employee, Options } from "./types";
 
@@ -34,6 +35,9 @@ watch(() => route.params.item, (item) => { activeItem.value = item && String(ite
 
 const selectedEmployee = ref("");
 const editingEmployee = ref<string | null>(null);
+// Staff photos come from the device camera only — there is no file-picker path.
+const showProfileCamera = ref(false);
+function onProfilePhotoCaptured(file: File) { showProfileCamera.value = false; savePhoto(file); }
 const savedNotice = ref("");
 const profile = ref<EmployeeProfile | null>(null);
 const profileLoading = ref(false);
@@ -155,7 +159,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
           <small>{{ profile.name }} · {{ profile.designation || "No designation" }}</small>
           <div v-if="canManage" class="employee-photo-actions">
             <button type="button" class="primary-action" @click="editingEmployee = profile.name"><Pencil :size="15" /> Edit details</button>
-            <label class="secondary-action" :aria-disabled="photoSaving"><Camera :size="15" /> {{ photoSaving ? "Saving..." : profile.image ? "Change photo" : "Upload photo" }}<input type="file" accept="image/jpeg,image/png,image/webp" hidden :disabled="photoSaving" @change="savePhoto(($event.target as HTMLInputElement).files?.[0] || null); ($event.target as HTMLInputElement).value = ''" /></label>
+            <button type="button" class="secondary-action" :disabled="photoSaving" @click="showProfileCamera = true"><Camera :size="15" /> {{ photoSaving ? "Saving..." : profile.image ? "Retake photo" : "Take photo" }}</button>
             <button v-if="profile.image" type="button" class="secondary-action" :disabled="photoSaving" @click="savePhoto(null)"><Trash2 :size="15" /> Remove</button>
           </div>
           <p v-if="photoError" class="login-error" role="alert">{{ photoError }}</p>
@@ -207,4 +211,5 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
     <footer><button type="button" class="secondary-action" @click="showRecordForm = false">Cancel</button><button class="primary-action">Save</button></footer></form></div>
   <p v-if="savedNotice" class="employee-saved-notice" role="status">{{ savedNotice }}</p>
   <EmployeeEditModal v-if="editingEmployee" :employee="editingEmployee" :options="formOptions" @close="editingEmployee = null" @saved="onEmployeeSaved" />
+  <div v-if="showProfileCamera" class="modal-backdrop" @click.self="showProfileCamera = false"><div class="user-modal camera-modal" role="dialog" aria-label="Take employee photo"><h2>Take photo</h2><CameraCapture @captured="onProfilePhotoCaptured" @cancel="showProfileCamera = false" /></div></div>
 </template>

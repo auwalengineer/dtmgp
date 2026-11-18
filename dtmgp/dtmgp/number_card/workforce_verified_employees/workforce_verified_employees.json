@@ -1,7 +1,7 @@
 {
  "aggregate_function_based_on": "",
- "color": "#2F6FB0",
- "creation": "2026-11-18 10:00:00.000000",
+ "color": "#1F7A4D",
+ "creation": "2026-11-18 22:30:00.000000",
  "docstatus": 0,
  "doctype": "Number Card",
  "document_type": "Employee",
@@ -12,7 +12,7 @@
  "is_public": 1,
  "is_standard": 1,
  "label": "Verified (Active)",
- "modified": "2026-11-18 10:00:00.000000",
+ "modified": "2026-11-18 22:30:00.000000",
  "modified_by": "Administrator",
  "module": "dtmgp",
  "name": "Workforce Verified Employees",
