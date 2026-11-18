@@ -13,6 +13,10 @@ from dtmgp.setup.security import (
 from dtmgp.workforce import get_workforce_summary
 
 IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp")
+# Browsers can render these, so an existing attachment can stand in as the photo.
+DISPLAYABLE_IMAGE_EXTENSIONS = (*IMAGE_EXTENSIONS, ".gif")
+# File.attached_to_field marker for attachments ruled out as the photo by "Remove photo".
+REMOVED_PHOTO_FIELD = "dtmgp_removed_photo"
 
 # Fields an HR manager may edit from the Vue app. Deliberately excluded:
 # - company (LGA): moves between LGAs go through Employee Transfer, not an edit;
@@ -69,6 +73,39 @@ def get_workforce_dashboard(company=None):
 	return get_workforce_summary(get_requested_companies(company))
 
 
+def _attached_photos(employees):
+	"""Newest displayable image attached to each Employee, for records whose Image
+	field is empty. Staff photos are often uploaded in Desk as plain attachments
+	(sidebar "Attach") instead of into the Image field; they're still that
+	employee's photo. Only files attached to the same Employee are considered,
+	so a private one inherits that Employee's LGA-scoped read permission."""
+	if not employees:
+		return {}
+	files = frappe.get_all(
+		"File",
+		filters={"attached_to_doctype": "Employee", "attached_to_name": ["in", list(employees)], "is_folder": 0},
+		fields=["attached_to_name", "attached_to_field", "file_url"],
+		order_by="creation desc",
+	)
+	photos = {}
+	for row in files:
+		if row.attached_to_field == REMOVED_PHOTO_FIELD or not (row.file_url or "").lower().endswith(DISPLAYABLE_IMAGE_EXTENSIONS):
+			continue
+		current = photos.get(row.attached_to_name)
+		# A file uploaded into the Image field itself wins over other attachments.
+		if current is None or (row.attached_to_field == "image" and current[1] != "image"):
+			photos[row.attached_to_name] = (row.file_url, row.attached_to_field)
+	return {name: url for name, (url, _field) in photos.items()}
+
+
+def _photo_fields(doc):
+	"""`image` plus whether it came from an attachment rather than the Image field."""
+	if doc.image:
+		return {"image": doc.image, "image_from_attachment": False}
+	attached = _attached_photos([doc.name]).get(doc.name)
+	return {"image": attached, "image_from_attachment": bool(attached)}
+
+
 @frappe.whitelist()
 def list_employees(company=None, search=None, department=None, status=None, page=1, page_size=25):
 	require_hr_access()
@@ -96,6 +133,10 @@ def list_employees(company=None, search=None, department=None, status=None, page
 		page_length=page_size,
 		order_by="employee_name asc",
 	)
+	attached = _attached_photos([row.name for row in items if not row.image])
+	for row in items:
+		if not row.image and row.name in attached:
+			row.image = attached[row.name]
 	total = len(frappe.get_all("Employee", filters=filters, or_filters=or_filters, pluck="name"))
 	return {"items": items, "total": total, "page": page, "page_size": page_size}
 
@@ -166,7 +207,7 @@ def get_employee_for_edit(employee):
 	_validate_company(doc.company)
 	return {
 		"values": {field: doc.get(field) for field in EDITABLE_EMPLOYEE_FIELDS},
-		"readonly": {field: doc.get(field) for field in READONLY_EMPLOYEE_FIELDS},
+		"readonly": {**{field: doc.get(field) for field in READONLY_EMPLOYEE_FIELDS}, **_photo_fields(doc)},
 		"pay_points": [lga.name for lga in BENUE_LGAS],
 		"salary_modes": list(SALARY_MODES),
 		# bank_name may be a Select (Nigerian banks, via property setter) or free text; return its options if any.
@@ -237,6 +278,16 @@ def set_employee_image(employee, file_url=None):
 			frappe.throw("Upload the photo to this employee record first")
 		if not file_url.lower().endswith(IMAGE_EXTENSIONS):
 			frappe.throw("Employee photo must be a JPG, PNG or WebP image")
+	if not file_url:
+		# Removing the photo must not let an attachment reappear as the photo
+		# (see _attached_photos). The files stay attached — personnel records are
+		# retained — they're just no longer photo candidates.
+		for row in frappe.get_all(
+			"File", filters={"attached_to_doctype": "Employee", "attached_to_name": doc.name, "is_folder": 0},
+			fields=["name", "file_url"],
+		):
+			if (row.file_url or "").lower().endswith(DISPLAYABLE_IMAGE_EXTENSIONS):
+				frappe.db.set_value("File", row.name, "attached_to_field", REMOVED_PHOTO_FIELD, update_modified=False)
 	doc.image = file_url or None
 	doc.save()
 	return {"name": doc.name, "image": doc.image}
@@ -252,7 +303,7 @@ def get_employee_profile(employee):
 	doc = frappe.get_doc("Employee", employee)
 	_validate_company(doc.company)
 	return {
-		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company, "image": doc.image,
+		"name": doc.name, "employee_name": doc.employee_name, "company": doc.company, **_photo_fields(doc),
 		"department": doc.department, "designation": doc.designation, "status": doc.status,
 		"gender": doc.gender, "date_of_birth": doc.date_of_birth, "date_of_joining": doc.date_of_joining,
 		"grade_level": doc.get(EMPLOYEE_GRADE_FIELD), "verification_status": doc.get(EMPLOYEE_VERIFICATION_FIELD),

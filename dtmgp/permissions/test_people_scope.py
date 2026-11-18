@@ -77,6 +77,30 @@ class TestPeopleScope(FrappeTestCase):
 		set_employee_image(employee, None)
 		self.assertIsNone(get_employee_profile(employee)["image"])
 
+	def test_desk_attached_photo_is_shown_when_image_field_is_empty(self):
+		# Photos uploaded in Desk as plain attachments (Image field left empty).
+		employee = self._make_employee(self.makurdi)
+		self._attach_image(employee, extension="txt")
+		attached = self._attach_image(employee)
+
+		frappe.set_user(self.hr_officer.name)
+		profile = get_employee_profile(employee)
+		self.assertEqual(profile["image"], attached)
+		self.assertTrue(profile["image_from_attachment"])
+		self.assertEqual(list_employees(self.makurdi, search=employee)["items"][0].image, attached)
+		self.assertEqual(get_employee_for_edit(employee)["readonly"]["image"], attached)
+
+		# The Image field, once set, wins; removing the photo doesn't resurrect an attachment.
+		frappe.set_user("Administrator")
+		chosen = self._attach_image(employee)
+		frappe.set_user(self.hr_officer.name)
+		set_employee_image(employee, chosen)
+		self.assertEqual(get_employee_profile(employee)["image"], chosen)
+		self.assertFalse(get_employee_profile(employee)["image_from_attachment"])
+		set_employee_image(employee, None)
+		self.assertIsNone(get_employee_profile(employee)["image"])
+		self.assertIsNone(list_employees(self.makurdi, search=employee)["items"][0].image)
+
 	def test_photo_cannot_be_set_across_lga(self):
 		employee = self._make_employee(self.gboko)
 		file_url = self._attach_image(employee)

@@ -14,7 +14,7 @@ import type { Employee, Options } from "./types";
 interface EmergencyContact { person_to_be_contacted: string | null; relation: string | null; emergency_phone_number: string | null }
 interface WorkHistoryRow { department: string | null; designation: string | null; branch: string | null; from_date: string | null; to_date: string | null }
 interface ExternalHistoryRow { company_name: string | null; designation: string | null; contact: string | null; total_experience: number | null }
-interface EmployeeProfile { name: string; employee_name: string; image: string | null; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
+interface EmployeeProfile { name: string; employee_name: string; image: string | null; image_from_attachment?: boolean; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
 interface DocumentRow { name: string; file_name: string; file_url: string; is_private: number; creation: string }
 interface PersonnelFile { name: string; file_status: string; classification: string; retention_category: string; retention_review_date?: string; physical_file_reference?: string }
 interface NextOfKin { name: string; full_name: string; relationship: string; phone: string; alternate_phone?: string; email?: string; address?: string; is_primary: number; verified_on?: string }
@@ -118,6 +118,7 @@ async function savePhoto(file: File | null) {
     const fileUrl = file ? (await uploadFile(file, { doctype: "Employee", docname: profile.value.name, isPrivate: true })).file_url : null;
     const result = await apiRequest<{ image: string | null }>("/api/method/dtmgp.api.v1.people.set_employee_image", { method: "POST", body: JSON.stringify({ employee: profile.value.name, file_url: fileUrl }) });
     profile.value.image = result.image;
+    profile.value.image_from_attachment = false;
     emit("photo-changed");
   } catch (reason) { photoError.value = reason instanceof Error ? reason.message : "Unable to update the photo"; }
   finally { photoSaving.value = false; }
@@ -160,7 +161,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
           <div v-if="canManage" class="employee-photo-actions">
             <button type="button" class="primary-action" @click="editingEmployee = profile.name"><Pencil :size="15" /> Edit details</button>
             <button type="button" class="secondary-action" :disabled="photoSaving" @click="showProfileCamera = true"><Camera :size="15" /> {{ photoSaving ? "Saving..." : profile.image ? "Retake photo" : "Take photo" }}</button>
-            <button v-if="profile.image" type="button" class="secondary-action" :disabled="photoSaving" @click="savePhoto(null)"><Trash2 :size="15" /> Remove</button>
+            <button v-if="profile.image && !profile.image_from_attachment" type="button" class="secondary-action" :disabled="photoSaving" @click="savePhoto(null)"><Trash2 :size="15" /> Remove</button>
           </div>
           <p v-if="photoError" class="login-error" role="alert">{{ photoError }}</p>
         </div>
