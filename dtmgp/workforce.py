@@ -69,6 +69,41 @@ _FIELDS = (
 )
 
 
+# Browsers can render these, so an existing attachment can stand in as the photo.
+DISPLAYABLE_IMAGE_EXTENSIONS = (".jpg", ".jpeg", ".png", ".webp", ".gif")
+# File.attached_to_field marker for attachments ruled out as the photo by "Remove photo".
+REMOVED_PHOTO_FIELD = "dtmgp_removed_photo"
+
+
+def attached_photos(employees):
+	"""Newest displayable image attached to each Employee, for records whose Image
+	field is empty. Staff photos are often uploaded in Desk as plain attachments
+	(sidebar "Attach") instead of into the Image field; they're still that
+	employee's photo. Only files attached to the same Employee are considered,
+	so a private one inherits that Employee's LGA-scoped read permission."""
+	if not employees:
+		return {}
+	wanted = set(employees)
+	filters = {"attached_to_doctype": "Employee", "is_folder": 0}
+	# A huge IN list (a statewide roll) is slower than scanning Employee attachments.
+	if len(wanted) <= 500:
+		filters["attached_to_name"] = ["in", list(wanted)]
+	files = frappe.get_all(
+		"File", filters=filters, fields=["attached_to_name", "attached_to_field", "file_url"], order_by="creation desc",
+	)
+	photos = {}
+	for row in files:
+		if row.attached_to_name not in wanted:
+			continue
+		if row.attached_to_field == REMOVED_PHOTO_FIELD or not (row.file_url or "").lower().endswith(DISPLAYABLE_IMAGE_EXTENSIONS):
+			continue
+		current = photos.get(row.attached_to_name)
+		# A file uploaded into the Image field itself wins over other attachments.
+		if current is None or (row.attached_to_field == "image" and current[1] != "image"):
+			photos[row.attached_to_name] = (row.file_url, row.attached_to_field)
+	return {name: url for name, (url, _field) in photos.items()}
+
+
 def short_lga(company):
 	return (company or "").replace(" Local Government Area", " LGA").replace(PARENT_COMPANY, "State HQ")
 
@@ -164,6 +199,10 @@ def _employees(companies):
 		row["has_photo"] = bool(row.pop("image", None))
 		row["has_phone"] = bool(row.pop("cell_number", None))
 		row["has_first_appointment"] = bool(row.get(EMPLOYEE_FIRST_APPOINTMENT_FIELD))
+	# Count a Desk-attached photo the same way the staff screens show it.
+	with_attached = attached_photos([row.name for row in rows if not row.has_photo])
+	for row in rows:
+		row["has_photo"] = row["has_photo"] or row.name in with_attached
 	return rows
 
 

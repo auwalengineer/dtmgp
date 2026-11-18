@@ -5,7 +5,7 @@ import { ref } from "vue";
 import { apiRequest } from "@/services/api";
 import { printReportDocument } from "@/services/reportPrint";
 
-const props = defineProps<{ reportId: string; title: string; columns: string[]; rows: unknown[][]; company?: string; filters?: Record<string, string | number | null | undefined> }>();
+const props = defineProps<{ reportId: string; title: string; columns: string[]; rows: unknown[][]; company?: string; filters?: Record<string, string | number | null | undefined>; exportParams?: Record<string, string | number | null | undefined> }>();
 const exportOpen = ref(false);
 const purpose = ref("");
 const exporting = ref(false);
@@ -23,7 +23,7 @@ async function exportReport() {
   try {
     const result = await apiRequest<{ filename: string; content: string }>("/api/method/dtmgp.api.v1.report_exports.export_report", {
       method: "POST",
-      body: JSON.stringify({ report_id: props.reportId, title: props.title, purpose: purpose.value, columns: props.columns, rows: props.rows, company: props.company || null }),
+      body: JSON.stringify({ report_id: props.reportId, title: props.title, purpose: purpose.value, columns: props.columns, rows: props.rows, company: props.company || null, filters: props.exportParams ?? null }),
     });
     const url = URL.createObjectURL(new Blob([result.content], { type: "text/csv;charset=utf-8" }));
     const link = document.createElement("a");

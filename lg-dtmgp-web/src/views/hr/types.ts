@@ -20,7 +20,6 @@ export interface AttendanceSummary { date: string; present: number; absent: numb
 export interface LeaveBalance { employee: string; employee_name: string; leave_type: string; total_leaves_allocated: number; taken: number; balance: number }
 export interface PayrollOverview { draft: number; submitted: number; paid: number }
 export interface AuditExceptions { unverified: Employee[]; duplicate_candidates: { employee_name: string; date_of_birth: string; employees: string[] }[]; missing_grade: Employee[] }
-export interface HRReports { strength_by_department: { department: string; count: number }[]; distribution_by_gender: { gender: string; count: number }[]; retirement_forecast_12m: number; leave_by_type: { leave_type: string; days: number }[]; establishment: { approved_total: number; filled_total: number; vacant_count: number } }
 
 export function docstatusLabel(docstatus: number, submittedLabel = "Submitted") { return docstatus === 1 ? submittedLabel : (docstatus === 2 ? "Cancelled" : "Draft"); }
 export function initials(name: string) { return name.split(" ").filter(Boolean).map(part => part[0]).slice(0, 2).join(""); }

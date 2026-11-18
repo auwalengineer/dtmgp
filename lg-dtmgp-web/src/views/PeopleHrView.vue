@@ -16,7 +16,7 @@ import ReportsSection from "./hr/ReportsSection.vue";
 import RetirementExitSection from "./hr/RetirementExitSection.vue";
 import StaffAuditSection from "./hr/StaffAuditSection.vue";
 import StaffSection from "./hr/StaffSection.vue";
-import type { AttendanceItem, AttendanceSummary, AuditExceptions, Dashboard, Department, DirectoryFilters, Employee, Exercise, HRReports, Leave, LeaveBalance, Options, PayrollOverview, Position, Promotion, RetirementItem, Separation, StaffingPlan, Transfer, VerificationRecord } from "./hr/types";
+import type { AttendanceItem, AttendanceSummary, AuditExceptions, Dashboard, Department, DirectoryFilters, Employee, Exercise, Leave, LeaveBalance, Options, PayrollOverview, Position, Promotion, RetirementItem, Separation, StaffingPlan, Transfer, VerificationRecord } from "./hr/types";
 import { emptyDirectoryFilters } from "./hr/types";
 import VerificationSection from "./hr/VerificationSection.vue";
 
@@ -49,7 +49,6 @@ const attendanceSummary = ref<AttendanceSummary | null>(null);
 const attendanceItems = ref<AttendanceItem[]>([]);
 const payroll = ref<PayrollOverview | null>(null);
 const auditExceptions = ref<AuditExceptions | null>(null);
-const hrReports = ref<HRReports | null>(null);
 const search = ref("");
 const department = ref("");
 const directoryFilters = ref<DirectoryFilters>(emptyDirectoryFilters());
@@ -116,7 +115,6 @@ async function selectTab(tab: Tab) {
   else if (tab === "Exit & Retirement") await loadExit();
   else if (tab === "Payroll") payroll.value = await apiRequest<PayrollOverview>(`/api/method/dtmgp.api.v1.hr.get_payroll_overview?${scopeQuery()}`);
   else if (tab === "Staff Audit") auditExceptions.value = await apiRequest<AuditExceptions>(`/api/method/dtmgp.api.v1.hr.get_staff_audit_exceptions?${scopeQuery()}`);
-  else if (tab === "Reports") hrReports.value = await apiRequest<HRReports>(`/api/method/dtmgp.api.v1.hr.get_hr_reports?${scopeQuery()}`);
 }
 watch(() => route.params.section, (section) => { const mapped = SECTION_TAB[String(section || "")]; if (mapped) selectTab(mapped); });
 
@@ -238,7 +236,7 @@ watch(() => session.activeLga, loadModule, { immediate: true });
 
       <StaffAuditSection v-else-if="activeTab === 'Staff Audit' && auditExceptions" :audit-exceptions="auditExceptions" />
 
-      <ReportsSection v-else-if="activeTab === 'Reports' && hrReports" :hr-reports="hrReports" />
+      <ReportsSection v-else-if="activeTab === 'Reports'" />
     </section>
   </template>
 

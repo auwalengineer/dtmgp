@@ -63,7 +63,21 @@ REPORT_COLUMNS = {
 	"traditional.succession": ["Status", "Count"],
 	"traditional.petitions": ["Status", "Count"],
 }
+# Reports whose CSV is rebuilt on the server rather than accepted from the client.
+SERVER_REPORT_PREFIX = "hr.report."
 REPORT_GATES = {"hr.payroll": require_payroll_access, "hr.staff-audit": require_staff_audit_access}
+
+
+def _server_report_table(report_id, company, filters):
+	from dtmgp.hr_reports import as_table, run_report
+
+	filters = frappe.parse_json(filters) if isinstance(filters, str) else (filters or {})
+	if not isinstance(filters, dict):
+		frappe.throw("Invalid report filters")
+	allowed = {"department", "status", "grade_level", "group_by", "dimension", "months", "from_date", "to_date"}
+	params = {key: value for key, value in filters.items() if key in allowed}
+	result = run_report(report_id[len(SERVER_REPORT_PREFIX):], get_requested_companies(company), params)
+	return as_table(result)
 
 
 def _safe_csv_cell(value):
@@ -73,10 +87,11 @@ def _safe_csv_cell(value):
 
 
 @frappe.whitelist(methods=["POST"])
-def export_report(report_id, title, purpose, columns, rows, company=None):
+def export_report(report_id, title, purpose, columns=None, rows=None, company=None, filters=None):
 	domain = (report_id or "").split(".", 1)[0]
 	gate = REPORT_GATES.get(report_id) or REPORT_DOMAINS.get(domain)
-	if not gate or report_id not in REPORT_COLUMNS:
+	server_built = (report_id or "").startswith(SERVER_REPORT_PREFIX)
+	if not gate or (report_id not in REPORT_COLUMNS and not server_built):
 		frappe.throw("This report is not approved for export", frappe.PermissionError)
 	gate()
 	if frappe.session.user != "Administrator" and not get_user_roles().intersection(EXPORT_ROLES):
@@ -86,11 +101,14 @@ def export_report(report_id, title, purpose, columns, rows, company=None):
 	purpose = (purpose or "").strip()
 	if len(purpose) < 10:
 		frappe.throw("An export purpose of at least 10 characters is required")
+	if server_built:
+		# Regenerated server-side from the filters: the browser's rows are never trusted.
+		columns, rows = _server_report_table(report_id, company, filters)
 	if isinstance(columns, str):
 		columns = frappe.parse_json(columns)
 	if isinstance(rows, str):
 		rows = frappe.parse_json(rows)
-	if columns != REPORT_COLUMNS[report_id]:
+	if not server_built and columns != REPORT_COLUMNS[report_id]:
 		frappe.throw("The report columns do not match the approved export layout")
 	if not isinstance(rows, list) or len(rows) > 5000 or any(not isinstance(row, list) or len(row) != len(columns) for row in rows):
 		frappe.throw("The report rows are invalid or exceed the 5,000-row export limit")

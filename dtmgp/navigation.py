@@ -64,7 +64,7 @@ NAVIGATION = (
 			_section("hr", "Retirement & Exit", "Upcoming Retirements|Retirement Processing|Resignations|Terminations|Exit Clearance|Former Staff"),
 			_section("hr", "Payroll", "Salary Structures|Payroll Processing|Salary Slips|Deductions|Payroll Reports", roles=STATE | {"Treasurer"}),
 			_section("hr", "Staff Audit", "Audit Exercises|Audit Exceptions|Duplicate Records|Staff Audit Reports", roles=STATE | {"Internal Auditor"}),
-			_section("hr", "HR Reports", "Staff Strength Report|Staff Distribution Report|Retirement Forecast|Leave Report|Establishment Report"),
+			_section("hr", "HR Reports", "Nominal Roll|Staff Strength Report|Staff Distribution Report|Retirement Forecast|Appointments & Exits|Leave Report|Establishment Report|Verification Report|Records Completeness"),
 		],
 	},
 	{

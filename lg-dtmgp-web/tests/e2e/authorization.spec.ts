@@ -96,3 +96,44 @@ test("staff directory filters send their values to the server and stay accessibl
   await page.getByRole("button", { name: "Clear filters (2)" }).click();
   await expect.poll(() => listRequests.at(-1)?.get("gender")).toBeNull();
 });
+
+test("HR reports render a filterable retirement forecast without serious accessibility violations", async ({ page }) => {
+  await mockSession(page, "HR Officer", true);
+  const reportRequests: URLSearchParams[] = [];
+  await page.route("**/api/method/dtmgp.api.v1.people.get_dashboard**", route => route.fulfill({ json: { message: { total: 3, active: 3, verified: 1, on_leave: 0, needs_attention: 2, can_manage: false } } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.get_form_options**", route => route.fulfill({ json: { message: { departments: [], designations: [], genders: ["Male", "Female"], statuses: ["Active"], verification_statuses: ["Pending"], grade_levels: [] } } }));
+  await page.route("**/api/method/dtmgp.api.v1.hr.list_lga_companies**", route => route.fulfill({ json: { message: [makurdi] } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.list_employees**", route => route.fulfill({ json: { message: { items: [], total: 0, page: 1, page_size: 25 } } }));
+  await page.route("**/api/method/dtmgp.api.v1.hr.get_hr_report_options**", route => route.fulfill({ json: { message: {
+    departments: [{ value: "Works - MKD", label: "Works" }], statuses: ["Active", "Suspended", "Inactive", "Left", "All"],
+    group_by: [{ value: "department", label: "Department" }], dimensions: [{ value: "grade_level", label: "Grade level" }],
+    leave_groups: [{ value: "leave_type", label: "Leave type" }], retirement_horizons: [12, 24, 36, 60], is_statewide: false,
+  } } }));
+  await page.route("**/api/method/dtmgp.api.v1.hr.get_hr_report?**", route => {
+    reportRequests.push(new URL(route.request().url()).searchParams);
+    return route.fulfill({ json: { message: {
+      columns: [
+        { key: "name", label: "Staff ID", type: "text" }, { key: "employee_name", label: "Name", type: "text" },
+        { key: "department", label: "Department", type: "text" }, { key: "grade_level", label: "Grade", type: "text" },
+        { key: "date_of_retirement", label: "Retirement date", type: "date" }, { key: "basis", label: "Basis", type: "text" },
+        { key: "months_left", label: "Months left", type: "int" }, { key: "timing", label: "Timing", type: "text" },
+      ],
+      rows: [
+        { name: "HR-EMP-00002", employee_name: "Tersoo Iorliam", department: "Works", grade_level: "GL 12", date_of_retirement: "2026-09-30", basis: "Age (60 years)", months_left: -2, timing: "Overdue" },
+        { name: "HR-EMP-00001", employee_name: "Amina Bello", department: "Health", grade_level: "GL 08", date_of_retirement: "2027-04-12", basis: "Service (35 years)", months_left: 5, timing: "Within 12 months" },
+      ],
+      totals: null,
+      summary: [{ label: "Overdue (still active)", value: 1, tone: "danger" }, { label: "Within 12 months", value: 1 }, { label: "Within 24 months", value: 1 }],
+      note: "Overdue staff are active but past their retirement date: confirm an approved extension or process the exit.", truncated: false,
+    } } });
+  });
+  await page.goto("/workspace/hr/hr-reports/retirement-forecast");
+  await expect(page.getByRole("heading", { name: "Retirement Forecast" })).toBeVisible();
+  await expect(page.getByRole("cell", { name: "Tersoo Iorliam" })).toBeVisible();
+  await page.getByRole("combobox", { name: "Horizon" }).selectOption("60");
+  await expect.poll(() => reportRequests.at(-1)?.get("months")).toBe("60");
+  expect(reportRequests.at(-1)?.get("report")).toBe("retirement-forecast");
+  const results = await new AxeBuilder({ page }).include(".hr-report").analyze();
+  expect(results.violations.filter(item => item.impact === "critical" || item.impact === "serious")).toEqual([]);
+  await page.screenshot({ path: test.info().outputPath("hr-reports.png"), fullPage: true });
+});

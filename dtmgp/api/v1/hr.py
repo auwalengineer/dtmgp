@@ -694,6 +694,50 @@ def get_staff_audit_exceptions(company=None):
 
 
 @frappe.whitelist()
+def get_hr_report(
+	report, company=None, department=None, status=None, grade_level=None, group_by=None, dimension=None,
+	months=None, from_date=None, to_date=None,
+):
+	"""One HR report (see dtmgp.hr_reports) for the caller's scope. The LGA is
+	always resolved server-side; every other value is a validated filter."""
+	from dtmgp.hr_reports import run_report
+
+	require_hr_access()
+	companies = get_requested_companies(company)
+	params = {
+		"department": department, "status": status, "grade_level": grade_level, "group_by": group_by,
+		"dimension": dimension, "months": months, "from_date": from_date, "to_date": to_date,
+	}
+	return run_report(report, companies, params)
+
+
+@frappe.whitelist()
+def get_hr_report_options(company=None):
+	"""Filter choices for the HR reports screen, limited to the caller's scope."""
+	from dtmgp.hr_reports import DIMENSIONS, GROUP_LABELS, LEAVE_GROUPS, RETIREMENT_HORIZONS, STATUSES
+
+	require_hr_access()
+	companies = get_requested_companies(company)
+	departments = frappe.get_all(
+		"Department", filters={"company": ["in", companies or [""]], "is_group": 0},
+		fields=["name", "department_name", "company"], order_by="department_name asc",
+	)
+	statewide = len(companies) > 1
+	return {
+		"departments": [
+			{"value": row.name, "label": f"{row.department_name} ({row.company.replace(' Local Government Area', '')})" if statewide else row.department_name}
+			for row in departments
+		],
+		"statuses": [*STATUSES, "All"],
+		"group_by": [{"value": key, "label": label} for key, label in GROUP_LABELS.items() if statewide or key != "lga"],
+		"dimensions": [{"value": key, "label": label} for key, label in DIMENSIONS.items() if statewide or key != "lga"],
+		"leave_groups": [{"value": key, "label": label} for key, label in LEAVE_GROUPS.items() if statewide or key != "lga"],
+		"retirement_horizons": list(RETIREMENT_HORIZONS),
+		"is_statewide": statewide,
+	}
+
+
+@frappe.whitelist()
 def get_hr_reports(company=None):
 	require_hr_access()
 	companies = get_requested_companies(company)
