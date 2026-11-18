@@ -35,6 +35,7 @@ REPORT_DOMAINS = {
 REPORT_COLUMNS = {
 	"hr.staff-strength": ["Department", "Staff"],
 	"hr.staff-distribution": ["Gender", "Staff"],
+	"hr.workforce-by-lga": ["LGA", "Active staff", "Verified", "Verified %"],
 	"hr.retirement-forecast": ["Measure", "Value"],
 	"hr.leave": ["Leave type", "Days taken"],
 	"hr.establishment": ["Measure", "Value"],

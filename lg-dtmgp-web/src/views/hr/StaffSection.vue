@@ -7,7 +7,8 @@ import { apiRequest, uploadFile } from "@/services/api";
 
 import ItemTabs from "../shared/ItemTabs.vue";
 import EmployeeAvatar from "./EmployeeAvatar.vue";
-import type { Employee } from "./types";
+import EmployeeEditModal from "./EmployeeEditModal.vue";
+import type { Employee, Options } from "./types";
 
 interface EmergencyContact { person_to_be_contacted: string | null; relation: string | null; emergency_phone_number: string | null }
 interface WorkHistoryRow { department: string | null; designation: string | null; branch: string | null; from_date: string | null; to_date: string | null }
@@ -20,10 +21,10 @@ interface StaffDocument { name: string; document_type: string; document_date?: s
 
 const PROFILE_ITEMS = new Set(["staff-profiles", "digital-personnel-files", "employment-history", "next-of-kin", "staff-documents"]);
 
-defineProps<{ employees: Employee[]; total: number; page: number; pageSize: number; departmentOptions: string[]; canManage: boolean }>();
+defineProps<{ employees: Employee[]; total: number; page: number; pageSize: number; departmentOptions: string[]; canManage: boolean; formOptions: Options }>();
 const search = defineModel<string>("search", { required: true });
 const department = defineModel<string>("department", { required: true });
-const emit = defineEmits<{ "apply-filters": []; "change-page": [change: number]; "edit-employee": [employee: Employee]; "photo-changed": [] }>();
+const emit = defineEmits<{ "apply-filters": []; "change-page": [change: number]; "employee-saved": []; "photo-changed": [] }>();
 
 const ITEM_LABELS: Record<string, string> = { "staff-directory": "Staff Directory", "staff-profiles": "Staff Profiles", "digital-personnel-files": "Digital Personnel Files", "employment-history": "Employment History", "next-of-kin": "Next of Kin", "staff-documents": "Staff Documents" };
 const DEFAULT_ITEM = "staff-directory";
@@ -32,6 +33,8 @@ const activeItem = ref(String(route.params.item || "") in ITEM_LABELS ? String(r
 watch(() => route.params.item, (item) => { activeItem.value = item && String(item) in ITEM_LABELS ? String(item) : DEFAULT_ITEM; });
 
 const selectedEmployee = ref("");
+const editingEmployee = ref<string | null>(null);
+const savedNotice = ref("");
 const profile = ref<EmployeeProfile | null>(null);
 const profileLoading = ref(false);
 const profileError = ref("");
@@ -115,6 +118,12 @@ async function savePhoto(file: File | null) {
   } catch (reason) { photoError.value = reason instanceof Error ? reason.message : "Unable to update the photo"; }
   finally { photoSaving.value = false; }
 }
+function onEmployeeSaved(result: { name: string; employee_name: string; changed: string[] }) {
+  editingEmployee.value = null;
+  savedNotice.value = result.changed.length ? `${result.employee_name} updated (${result.changed.length} field${result.changed.length === 1 ? "" : "s"}).` : "";
+  emit("employee-saved");
+  if (profile.value?.name === result.name) loadProfile(result.name);
+}
 watch(selectedEmployee, (employee) => { loadProfile(employee); loadRestrictedRecords(employee); if (employee && DOCUMENT_ITEMS.has(activeItem.value)) ensureDocuments(employee); });
 watch(activeItem, (item) => { if (selectedEmployee.value && DOCUMENT_ITEMS.has(item)) ensureDocuments(selectedEmployee.value); });
 
@@ -127,7 +136,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
   <template v-if="activeItem === 'staff-directory'">
     <form class="directory-toolbar" @submit.prevent="$emit('apply-filters')"><label class="directory-search"><Search :size="17" /><input v-model="search" type="search" placeholder="Search name, ID or designation" /></label><select v-model="department" class="toolbar-select"><option value="">All departments</option><option v-for="item in departmentOptions" :key="item">{{ item }}</option></select><button class="secondary-action">Apply</button></form>
     <div class="staff-table-wrap"><table class="staff-table"><thead><tr><th>Staff member</th><th>Department</th><th>Grade</th><th>Employment</th><th>Verification</th><th></th></tr></thead><tbody>
-      <tr v-for="person in employees" :key="person.name" v-record="{ doctype: 'Employee', name: person.name }"><td><div class="staff-person"><EmployeeAvatar :name="person.employee_name" :image="person.image" /><div><strong>{{ person.employee_name }}</strong><small>{{ person.name }} · {{ person.designation || "No designation" }}</small></div></div></td><td>{{ person.department || "Unassigned" }}</td><td>{{ person.dtmgp_grade_level || "-" }}</td><td><span class="table-status" :class="person.status === 'Active' ? 'success' : 'neutral'">{{ person.status }}</span></td><td><span class="verification-status" :class="person.dtmgp_verification_status === 'Verified' ? 'verified' : 'pending'">{{ person.dtmgp_verification_status || "Pending" }}</span></td><td><button v-if="canManage" class="icon-button" title="Edit employee" @click="$emit('edit-employee', person)"><Pencil :size="17" /></button></td></tr>
+      <tr v-for="person in employees" :key="person.name" v-record="{ doctype: 'Employee', name: person.name }"><td><div class="staff-person"><EmployeeAvatar :name="person.employee_name" :image="person.image" /><div><strong>{{ person.employee_name }}</strong><small>{{ person.name }} · {{ person.designation || "No designation" }}</small></div></div></td><td>{{ person.department || "Unassigned" }}</td><td>{{ person.dtmgp_grade_level || "-" }}</td><td><span class="table-status" :class="person.status === 'Active' ? 'success' : 'neutral'">{{ person.status }}</span></td><td><span class="verification-status" :class="person.dtmgp_verification_status === 'Verified' ? 'verified' : 'pending'">{{ person.dtmgp_verification_status || "Pending" }}</span></td><td><button v-if="canManage" class="icon-button" title="Edit employee" @click="editingEmployee = person.name"><Pencil :size="17" /></button></td></tr>
     </tbody></table><footer class="table-footer"><span>Showing {{ employees.length }} of {{ total }} staff</span><div><button :disabled="page === 1" @click="$emit('change-page', -1)"><ChevronLeft :size="14" /> Previous</button><button class="current">{{ page }}</button><button :disabled="page * pageSize >= total" @click="$emit('change-page', 1)">Next <ChevronRight :size="14" /></button></div></footer></div>
   </template>
 
@@ -145,6 +154,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
           <strong>{{ profile.employee_name }}</strong>
           <small>{{ profile.name }} · {{ profile.designation || "No designation" }}</small>
           <div v-if="canManage" class="employee-photo-actions">
+            <button type="button" class="primary-action" @click="editingEmployee = profile.name"><Pencil :size="15" /> Edit details</button>
             <label class="secondary-action" :aria-disabled="photoSaving"><Camera :size="15" /> {{ photoSaving ? "Saving..." : profile.image ? "Change photo" : "Upload photo" }}<input type="file" accept="image/jpeg,image/png,image/webp" hidden :disabled="photoSaving" @change="savePhoto(($event.target as HTMLInputElement).files?.[0] || null); ($event.target as HTMLInputElement).value = ''" /></label>
             <button v-if="profile.image" type="button" class="secondary-action" :disabled="photoSaving" @click="savePhoto(null)"><Trash2 :size="15" /> Remove</button>
           </div>
@@ -195,4 +205,6 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
     <template v-else><label>Document type<select v-model="recordForm.document_type"><option>Appointment Letter</option><option>Promotion Letter</option><option>Qualification</option><option>Identity Document</option><option>Medical Record</option><option>Disciplinary Record</option><option>Pension Record</option><option>Exit Document</option><option>Other</option></select></label><label>Reference number<input v-model="recordForm.reference_number" /></label><label>Private file<input type="file" required @change="pendingDocument = ($event.target as HTMLInputElement).files?.[0] || null" /></label></template>
     <label v-if="recordKind !== 'next_of_kin'">Classification<select v-model="recordForm.classification"><option>Restricted</option><option>Confidential</option></select></label><label v-if="recordKind !== 'next_of_kin'">Retention category<input v-model="recordForm.retention_category" required /></label><label v-if="recordKind !== 'next_of_kin'">Retention review date<input v-model="recordForm.retention_review_date" type="date" /></label>
     <footer><button type="button" class="secondary-action" @click="showRecordForm = false">Cancel</button><button class="primary-action">Save</button></footer></form></div>
+  <p v-if="savedNotice" class="employee-saved-notice" role="status">{{ savedNotice }}</p>
+  <EmployeeEditModal v-if="editingEmployee" :employee="editingEmployee" :options="formOptions" @close="editingEmployee = null" @saved="onEmployeeSaved" />
 </template>

@@ -27,10 +27,9 @@ def validate_employee_record(doc, method=None):
 			frappe.throw(f"{label} must be exactly 11 digits (got {value!r})")
 		doc.set(fieldname, value or None)
 
+	# Date of Present APPT is deliberately not checked against Date of 1st APPT: nominal-roll
+	# data carries legitimate cases where it reads earlier (e.g. re-appointment, records corrected).
 	first_appointment = doc.get(EMPLOYEE_FIRST_APPOINTMENT_FIELD) or doc.date_of_joining
-	present_appointment = doc.get("dtmgp_date_of_present_appointment")
-	if first_appointment and present_appointment and getdate(present_appointment) < getdate(first_appointment):
-		frappe.throw("Date of Present APPT cannot be before Date of 1st APPT")
 
 	by_age = add_years(getdate(doc.date_of_birth), RETIREMENT_AGE_YEARS) if doc.date_of_birth else None
 	by_service = add_years(getdate(first_appointment), RETIREMENT_SERVICE_YEARS) if first_appointment else None

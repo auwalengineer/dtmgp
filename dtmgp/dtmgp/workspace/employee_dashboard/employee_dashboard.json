@@ -1,0 +1,184 @@
+{
+ "charts": [
+  {
+   "chart_name": "Workforce by LGA",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by LGA"
+  },
+  {
+   "chart_name": "Workforce by Status",
+   "doctype": "Workspace Chart",
+   "label": "All staff by status"
+  },
+  {
+   "chart_name": "Workforce by Gender",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by gender"
+  },
+  {
+   "chart_name": "Workforce by Grade Level",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by grade level"
+  },
+  {
+   "chart_name": "Workforce Verification Status",
+   "doctype": "Workspace Chart",
+   "label": "Verification status (active staff)"
+  },
+  {
+   "chart_name": "Workforce by Age Band",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by age band"
+  },
+  {
+   "chart_name": "Workforce by Department",
+   "doctype": "Workspace Chart",
+   "label": "Active staff by department (top 10)"
+  },
+  {
+   "chart_name": "Upcoming Retirements by Year",
+   "doctype": "Workspace Chart",
+   "label": "Retirements due by year"
+  },
+  {
+   "chart_name": "Appointments by Year",
+   "doctype": "Workspace Chart",
+   "label": "First appointments by year"
+  }
+ ],
+ "content": "[{\"id\": \"hdr-summary\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Workforce at a glance</b></span>\", \"col\": 12}}, {\"id\": \"nc-0\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Total Employees\", \"col\": 4}}, {\"id\": \"nc-1\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Active Employees\", \"col\": 4}}, {\"id\": \"nc-2\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Verified Employees\", \"col\": 4}}, {\"id\": \"nc-3\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Pending Verification\", \"col\": 4}}, {\"id\": \"nc-4\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Retiring in 12 Months\", \"col\": 4}}, {\"id\": \"nc-5\", \"type\": \"number_card\", \"data\": {\"number_card_name\": \"Workforce Past Retirement Date\", \"col\": 4}}, {\"id\": \"hdr-dist\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Distribution</b></span>\", \"col\": 12}}, {\"id\": \"ch-0\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by LGA\", \"col\": 12}}, {\"id\": \"ch-1\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Status\", \"col\": 6}}, {\"id\": \"ch-2\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Gender\", \"col\": 6}}, {\"id\": \"ch-3\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Grade Level\", \"col\": 6}}, {\"id\": \"ch-4\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce Verification Status\", \"col\": 6}}, {\"id\": \"ch-5\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Age Band\", \"col\": 6}}, {\"id\": \"ch-6\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Workforce by Department\", \"col\": 12}}, {\"id\": \"ch-7\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Upcoming Retirements by Year\", \"col\": 6}}, {\"id\": \"ch-8\", \"type\": \"chart\", \"data\": {\"chart_name\": \"Appointments by Year\", \"col\": 12}}, {\"id\": \"hdr-links\", \"type\": \"header\", \"data\": {\"text\": \"<span class=\\\"h4\\\"><b>Go to</b></span>\", \"col\": 12}}, {\"id\": \"sc-0\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Employees\", \"col\": 3}}, {\"id\": \"sc-1\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Leave Applications\", \"col\": 3}}, {\"id\": \"sc-2\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Exit Cases\", \"col\": 3}}, {\"id\": \"sc-3\", \"type\": \"shortcut\", \"data\": {\"shortcut_name\": \"Staffing Plans\", \"col\": 3}}]",
+ "creation": "2026-11-18 10:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "users",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Employee Dashboard",
+ "links": [],
+ "modified": "2026-11-18 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "dtmgp",
+ "name": "Employee Dashboard",
+ "number_cards": [
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Employees on Record",
+   "number_card_name": "Workforce Total Employees"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Active Employees",
+   "number_card_name": "Workforce Active Employees"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Verified (Active)",
+   "number_card_name": "Workforce Verified Employees"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Pending Verification",
+   "number_card_name": "Workforce Pending Verification"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Retiring in 12 Months",
+   "number_card_name": "Workforce Retiring in 12 Months"
+  },
+  {
+   "doctype": "Workspace Number Card",
+   "label": "Active Past Retirement Date",
+   "number_card_name": "Workforce Past Retirement Date"
+  }
+ ],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [
+  {
+   "doctype": "Has Role",
+   "role": "System Manager"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "State Administrator"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "State Executive Viewer"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "State Auditor"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "LGA Administrator"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "LGA Chairman"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "LGA Secretary"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "HR Officer"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "Internal Auditor"
+  },
+  {
+   "doctype": "Has Role",
+   "role": "Read-only Officer"
+  }
+ ],
+ "sequence_id": 9.0,
+ "shortcuts": [
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "doctype": "Workspace Shortcut",
+   "label": "Employees",
+   "link_to": "Employee",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "doctype": "Workspace Shortcut",
+   "label": "Leave Applications",
+   "link_to": "Leave Application",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "doctype": "Workspace Shortcut",
+   "label": "Exit Cases",
+   "link_to": "Employee Separation",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Yellow",
+   "doc_view": "List",
+   "doctype": "Workspace Shortcut",
+   "label": "Staffing Plans",
+   "link_to": "Staffing Plan",
+   "stats_filter": "[]",
+   "type": "DocType"
+  }
+ ],
+ "title": "Employee Dashboard"
+}

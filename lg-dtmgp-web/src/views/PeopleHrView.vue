@@ -57,7 +57,6 @@ const pageSize = 25;
 const loading = ref(true);
 const error = ref("");
 const showEmployeeForm = ref(false);
-const editingEmployee = ref<string | null>(null);
 const employeeForm = ref(emptyEmployeeForm());
 const showForm = ref(false);
 const formKind = ref<"plan" | "transfer" | "promotion" | "exercise" | "record" | "separation">("plan");
@@ -150,17 +149,12 @@ async function loadExit() {
 async function applyFilters() { page.value = 1; await loadEmployees(); }
 async function changePage(change: number) { page.value += change; await loadEmployees(); }
 
-function openCreateEmployee() { editingEmployee.value = null; employeeForm.value = emptyEmployeeForm(); showEmployeeForm.value = true; }
-function openEditEmployee(employee: Employee) {
-  editingEmployee.value = employee.name;
-  employeeForm.value = { first_name: employee.first_name, last_name: employee.last_name || "", company: employee.company, gender: employee.gender, date_of_birth: employee.date_of_birth, date_of_joining: employee.date_of_joining, department: employee.department || "", designation: employee.designation || "", grade_level: employee.dtmgp_grade_level || "", status: employee.status, verification_status: employee.dtmgp_verification_status || "Pending" };
-  showEmployeeForm.value = true;
-}
+function openCreateEmployee() { employeeForm.value = emptyEmployeeForm(); showEmployeeForm.value = true; }
 async function saveEmployee() {
   saving.value = true;
   error.value = "";
   try {
-    await apiRequest("/api/method/dtmgp.api.v1.people.save_employee", { method: "POST", body: JSON.stringify({ ...employeeForm.value, employee: editingEmployee.value }) });
+    await apiRequest("/api/method/dtmgp.api.v1.people.save_employee", { method: "POST", body: JSON.stringify(employeeForm.value) });
     showEmployeeForm.value = false;
     await loadModule();
   } catch (reason) {
@@ -221,7 +215,7 @@ watch(() => session.activeLga, loadModule, { immediate: true });
     <section class="hr-workspace">
       <nav class="hr-tabs" aria-label="People and HR views"><button v-for="tab in visibleTabs" :key="tab" :class="{ active: activeTab === tab }" @click="selectTab(tab)">{{ tab }}</button></nav>
 
-      <StaffSection v-if="activeTab === 'Staff directory'" :employees="employees" :total="total" :page="page" :page-size="pageSize" v-model:search="search" v-model:department="department" :department-options="options.departments" :can-manage="dashboard.can_manage" @apply-filters="applyFilters" @change-page="changePage" @edit-employee="openEditEmployee" @photo-changed="loadEmployees" />
+      <StaffSection v-if="activeTab === 'Staff directory'" :employees="employees" :total="total" :page="page" :page-size="pageSize" v-model:search="search" v-model:department="department" :department-options="options.departments" :can-manage="dashboard.can_manage" @apply-filters="applyFilters" @change-page="changePage" :form-options="options" @employee-saved="loadEmployees" @photo-changed="loadEmployees" />
 
       <VerificationSection v-else-if="activeTab === 'Verification'" :exercises="exercises" :active-exercise="activeExercise" :verification-records="verificationRecords" :can-manage="dashboard.can_manage" @new-exercise="openForm('exercise', { company: session.activeLga, title: '', cycle_start_date: today(), cycle_end_date: today() })" @select-exercise="selectExercise" @transition-exercise="transitionExercise" @new-record="openForm('record', { company: session.activeLga, exercise: activeExercise, employee: '', biometric_captured: 0 })" @review-record="reviewRecord" />
 
@@ -245,7 +239,7 @@ watch(() => session.activeLga, loadModule, { immediate: true });
     </section>
   </template>
 
-  <div v-if="showEmployeeForm" class="modal-backdrop" @click.self="showEmployeeForm = false"><form class="user-modal employee-modal" @submit.prevent="saveEmployee"><h2>{{ editingEmployee ? "Edit employee" : "Add employee" }}</h2><div class="form-grid"><label>First name<input v-model="employeeForm.first_name" required /></label><label>Last name<input v-model="employeeForm.last_name" /></label><label>Gender<select v-model="employeeForm.gender" required><option value="" disabled>Select gender</option><option v-for="item in options.genders" :key="item">{{ item }}</option></select></label><label>Date of birth<input v-model="employeeForm.date_of_birth" type="date" required /></label><label>Date joined<input v-model="employeeForm.date_of_joining" type="date" required /></label><label>Department<select v-model="employeeForm.department"><option value="">Unassigned</option><option v-for="item in options.departments" :key="item">{{ item }}</option></select></label><label>Designation<select v-model="employeeForm.designation"><option value="">Unassigned</option><option v-for="item in options.designations" :key="item">{{ item }}</option></select></label><label>Grade level<input v-model="employeeForm.grade_level" placeholder="GL 08" /></label><label>Employment status<select v-model="employeeForm.status"><option v-for="item in options.statuses" :key="item">{{ item }}</option></select></label></div><p v-if="error" class="login-error" role="alert">{{ error }}</p><footer><button type="button" class="secondary-action" @click="showEmployeeForm = false">Cancel</button><button class="primary-action" :disabled="saving">{{ saving ? "Saving..." : "Save employee" }}</button></footer></form></div>
+  <div v-if="showEmployeeForm" class="modal-backdrop" @click.self="showEmployeeForm = false"><form class="user-modal employee-modal" @submit.prevent="saveEmployee"><h2>Add employee</h2><div class="form-grid"><label>First name<input v-model="employeeForm.first_name" required /></label><label>Last name<input v-model="employeeForm.last_name" /></label><label>Gender<select v-model="employeeForm.gender" required><option value="" disabled>Select gender</option><option v-for="item in options.genders" :key="item">{{ item }}</option></select></label><label>Date of birth<input v-model="employeeForm.date_of_birth" type="date" required /></label><label>Date joined<input v-model="employeeForm.date_of_joining" type="date" required /></label><label>Department<select v-model="employeeForm.department"><option value="">Unassigned</option><option v-for="item in options.departments" :key="item">{{ item }}</option></select></label><label>Designation<select v-model="employeeForm.designation"><option value="">Unassigned</option><option v-for="item in options.designations" :key="item">{{ item }}</option></select></label><label>Grade level<input v-model="employeeForm.grade_level" placeholder="GL 08" /></label><label>Employment status<select v-model="employeeForm.status"><option v-for="item in options.statuses" :key="item">{{ item }}</option></select></label></div><p v-if="error" class="login-error" role="alert">{{ error }}</p><footer><button type="button" class="secondary-action" @click="showEmployeeForm = false">Cancel</button><button class="primary-action" :disabled="saving">{{ saving ? "Saving..." : "Save employee" }}</button></footer></form></div>
 
   <div v-if="showForm" class="modal-backdrop" @click.self="showForm = false"><form class="user-modal" @submit.prevent="saveForm">
     <template v-if="formKind === 'plan'"><h2>New staffing plan</h2><div class="form-grid"><label>Department<select v-model="form.department" required><option value="" disabled>Select department</option><option v-for="item in options.departments" :key="item">{{ item }}</option></select></label><label>Designation<select v-model="form.designation" required><option value="" disabled>Select designation</option><option v-for="item in options.designations" :key="item">{{ item }}</option></select></label><label>From date<input v-model="form.from_date" type="date" required /></label><label>To date<input v-model="form.to_date" type="date" required /></label><label>Vacancies<input v-model.number="form.vacancies" type="number" min="0" required /></label></div></template>
