@@ -208,3 +208,18 @@ body.drawer-open { overflow: hidden; }
 .directory-filters .toolbar-select.active { border-color: var(--green-700); box-shadow: inset 0 0 0 1px var(--green-700); }
 .directory-clear { align-items: center; display: inline-flex; gap: 6px; white-space: nowrap; }
 @media (max-width: 720px) { .directory-filters { padding: 0 12px 12px; } .directory-filters .toolbar-select { flex-basis: calc(50% - 4px); max-width: none; } }
+.profile-sections { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+.profile-section { border: 1px solid var(--line); padding: 14px 16px; }
+.profile-section h3 { color: var(--green-900); font-size: .82rem; letter-spacing: .04em; margin: 0 0 10px; text-transform: uppercase; }
+.profile-section dl { display: grid; gap: 0; margin: 0; }
+.profile-section dl > div { border-top: 1px solid var(--line); display: grid; gap: 12px; grid-template-columns: minmax(130px, 42%) 1fr; padding: 7px 0; }
+.profile-section dl > div:first-child { border-top: 0; }
+.profile-section dt { color: var(--muted); font-size: .74rem; }
+.profile-section dd { color: #23302a; font-size: .8rem; margin: 0; overflow-wrap: anywhere; white-space: pre-line; }
+.profile-section dl > div.empty dd { color: var(--muted); }
+.profile-section dd.masked { font-variant-numeric: tabular-nums; letter-spacing: .06em; }
+.profile-note { color: var(--muted); font-size: .72rem; margin: 10px 0 0; }
+@media (max-width: 640px) { .profile-sections { grid-template-columns: 1fr; } }
+.employee-photo-panel, .profile-sections, .profile-note { margin-left: 20px; margin-right: 20px; }
+.profile-note { margin-bottom: 20px; }
+@media (max-width: 760px) { .employee-photo-panel, .profile-sections, .profile-note { margin-left: 12px; margin-right: 12px; } }

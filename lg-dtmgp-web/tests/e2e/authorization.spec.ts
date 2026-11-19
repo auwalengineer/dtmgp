@@ -137,3 +137,48 @@ test("HR reports render a filterable retirement forecast without serious accessi
   expect(results.violations.filter(item => item.impact === "critical" || item.impact === "serious")).toEqual([]);
   await page.screenshot({ path: test.info().outputPath("hr-reports.png"), fullPage: true });
 });
+
+test("staff profile picker searches the whole LGA on the server", async ({ page }) => {
+  await mockSession(page, "HR Officer", true);
+  const staff = [
+    { name: "HR-EMP-00001", employee_name: "Amina Bello", designation: "Officer", status: "Active", image: null },
+    { name: "HR-EMP-00002", employee_name: "Tersoo Iorliam", designation: "Accountant", status: "Active", image: null },
+  ];
+  const searches: (string | null)[] = [];
+  await page.route("**/api/method/dtmgp.api.v1.people.get_dashboard**", route => route.fulfill({ json: { message: { total: 2, active: 2, verified: 0, on_leave: 0, needs_attention: 2, can_manage: false } } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.get_form_options**", route => route.fulfill({ json: { message: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [], grade_levels: [] } } }));
+  await page.route("**/api/method/dtmgp.api.v1.hr.list_lga_companies**", route => route.fulfill({ json: { message: [makurdi] } }));
+  await page.route("**/api/method/dtmgp.api.v1.hr.list_restricted_hr_records**", route => route.fulfill({ json: { message: [] } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.get_employee_profile**", route => route.fulfill({ json: { message: {
+    name: "HR-EMP-00002", employee_name: "Tersoo Iorliam", image: null, company: makurdi, department: "Works", designation: "Accountant", status: "Active",
+    gender: "Male", date_of_birth: "1980-01-01", date_of_joining: "2010-01-01", grade_level: "GL 10", verification_status: "Pending",
+    cell_number: null, personal_email: null, emergency_contact: { person_to_be_contacted: null, relation: null, emergency_phone_number: null },
+    internal_work_history: [], external_work_history: [],
+    sections: [
+      { label: "Personal", fields: [{ label: "Staff ID", value: "HR-EMP-00002", type: "text" }, { label: "Gender", value: "Male", type: "text" }, { label: "Date of birth", value: "1980-01-01", type: "date" }, { label: "Age", value: 46.9, type: "years" }, { label: "Qualifications", value: null, type: "text" }] },
+      { label: "Service & appointment", fields: [{ label: "Department", value: "Works", type: "text" }, { label: "Grade level", value: "GL 10", type: "text" }, { label: "Step", value: 4, type: "text" }, { label: "Date of retirement", value: "2040-01-01", type: "date" }, { label: "Retirement basis", value: "Age (60 years)", type: "text" }] },
+      { label: "Verification & identity", fields: [{ label: "Verification status", value: "Pending", type: "text" }, { label: "BVN", value: "•••••••5678", type: "masked" }, { label: "NIN", value: null, type: "masked" }] },
+      { label: "Pay & bank", fields: [{ label: "Salary mode", value: "Bank", type: "text" }, { label: "Bank", value: "First Bank of Nigeria Limited", type: "text" }, { label: "Account number", value: "••••••6789", type: "masked" }] },
+    ],
+  } } }));
+  await page.route("**/api/method/dtmgp.api.v1.people.list_employees**", route => {
+    const term = new URL(route.request().url()).searchParams.get("search");
+    searches.push(term);
+    const items = term ? staff.filter(person => person.employee_name.toLowerCase().includes(term.toLowerCase())) : staff;
+    return route.fulfill({ json: { message: { items, total: items.length, page: 1, page_size: 20 } } });
+  });
+  await page.goto("/workspace/hr/staff/staff-profiles");
+  const picker = page.getByRole("combobox", { name: "Staff member" });
+  await picker.fill("ters");
+  await expect.poll(() => searches.at(-1)).toBe("ters");
+  await expect(page.getByRole("option")).toHaveCount(1);
+  const results = await new AxeBuilder({ page }).include(".employee-picker").analyze();
+  expect(results.violations.filter(item => item.impact === "critical" || item.impact === "serious")).toEqual([]);
+  await page.screenshot({ path: test.info().outputPath("employee-picker.png") });
+  await page.keyboard.press("Enter");
+  await expect(page.getByRole("heading", { name: "Service & appointment" })).toBeVisible();
+  await expect(page.getByText("••••••6789")).toBeVisible();
+  const profileResults = await new AxeBuilder({ page }).include(".profile-sections").analyze();
+  expect(profileResults.violations.filter(item => item.impact === "critical" || item.impact === "serious")).toEqual([]);
+  await page.screenshot({ path: test.info().outputPath("employee-profile.png"), fullPage: true });
+});

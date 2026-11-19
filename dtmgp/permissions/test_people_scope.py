@@ -143,6 +143,32 @@ class TestPeopleScope(FrappeTestCase):
 		with self.assertRaises(frappe.ValidationError):
 			list_employees(self.makurdi, status="Retired")
 
+	def test_profile_shows_the_full_record_with_identity_numbers_masked(self):
+		employee = self._make_employee(self.makurdi)
+		frappe.set_user(self.hr_officer.name)
+		update_employee(employee, {
+			"dtmgp_bvn": "22212345678", "dtmgp_nin": "12345678901", "salary_mode": "Bank",
+			"bank_name": "First Bank of Nigeria Limited", "bank_ac_no": "0123456789", "dtmgp_rank": "Senior Officer",
+			"dtmgp_step": 3, "dtmgp_lg_of_origin": "Gboko", "dtmgp_date_of_first_appointment": "2012-02-01",
+		})
+		profile = get_employee_profile(employee)
+		fields = {(section["label"], field["label"]): field for section in profile["sections"] for field in section["fields"]}
+
+		self.assertEqual(
+			[section["label"] for section in profile["sections"]],
+			["Personal", "Service & appointment", "Verification & identity", "Pay & bank", "Contact & next of kin", "Origin"],
+		)
+		self.assertEqual(fields[("Service & appointment", "Rank")]["value"], "Senior Officer")
+		self.assertEqual(fields[("Service & appointment", "Step")]["value"], 3)
+		self.assertEqual(fields[("Origin", "LG of origin")]["value"], "Gboko")
+		self.assertEqual(fields[("Pay & bank", "Bank")]["value"], "First Bank of Nigeria Limited")
+		self.assertIsNotNone(fields[("Service & appointment", "Retirement basis")]["value"])
+		self.assertEqual(fields[("Verification & identity", "BVN")]["value"], "•••••••5678")
+		self.assertEqual(fields[("Pay & bank", "Account number")]["value"], "••••••6789")
+		serialized = frappe.as_json(profile)
+		for secret in ("22212345678", "12345678901", "0123456789"):
+			self.assertNotIn(secret, serialized)
+
 	def test_photo_cannot_be_set_across_lga(self):
 		employee = self._make_employee(self.gboko)
 		file_url = self._attach_image(employee)

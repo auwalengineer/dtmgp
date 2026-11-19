@@ -1,5 +1,5 @@
 import frappe
-from frappe.utils import cint, nowdate
+from frappe.utils import cint, date_diff, getdate, nowdate
 
 from dtmgp.audit import record_event
 from dtmgp.permissions.scope import can_manage_hr, get_requested_companies, require_hr_access
@@ -337,7 +337,89 @@ def get_employee_profile(employee):
 			{"company_name": row.company_name, "designation": row.designation, "contact": row.contact, "total_experience": row.total_experience}
 			for row in doc.external_work_history
 		],
+		"sections": _profile_sections(doc),
 	}
+
+
+def _mask(value):
+	"""Last four characters only: the profile is readable by more roles than can edit."""
+	value = (value or "").strip()
+	return f"{'•' * max(len(value) - 4, 0)}{value[-4:]}" if value else None
+
+
+def _profile_sections(doc):
+	"""The full employee record for the Staff Profile view, grouped like the edit
+	form. Each field is {label, value, type}; type is text, date, years or masked.
+	BVN, NIN and account number are masked here — the edit form (HR write access)
+	is where full values are handled."""
+	today = getdate(nowdate())
+
+	def years(start):
+		return round(date_diff(today, start) / 365.25, 1) if start else None
+
+	department = frappe.db.get_value("Department", doc.department, "department_name") if doc.department else None
+	first_appointment = doc.get("dtmgp_date_of_first_appointment") or doc.date_of_joining
+	by_age, by_service = doc.get(EMPLOYEE_RETIRE_BY_AGE_FIELD), doc.get(EMPLOYEE_RETIRE_BY_SERVICE_FIELD)
+	retirement = getdate(doc.date_of_retirement) if doc.date_of_retirement else None
+	basis = None
+	if retirement:
+		basis = "Age (60 years)" if by_age and getdate(by_age) == retirement else (
+			"Service (35 years)" if by_service and getdate(by_service) == retirement else "Set manually"
+		)
+
+	def field(label, value, kind="text"):
+		return {"label": label, "value": value if value not in ("", None) else None, "type": kind}
+
+	service = [
+		field("LGA", doc.company.replace(" Local Government Area", " LGA") if doc.company else None),
+		field("Department", department or doc.department),
+		field("Designation", doc.designation),
+		field("Rank", doc.get("dtmgp_rank")),
+		field("Grade level", doc.get(EMPLOYEE_GRADE_FIELD)),
+		field("Step", doc.get("dtmgp_step") or None),
+		field("Schedule of duty", doc.get("dtmgp_schedule_of_duty")),
+		field("Employment status", doc.status),
+		field("Date joined", doc.date_of_joining, "date"),
+		field("Date of 1st appointment", doc.get("dtmgp_date_of_first_appointment"), "date"),
+		field("Date of present appointment", doc.get("dtmgp_date_of_present_appointment"), "date"),
+		field("Years of service", years(first_appointment), "years"),
+		field("Date of retirement", doc.date_of_retirement, "date"),
+		field("Retirement basis", basis),
+		field("Retires by age", by_age, "date"),
+		field("Retires by length of service", by_service, "date"),
+	]
+	if doc.status == "Left":
+		service += [field("Relieving date", doc.relieving_date, "date"), field("Reason for leaving", doc.reason_for_leaving)]
+	return [
+		{"label": "Personal", "fields": [
+			field("Staff ID", doc.name), field("File no.", doc.employee_number),
+			field("First name", doc.first_name), field("Middle name", doc.middle_name), field("Last name", doc.last_name),
+			field("Gender", doc.gender), field("Date of birth", doc.date_of_birth, "date"),
+			field("Age", years(doc.date_of_birth), "years"), field("Qualifications", doc.get("dtmgp_qualifications")),
+		]},
+		{"label": "Service & appointment", "fields": service},
+		{"label": "Verification & identity", "fields": [
+			field("Verification status", doc.get(EMPLOYEE_VERIFICATION_FIELD) or "Pending"),
+			field("BVN", _mask(doc.get("dtmgp_bvn")), "masked"), field("NIN", _mask(doc.get("dtmgp_nin")), "masked"),
+			field("NIN verification", doc.get("dtmgp_nin_verification_status")),
+			field("Name match", doc.get("dtmgp_name_match_status")),
+			field("Last verification attempt", doc.get("dtmgp_last_verification_attempt"), "date"),
+			field("Verification date", doc.get("dtmgp_nin_verification_date"), "date"),
+			field("Verification remarks", doc.get("dtmgp_verification_remarks")),
+		]},
+		{"label": "Pay & bank", "fields": [
+			field("Pay point", doc.get("dtmgp_local_govt_of_payment")), field("Salary mode", doc.salary_mode),
+			field("Bank", doc.bank_name), field("Account number", _mask(doc.bank_ac_no), "masked"),
+		]},
+		{"label": "Contact & next of kin", "fields": [
+			field("Phone number", doc.cell_number), field("Personal email", doc.personal_email),
+			field("Work email", doc.company_email), field("Emergency contact", doc.person_to_be_contacted),
+			field("Relationship", doc.relation), field("Emergency phone", doc.emergency_phone_number),
+		]},
+		{"label": "Origin", "fields": [
+			field("LG of origin", doc.get("dtmgp_lg_of_origin")), field("Council ward", doc.get("dtmgp_council_ward")),
+		]},
+	]
 
 
 @frappe.whitelist()

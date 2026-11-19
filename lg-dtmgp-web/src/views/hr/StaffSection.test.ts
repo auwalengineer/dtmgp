@@ -1,10 +1,15 @@
-import { flushPromises, mount } from "@vue/test-utils";
+import { flushPromises, mount, type VueWrapper } from "@vue/test-utils";
+import { createPinia, setActivePinia } from "pinia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 let mockRouteParams: Record<string, string> = {};
 vi.mock("vue-router", () => ({ useRoute: () => ({ params: mockRouteParams }) }));
 
-const PROFILE = { name: "HR-0001", employee_name: "Amina Bello", image: null, company: "Makurdi Local Government Area", department: "Finance", designation: "Officer", status: "Active", gender: "Female", date_of_birth: "1990-01-01", date_of_joining: "2020-01-01", grade_level: "GL 08", verification_status: "Verified", cell_number: "0800", personal_email: "amina@example.com", emergency_contact: { person_to_be_contacted: "Bala Bello", relation: "Spouse", emergency_phone_number: "0801" }, internal_work_history: [], external_work_history: [] };
+const PROFILE = { name: "HR-0001", employee_name: "Amina Bello", image: null, company: "Makurdi Local Government Area", department: "Finance", designation: "Officer", status: "Active", gender: "Female", date_of_birth: "1990-01-01", date_of_joining: "2020-01-01", grade_level: "GL 08", verification_status: "Verified", cell_number: "0800", personal_email: "amina@example.com", emergency_contact: { person_to_be_contacted: "Bala Bello", relation: "Spouse", emergency_phone_number: "0801" }, internal_work_history: [], external_work_history: [],
+  sections: [
+    { label: "Personal", fields: [{ label: "Date of birth", value: "1990-01-01", type: "date" }, { label: "Age", value: 36.4, type: "years" }, { label: "Qualifications", value: null, type: "text" }] },
+    { label: "Pay & bank", fields: [{ label: "Account number", value: "••••••6789", type: "masked" }] },
+  ] };
 const DOCUMENTS = [{ name: "FILE-1", file_name: "contract.pdf", file_url: "/files/contract.pdf", is_private: 1, creation: "2026-01-01" }];
 const apiRequest = vi.fn((path: string, _options?: RequestInit) => {
   if (path.includes("get_employee_profile")) return Promise.resolve({ ...PROFILE });
@@ -12,6 +17,7 @@ const apiRequest = vi.fn((path: string, _options?: RequestInit) => {
   if (path.includes("list_employee_documents")) return Promise.resolve(DOCUMENTS);
   if (path.includes("record_type=next_of_kin")) return Promise.resolve([{ name: "NOK-1", full_name: "Bala Bello", relationship: "Spouse", phone: "0801", is_primary: 1 }]);
   if (path.includes("list_restricted_hr_records")) return Promise.resolve([]);
+  if (path.includes("list_employees")) return Promise.resolve({ items: EMPLOYEES, total: EMPLOYEES.length });
   return Promise.resolve({});
 });
 const uploadFile = vi.fn((_file: File, _params: Record<string, unknown>) => Promise.resolve({ file_url: "/private/files/amina.png" }));
@@ -26,13 +32,22 @@ const CameraCaptureStub = { emits: ["captured", "cancel"], template: '<button cl
 
 const EMPLOYEES: Employee[] = [{ name: "HR-0001", employee_name: "Amina Bello", first_name: "Amina", last_name: "Bello", company: "Makurdi Local Government Area", department: "Finance", designation: "Officer", status: "Active", date_of_joining: "2020-01-01", date_of_birth: "1990-01-01", gender: "Female", dtmgp_grade_level: "GL 08", dtmgp_verification_status: "Verified" }];
 
+/** Picks a staff member through the searchable picker, as a user would. */
+async function pickEmployee(wrapper: VueWrapper, name = "HR-0001") {
+  await wrapper.get('input[role="combobox"]').trigger("focus");
+  await flushPromises();
+  const option = wrapper.findAll('[role="option"]').find((item) => item.text().includes(name));
+  await option!.trigger("mousedown");
+  await flushPromises();
+}
+
 function mountSection(routeItem?: string) {
   mockRouteParams = routeItem ? { section: "staff", item: routeItem } : { section: "staff" };
   return mount(StaffSection, { props: { employees: EMPLOYEES, total: 1, page: 1, pageSize: 25, search: "", department: "", departmentOptions: ["Finance"], canManage: true, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } }, global: { stubs: { CameraCapture: CameraCaptureStub } } });
 }
 
 describe("StaffSection", () => {
-  beforeEach(() => { apiRequest.mockClear(); uploadFile.mockClear(); });
+  beforeEach(() => { setActivePinia(createPinia()); apiRequest.mockClear(); uploadFile.mockClear(); });
 
   it("defaults to Staff Directory when no item is in the route", () => {
     const wrapper = mountSection();
@@ -55,8 +70,7 @@ describe("StaffSection", () => {
 
   it("fetches the employee profile and restricted next-of-kin records", async () => {
     const wrapper = mountSection("next-of-kin");
-    await wrapper.find("select").setValue("HR-0001");
-    await flushPromises();
+    await pickEmployee(wrapper);
 
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("get_employee_profile?employee=HR-0001"));
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("record_type=next_of_kin"));
@@ -65,8 +79,7 @@ describe("StaffSection", () => {
 
   it("fetches documents for Staff Documents once a staff member is picked", async () => {
     const wrapper = mountSection("staff-documents");
-    await wrapper.find("select").setValue("HR-0001");
-    await flushPromises();
+    await pickEmployee(wrapper);
 
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("list_employee_documents?employee=HR-0001"));
     expect(apiRequest).toHaveBeenCalledWith(expect.stringContaining("record_type=staff_document"));
@@ -93,8 +106,7 @@ describe("StaffSection", () => {
 
   it("takes the photo with the device camera and saves it as a private file on the employee", async () => {
     const wrapper = mountSection("staff-profiles");
-    await wrapper.find("select").setValue("HR-0001");
-    await flushPromises();
+    await pickEmployee(wrapper);
     expect(wrapper.find(".employee-avatar.large").text()).toBe("AB");
     // Camera-only: there is no file picker anywhere in the profile.
     expect(wrapper.find("input[type=file]").exists()).toBe(false);
@@ -134,5 +146,16 @@ describe("StaffSection", () => {
     mockRouteParams = { section: "staff" };
     const wrapper = mount(StaffSection, { props: { employees: [], total: 0, page: 1, pageSize: 25, search: "", department: "Finance", departmentOptions: ["Finance"], canManage: false, formOptions: { departments: [], designations: [], genders: [], statuses: [], verification_statuses: [] } } });
     expect(wrapper.text()).toContain("No staff match these filters.");
+  });
+
+  it("shows every profile section with formatted and masked values", async () => {
+    const wrapper = mountSection("staff-profiles");
+    await pickEmployee(wrapper);
+    const sections = wrapper.findAll(".profile-section");
+    expect(sections.map((section) => section.find("h3").text())).toEqual(["Personal", "Pay & bank"]);
+    expect(sections[0].text()).toContain("01 Jan 1990");
+    expect(sections[0].text()).toContain("36.4 years");
+    expect(sections[0].find(".empty dd").text()).toBe("—");
+    expect(sections[1].find("dd.masked").text()).toBe("••••••6789");
   });
 });

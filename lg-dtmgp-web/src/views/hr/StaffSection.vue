@@ -9,12 +9,15 @@ import ItemTabs from "../shared/ItemTabs.vue";
 import EmployeeAvatar from "./EmployeeAvatar.vue";
 import CameraCapture from "./CameraCapture.vue";
 import EmployeeEditModal from "./EmployeeEditModal.vue";
+import EmployeePicker from "./EmployeePicker.vue";
 import { emptyDirectoryFilters, type DirectoryFilters, type Employee, type Options } from "./types";
 
 interface EmergencyContact { person_to_be_contacted: string | null; relation: string | null; emergency_phone_number: string | null }
 interface WorkHistoryRow { department: string | null; designation: string | null; branch: string | null; from_date: string | null; to_date: string | null }
 interface ExternalHistoryRow { company_name: string | null; designation: string | null; contact: string | null; total_experience: number | null }
-interface EmployeeProfile { name: string; employee_name: string; image: string | null; image_from_attachment?: boolean; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
+interface ProfileField { label: string; value: string | number | null; type: "text" | "date" | "years" | "masked" }
+interface ProfileSection { label: string; fields: ProfileField[] }
+interface EmployeeProfile { sections?: ProfileSection[]; name: string; employee_name: string; image: string | null; image_from_attachment?: boolean; company: string; department: string | null; designation: string | null; status: string; gender: string; date_of_birth: string; date_of_joining: string; grade_level: string | null; verification_status: string | null; cell_number: string | null; personal_email: string | null; emergency_contact: EmergencyContact; internal_work_history: WorkHistoryRow[]; external_work_history: ExternalHistoryRow[] }
 interface DocumentRow { name: string; file_name: string; file_url: string; is_private: number; creation: string }
 interface PersonnelFile { name: string; file_status: string; classification: string; retention_category: string; retention_review_date?: string; physical_file_reference?: string }
 interface NextOfKin { name: string; full_name: string; relationship: string; phone: string; alternate_phone?: string; email?: string; address?: string; is_primary: number; verified_on?: string }
@@ -127,6 +130,13 @@ async function saveRestrictedRecord() {
     await loadRestrictedRecords(selectedEmployee.value);
   } catch (reason) { recordError.value = reason instanceof Error ? reason.message : "Unable to save restricted personnel record"; }
 }
+const PROFILE_DATE = new Intl.DateTimeFormat("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+function formatProfileValue(field: ProfileField) {
+  if (field.value === null || field.value === "") return "—";
+  if (field.type === "date") { const date = new Date(`${field.value}T00:00:00`); return Number.isNaN(date.getTime()) ? String(field.value) : PROFILE_DATE.format(date); }
+  if (field.type === "years") return `${Number(field.value).toFixed(1)} years`;
+  return String(field.value);
+}
 const photoSaving = ref(false);
 const photoError = ref("");
 const PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
@@ -175,7 +185,7 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
   </template>
 
   <template v-else-if="showPicker">
-    <div class="directory-toolbar"><label style="flex:1;max-width:360px">Staff member<select v-model="selectedEmployee"><option value="">Select a staff member</option><option v-for="item in employees" :key="item.name" :value="item.name">{{ item.employee_name }} — {{ item.name }}</option></select></label></div>
+    <div class="directory-toolbar"><EmployeePicker v-model="selectedEmployee" /></div>
     <p v-if="!selectedEmployee" class="users-empty">Select a staff member above to view their record.</p>
     <p v-else-if="profileLoading" class="users-empty">Loading record...</p>
     <p v-else-if="profileError" class="login-error" role="alert">{{ profileError }}</p>
@@ -195,19 +205,18 @@ const showPicker = computed(() => PROFILE_ITEMS.has(activeItem.value));
           <p v-if="photoError" class="login-error" role="alert">{{ photoError }}</p>
         </div>
       </div>
-      <div class="staff-table-wrap"><table class="staff-table"><tbody>
-        <tr><td>Name</td><td>{{ profile.employee_name }}</td></tr>
-        <tr><td>Department</td><td>{{ profile.department || '-' }}</td></tr>
-        <tr><td>Designation</td><td>{{ profile.designation || '-' }}</td></tr>
-        <tr><td>Grade level</td><td>{{ profile.grade_level || '-' }}</td></tr>
-        <tr><td>Status</td><td>{{ profile.status }}</td></tr>
-        <tr><td>Gender</td><td>{{ profile.gender }}</td></tr>
-        <tr><td>Date of birth</td><td>{{ profile.date_of_birth }}</td></tr>
-        <tr><td>Date joined</td><td>{{ profile.date_of_joining }}</td></tr>
-        <tr><td>Cell number</td><td>{{ profile.cell_number || '-' }}</td></tr>
-        <tr><td>Personal email</td><td>{{ profile.personal_email || '-' }}</td></tr>
-        <tr><td>Verification status</td><td>{{ profile.verification_status || 'Pending' }}</td></tr>
-      </tbody></table></div>
+      <div v-if="profile.sections?.length" class="profile-sections">
+        <section v-for="section in profile.sections" :key="section.label" class="profile-section">
+          <h3>{{ section.label }}</h3>
+          <dl>
+            <div v-for="field in section.fields" :key="field.label" :class="{ empty: field.value === null }">
+              <dt>{{ field.label }}</dt>
+              <dd :class="{ masked: field.type === 'masked' && field.value !== null }">{{ formatProfileValue(field) }}</dd>
+            </div>
+          </dl>
+        </section>
+      </div>
+      <p class="profile-note">BVN, NIN and account numbers show only their last four digits.<template v-if="canManage"> Use Edit details to see or change the full values.</template></p>
     </template>
 
     <template v-else-if="profile && activeItem === 'digital-personnel-files'">
